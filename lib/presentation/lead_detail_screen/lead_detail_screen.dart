@@ -114,7 +114,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (_) => SafeArea(top: false, minimum: const EdgeInsets.only(bottom: 8), child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -270,7 +270,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -287,40 +287,42 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: Column(
-        children: [
-          _buildHeader(context),
-          Container(
-            color: AppTheme.primary,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white.withAlpha(150),
-              indicatorColor: Colors.white,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicatorWeight: 3,
-              labelStyle: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Container(
+              color: AppTheme.primary,
+              child: TabBar(
+                controller: _tabController,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white.withAlpha(150),
+                indicatorColor: Colors.white,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorWeight: 3,
+                labelStyle: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+                tabs: const [
+                  Tab(text: 'Overview'),
+                  Tab(text: 'Timeline'),
+                  Tab(text: 'Notes'),
+                ],
               ),
-              tabs: const [
-                Tab(text: 'Overview'),
-                Tab(text: 'Timeline'),
-                Tab(text: 'Notes'),
-              ],
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(),
-                _buildTimelineTab(),
-                _buildNotesTab(),
-              ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOverviewTab(),
+                  _buildTimelineTab(),
+                  _buildNotesTab(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: _buildQuickActions(),
     );
@@ -336,6 +338,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
         ),
       ),
       child: SafeArea(
+        top: false,
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2531,7 +2534,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
+      builder: (ctx) => SafeArea(top: false, minimum: const EdgeInsets.only(bottom: 8), child: StatefulBuilder(
         builder: (ctx, setSheet) {
           // Sort agents: selected first
           final sortedAgents = [...agents];
@@ -3110,7 +3113,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
             ),
           );
         },
-      ),
+      )),
     );
   }
 
@@ -3201,7 +3204,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Padding(
+      builder: (_) => SafeArea(top: false, minimum: const EdgeInsets.only(bottom: 8), child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -3241,7 +3244,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -3282,7 +3285,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => StatefulBuilder(
+      builder: (ctx) => SafeArea(top: false, minimum: const EdgeInsets.only(bottom: 8), child: StatefulBuilder(
         builder: (ctx, setSheet) {
           String searchQuery = '';
           return StatefulBuilder(
@@ -3401,7 +3404,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
             },
           );
         },
-      ),
+      )),
     );
   }
 

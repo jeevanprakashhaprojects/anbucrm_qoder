@@ -59,30 +59,33 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          maxChildSize: 0.9,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (_, scrollCtrl) => Column(
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppTheme.surface200,
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setModalState) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            maxChildSize: 0.9,
+            minChildSize: 0.4,
+            expand: false,
+            builder: (_, scrollCtrl) => Column(
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface200,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: searchCtrl,
-                  decoration: InputDecoration(
-                    hintText: 'Search country...',
-                    prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'Search country...',
+                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 10,
@@ -152,7 +155,8 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   @override

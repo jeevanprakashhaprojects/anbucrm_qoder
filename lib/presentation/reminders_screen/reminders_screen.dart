@@ -593,7 +593,10 @@ class _RemindersScreenState extends State<RemindersScreen> {
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NewReminderSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _NewReminderSheet(
         onSave: (data) {
           globalReminderMaps.insert(0, data);
           setState(() => _reminders = List.from(globalReminderMaps));
@@ -618,7 +621,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
             ),
           );
         },
-      ),
+      )),
     );
   }
 
@@ -901,7 +904,10 @@ class _RemindersScreenState extends State<RemindersScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SnoozeSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _SnoozeSheet(
         reminder: r,
         onSnooze: (newDt) {
           final timeline = List<Map<String, dynamic>>.from(
@@ -922,7 +928,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
             _reminders = List.from(globalReminderMaps);
           });
         },
-      ),
+      )),
     );
   }
 
@@ -931,7 +937,10 @@ class _RemindersScreenState extends State<RemindersScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _RescheduleSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _RescheduleSheet(
         reminder: r,
         onReschedule: (newDt) {
           final timeline = List<Map<String, dynamic>>.from(
@@ -961,7 +970,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
             ),
           );
         },
-      ),
+      )),
     );
   }
 
@@ -970,7 +979,10 @@ class _RemindersScreenState extends State<RemindersScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ReminderFilterSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _ReminderFilterSheet(
         selectedHosts: List.from(_selectedHosts),
         selectedTypes: List.from(_selectedTypes),
         selectedPriority: _selectedPriority,
@@ -1007,7 +1019,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 _showDueToday = showDueToday;
               });
             },
-      ),
+      )),
     );
   }
 
@@ -1015,10 +1027,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ReminderSortSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _ReminderSortSheet(
         current: _sortOption,
         onSelect: (opt) => setState(() => _sortOption = opt),
-      ),
+      )),
     );
   }
 
@@ -1260,12 +1275,17 @@ class _RemindersScreenState extends State<RemindersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Reminders',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Reminders',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 // X/Total format
@@ -1295,14 +1315,12 @@ class _RemindersScreenState extends State<RemindersScreen> {
           ),
           _HeaderBtn(
             icon: Icons.filter_list_rounded,
-            label: 'Filter',
             hasActive: _hasActiveFilters,
             onTap: _showFilterSheet,
           ),
           const SizedBox(width: 4),
           _HeaderBtn(
             icon: Icons.sort_rounded,
-            label: 'Sort',
             hasActive: false,
             onTap: _showSortSheet,
           ),
@@ -1393,7 +1411,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
       ),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1723,11 +1741,14 @@ class _RemindersScreenState extends State<RemindersScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ReminderDetailSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _ReminderDetailSheet(
         reminder: r,
         onSnooze: () => _showSnoozeSheet(r),
         onReschedule: () => _showRescheduleSheet(r),
-      ),
+      )),
     );
   }
 
@@ -2128,7 +2149,10 @@ class _ReminderCardState extends State<_ReminderCard>
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => Container(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
         decoration: const BoxDecoration(
           color: AppTheme.surfaceLight,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -2280,7 +2304,7 @@ class _ReminderCardState extends State<_ReminderCard>
               ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -6334,12 +6358,10 @@ class _ReminderSortSheet extends StatelessWidget {
 
 class _HeaderBtn extends StatelessWidget {
   final IconData icon;
-  final String label;
   final bool hasActive;
   final VoidCallback onTap;
   const _HeaderBtn({
     required this.icon,
-    required this.label,
     required this.hasActive,
     required this.onTap,
   });
@@ -6349,7 +6371,7 @@ class _HeaderBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: hasActive
               ? AppTheme.primary.withAlpha(20)
@@ -6361,24 +6383,10 @@ class _HeaderBtn extends StatelessWidget {
                 : AppTheme.surface200,
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 15,
-              color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-              ),
-            ),
-          ],
+        child: Icon(
+          icon,
+          size: 16,
+          color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
         ),
       ),
     );

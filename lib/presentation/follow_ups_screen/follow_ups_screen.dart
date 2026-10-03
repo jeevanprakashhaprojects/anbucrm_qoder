@@ -607,7 +607,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
 
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 44,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -864,7 +864,10 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _FUFilterSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _FUFilterSheet(
         selectedAgents: List.from(_selectedAgents),
         selectedTypes: List.from(_selectedTypes),
         selectedFrequencies: List.from(_selectedFrequencies),
@@ -909,6 +912,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
                 _showToday = showToday;
               });
             },
+        ),
       ),
     );
   }
@@ -917,9 +921,13 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _FUSortSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _FUSortSheet(
         current: _sortOption,
         onSelect: (o) => setState(() => _sortOption = o),
+        ),
       ),
     );
   }
@@ -1191,12 +1199,17 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Follow Ups',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Follow Ups',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 // X/Total format
@@ -1226,14 +1239,12 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
           ),
           _HeaderBtn(
             icon: Icons.filter_list_rounded,
-            label: 'Filter',
             hasActive: _hasActiveFilters,
             onTap: _showFilterSheet,
           ),
           const SizedBox(width: 6),
           _HeaderBtn(
             icon: Icons.sort_rounded,
-            label: 'Sort',
             hasActive: false,
             onTap: _showSortSheet,
           ),
@@ -1323,7 +1334,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       ),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1575,7 +1586,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
       itemCount: items.length,
       itemBuilder: (ctx, i) {
-        final item = items[i];
+            final item = items[i];
         if (item is String) {
           final isToday = item.startsWith('Today');
           final isOverdue =
@@ -1671,7 +1682,10 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NewFollowUpSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _NewFollowUpSheet(
         agents: _kAgents,
         onSave: (followUpData) {
           // Check: max 1 active follow-up per customer
@@ -1765,6 +1779,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
             ),
           );
         },
+        ),
       ),
     );
   }
@@ -1774,7 +1789,10 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _FollowUpTemplatesSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _FollowUpTemplatesSheet(
         onUseTemplate: (templateData) {
           globalFollowUpMaps.insert(0, templateData);
           setState(() {
@@ -1791,6 +1809,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
             ),
           );
         },
+        ),
       ),
     );
   }
@@ -2020,13 +2039,17 @@ class _FollowUpCardState extends State<_FollowUpCard>
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => _FUTemplatePickerSheet(
+        builder: (_) => SafeArea(
+          top: false,
+          minimum: const EdgeInsets.only(bottom: 8),
+          child: _FUTemplatePickerSheet(
           actionLabel: actionLabel,
           templates: templates,
           customerName: customerName,
           isWhatsApp: platform?.toLowerCase() == 'whatsapp',
           onUseTemplate: (_) => logAction(actionKey, actionLabel),
           onCustomMessage: () => logAction(actionKey, actionLabel),
+          ),
         ),
       );
     }
@@ -2243,7 +2266,10 @@ class _FollowUpCardState extends State<_FollowUpCard>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.65,
         maxChildSize: 0.92,
@@ -2521,6 +2547,7 @@ class _FollowUpCardState extends State<_FollowUpCard>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -2805,7 +2832,10 @@ class _FollowUpCardState extends State<_FollowUpCard>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.75,
         maxChildSize: 0.95,
@@ -3193,6 +3223,7 @@ class _FollowUpCardState extends State<_FollowUpCard>
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -3533,12 +3564,16 @@ class _FollowUpCardState extends State<_FollowUpCard>
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _RescheduleSheetWidget(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _RescheduleSheetWidget(
         followUp: f,
         onReschedule: (newFu) {
           globalFollowUpMaps.add(newFu);
           widget.onUpdate();
         },
+        ),
       ),
     );
   }
@@ -7047,12 +7082,10 @@ class _SectionHeader extends StatelessWidget {
 
 class _HeaderBtn extends StatelessWidget {
   final IconData icon;
-  final String label;
   final bool hasActive;
   final VoidCallback onTap;
   const _HeaderBtn({
     required this.icon,
-    required this.label,
     required this.hasActive,
     required this.onTap,
   });
@@ -7062,7 +7095,7 @@ class _HeaderBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: hasActive ? AppTheme.primaryContainer : AppTheme.surface100,
           borderRadius: BorderRadius.circular(10),
@@ -7070,35 +7103,10 @@ class _HeaderBtn extends StatelessWidget {
             color: hasActive ? AppTheme.primary : AppTheme.surface200,
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 15,
-              color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-              ),
-            ),
-            if (hasActive) ...[
-              const SizedBox(width: 4),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: AppTheme.error,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
+        child: Icon(
+          icon,
+          size: 16,
+          color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
         ),
       ),
     );

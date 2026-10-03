@@ -980,7 +980,7 @@ class _LogsScreenState extends State<LogsScreen> {
     ];
 
     return SizedBox(
-      height: 120,
+      height: 130,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
@@ -1079,9 +1079,12 @@ class _LogsScreenState extends State<LogsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) {
-          return DraggableScrollableSheet(
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) {
+            return DraggableScrollableSheet(
             expand: false,
             initialChildSize: 0.85,
             maxChildSize: 0.95,
@@ -1412,6 +1415,7 @@ class _LogsScreenState extends State<LogsScreen> {
           );
         },
       ),
+      ),
     );
   }
 
@@ -1421,8 +1425,11 @@ class _LogsScreenState extends State<LogsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Padding(
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1488,6 +1495,7 @@ class _LogsScreenState extends State<LogsScreen> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -1496,7 +1504,11 @@ class _LogsScreenState extends State<LogsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CallDetailSheet(entry: entry),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _CallDetailSheet(entry: entry),
+      ),
     );
   }
 }

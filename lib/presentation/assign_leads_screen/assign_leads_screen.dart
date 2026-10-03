@@ -290,12 +290,17 @@ class _AssignLeadsScreenState extends State<AssignLeadsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Assign Leads',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Assign Leads',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 Container(
@@ -1083,7 +1088,7 @@ class _AssignLeadsScreenState extends State<AssignLeadsScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AssignLeadsSheet(
+      builder: (_) => SafeArea(top: false, minimum: const EdgeInsets.only(bottom: 8), child: _AssignLeadsSheet(
         selectedLeadIds: List.from(_selectedLeadIds),
         employees: globalEmployeeMaps
             .where((e) => !(e['isArchived'] as bool? ?? false))
@@ -1104,7 +1109,7 @@ class _AssignLeadsScreenState extends State<AssignLeadsScreen>
             ),
           );
         },
-      ),
+      )),
     );
   }
 }

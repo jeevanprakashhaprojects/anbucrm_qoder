@@ -893,30 +893,33 @@ class _SectionNotesWidgetState extends State<SectionNotesWidget>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        builder: (_, scrollCtrl) => Column(
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: AppTheme.surface200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Note Templates',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          maxChildSize: 0.9,
+          minChildSize: 0.4,
+          builder: (_, scrollCtrl) => Column(
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface200,
+                  borderRadius: BorderRadius.circular(2),
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Note Templates',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
               ),
             ),
             const SizedBox(height: 12),
@@ -964,6 +967,7 @@ class _SectionNotesWidgetState extends State<SectionNotesWidget>
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

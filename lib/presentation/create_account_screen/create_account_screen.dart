@@ -644,9 +644,13 @@ class _PersonalInfoStepState extends State<_PersonalInfoStep> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CountryPickerSheet(
-        selected: widget.selectedCountry,
-        onSelect: widget.onCountryChanged,
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _CountryPickerSheet(
+          selected: widget.selectedCountry,
+          onSelect: widget.onCountryChanged,
+        ),
       ),
     );
   }

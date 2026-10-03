@@ -152,12 +152,16 @@ class _ECountryCodePickerState extends State<_ECountryCodePicker> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _ECountryPickerSheet(
-        selected: widget.selected,
-        onSelect: (c) {
-          widget.onChanged(c);
-          Navigator.pop(context);
-        },
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _ECountryPickerSheet(
+          selected: widget.selected,
+          onSelect: (c) {
+            widget.onChanged(c);
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -1209,24 +1213,28 @@ class _EmployeesScreenState extends State<EmployeesScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EmpFilterSheet(
-        selectedDepts: List.from(_selectedDepts),
-        selectedAccessLevels: List.from(_selectedAccessLevels),
-        selectedHosts: List.from(_selectedHosts),
-        deptOptions: _deptOptions,
-        accessLevelOptions: _accessLevelOptions,
-        allEmployees: _employees
-            .where((e) => !(e['isArchived'] as bool? ?? false))
-            .toList(),
-        dateFrom: _dateFrom,
-        dateTo: _dateTo,
-        onApply: (depts, accessLevels, hosts, from, to) => setState(() {
-          _selectedDepts = depts;
-          _selectedAccessLevels = accessLevels;
-          _selectedHosts = hosts;
-          _dateFrom = from;
-          _dateTo = to;
-        }),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _EmpFilterSheet(
+          selectedDepts: List.from(_selectedDepts),
+          selectedAccessLevels: List.from(_selectedAccessLevels),
+          selectedHosts: List.from(_selectedHosts),
+          deptOptions: _deptOptions,
+          accessLevelOptions: _accessLevelOptions,
+          allEmployees: _employees
+              .where((e) => !(e['isArchived'] as bool? ?? false))
+              .toList(),
+          dateFrom: _dateFrom,
+          dateTo: _dateTo,
+          onApply: (depts, accessLevels, hosts, from, to) => setState(() {
+            _selectedDepts = depts;
+            _selectedAccessLevels = accessLevels;
+            _selectedHosts = hosts;
+            _dateFrom = from;
+            _dateTo = to;
+          }),
+        ),
       ),
     );
   }
@@ -1235,9 +1243,13 @@ class _EmployeesScreenState extends State<EmployeesScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _EmpSortSheet(
-        current: _sortOption,
-        onSelect: (o) => setState(() => _sortOption = o),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _EmpSortSheet(
+          current: _sortOption,
+          onSelect: (o) => setState(() => _sortOption = o),
+        ),
       ),
     );
   }
@@ -1249,32 +1261,36 @@ class _EmployeesScreenState extends State<EmployeesScreen>
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddEmployeeSheet(
-        existingEmployees: _employees,
-        onSave: (empData) {
-          globalEmployeeMaps.insert(0, empData);
-          setState(() => _employees = List.from(globalEmployeeMaps));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text('Employee ${empData['employeeId']} account created!'),
-                ],
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _AddEmployeeSheet(
+          existingEmployees: _employees,
+          onSave: (empData) {
+            globalEmployeeMaps.insert(0, empData);
+            setState(() => _employees = List.from(globalEmployeeMaps));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text('Employee ${empData['employeeId']} account created!'),
+                  ],
+                ),
+                backgroundColor: AppTheme.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              backgroundColor: AppTheme.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -1396,12 +1412,17 @@ class _EmployeesScreenState extends State<EmployeesScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Employees',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Employees',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 Text(
@@ -1430,14 +1451,12 @@ class _EmployeesScreenState extends State<EmployeesScreen>
           ),
           _EHeaderBtn(
             icon: Icons.filter_list_rounded,
-            label: 'Filter',
             hasActive: _hasActiveFilters,
             onTap: _showFilterSheet,
           ),
           const SizedBox(width: 6),
           _EHeaderBtn(
             icon: Icons.sort_rounded,
-            label: 'Sort',
             hasActive: false,
             onTap: _showSortSheet,
           ),
@@ -1520,7 +1539,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
       ),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1533,7 +1552,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
 
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 44,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -4848,12 +4867,10 @@ class _AddEmployeeSheetState extends State<_AddEmployeeSheet> {
 
 class _EHeaderBtn extends StatelessWidget {
   final IconData icon;
-  final String label;
   final bool hasActive;
   final VoidCallback onTap;
   const _EHeaderBtn({
     required this.icon,
-    required this.label,
     required this.hasActive,
     required this.onTap,
   });
@@ -4863,7 +4880,7 @@ class _EHeaderBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: hasActive ? AppTheme.primaryContainer : AppTheme.surface100,
           borderRadius: BorderRadius.circular(10),
@@ -4871,35 +4888,10 @@ class _EHeaderBtn extends StatelessWidget {
             color: hasActive ? AppTheme.primary : AppTheme.surface200,
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 15,
-              color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-              ),
-            ),
-            if (hasActive) ...[
-              const SizedBox(width: 4),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: AppTheme.error,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
+        child: Icon(
+          icon,
+          size: 16,
+          color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
         ),
       ),
     );

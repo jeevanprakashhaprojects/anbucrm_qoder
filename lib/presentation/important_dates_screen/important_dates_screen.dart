@@ -478,12 +478,17 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Important Dates',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Important Dates',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 Row(
@@ -540,11 +545,11 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
               }
             }),
           ),
-          // Filter button with count badge
+          // Filter button
           GestureDetector(
             onTap: _showFilterSheet,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: hasFilter
                     ? const Color(0xFF8B5CF6).withAlpha(20)
@@ -556,28 +561,12 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
                       : AppTheme.surface200,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.filter_list_rounded,
-                    size: 14,
-                    color: hasFilter
-                        ? const Color(0xFF8B5CF6)
-                        : AppTheme.textSecondary,
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-                    hasFilter ? 'Filter ($count)' : 'Filter',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: hasFilter
-                          ? const Color(0xFF8B5CF6)
-                          : AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
+              child: Icon(
+                Icons.filter_list_rounded,
+                size: 16,
+                color: hasFilter
+                    ? const Color(0xFF8B5CF6)
+                    : AppTheme.textSecondary,
               ),
             ),
           ),
@@ -586,7 +575,7 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
           GestureDetector(
             onTap: _showSortSheet,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: _sortBy != 'Date (Ascending)'
                     ? const Color(0xFF8B5CF6).withAlpha(20)
@@ -598,28 +587,12 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
                       : AppTheme.surface200,
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.sort_rounded,
-                    size: 14,
-                    color: _sortBy != 'Date (Ascending)'
-                        ? const Color(0xFF8B5CF6)
-                        : AppTheme.textSecondary,
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-                    'Sort',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: _sortBy != 'Date (Ascending)'
-                          ? const Color(0xFF8B5CF6)
-                          : AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
+              child: Icon(
+                Icons.sort_rounded,
+                size: 16,
+                color: _sortBy != 'Date (Ascending)'
+                    ? const Color(0xFF8B5CF6)
+                    : AppTheme.textSecondary,
               ),
             ),
           ),
@@ -634,10 +607,14 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _IDFilterSheet(
-        selectedTypes: List.from(_selectedDateTypes),
-        allTypes: _allDateTypes,
-        onApply: (types) => setState(() => _selectedDateTypes = types),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _IDFilterSheet(
+          selectedTypes: List.from(_selectedDateTypes),
+          allTypes: _allDateTypes,
+          onApply: (types) => setState(() => _selectedDateTypes = types),
+        ),
       ),
     );
   }
@@ -646,10 +623,14 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _IDSortSheet(
-        current: _sortBy,
-        options: _sortOptions,
-        onSelect: (s) => setState(() => _sortBy = s),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _IDSortSheet(
+          current: _sortBy,
+          options: _sortOptions,
+          onSelect: (s) => setState(() => _sortBy = s),
+        ),
       ),
     );
   }
@@ -729,7 +710,7 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
       ),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -816,7 +797,7 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
 
   Widget _buildTimeFilter() {
     return SizedBox(
-      height: 44,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -1099,23 +1080,27 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AddImportantDateSheet(
-        onSave: (dateData) {
-          globalImportantDateMaps.insert(0, dateData);
-          setState(() {
-            _dates = List.from(globalImportantDateMaps);
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Important date added!'),
-              backgroundColor: AppTheme.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _AddImportantDateSheet(
+          onSave: (dateData) {
+            globalImportantDateMaps.insert(0, dateData);
+            setState(() {
+              _dates = List.from(globalImportantDateMaps);
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Important date added!'),
+                backgroundColor: AppTheme.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -2054,7 +2039,11 @@ class _ImportantDateCard extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _IDDetailSheet(dateItem: dateItem),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _IDDetailSheet(dateItem: dateItem),
+      ),
     );
   }
 
@@ -2072,41 +2061,45 @@ class _ImportantDateCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _IDThreeDotsSheet(
-        phone: phone,
-        email: email,
-        instagram: instagram,
-        facebook: facebook,
-        twitter: twitter,
-        telegram: telegram,
-        leadId: leadId,
-        isLinkedToLead: isLinkedToLead,
-        onViewLead: () {
-          if (leadId.isNotEmpty) {
-            final leadMap = leads_list.globalLeads.firstWhere(
-              (m) => m['id'] == leadId,
-              orElse: () => {},
-            );
-            if (leadMap.isNotEmpty) {
-              context.push(
-                AppRoutes.leadDetailScreen,
-                extra: leads_list.LeadModel.fromMap(leadMap),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _IDThreeDotsSheet(
+          phone: phone,
+          email: email,
+          instagram: instagram,
+          facebook: facebook,
+          twitter: twitter,
+          telegram: telegram,
+          leadId: leadId,
+          isLinkedToLead: isLinkedToLead,
+          onViewLead: () {
+            if (leadId.isNotEmpty) {
+              final leadMap = leads_list.globalLeads.firstWhere(
+                (m) => m['id'] == leadId,
+                orElse: () => {},
               );
+              if (leadMap.isNotEmpty) {
+                context.push(
+                  AppRoutes.leadDetailScreen,
+                  extra: leads_list.LeadModel.fromMap(leadMap),
+                );
+              }
             }
-          }
-        },
-        onViewCustomer: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Opening customer details...'),
-              backgroundColor: AppTheme.primary,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          },
+          onViewCustomer: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Opening customer details...'),
+                backgroundColor: AppTheme.primary,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

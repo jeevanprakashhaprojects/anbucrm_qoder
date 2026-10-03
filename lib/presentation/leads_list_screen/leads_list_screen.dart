@@ -371,6 +371,7 @@ final List<Map<String, dynamic>> globalLeadMaps = [
 'yearsOfService': '15 years',
 'interests': ['Add-on Cover', 'Family Floater'],
 'createdAt': DateTime.now().subtract(const Duration(days: 20, hours: 9, minutes: 30)),
+'isExistingCustomer': true,
 'scheduledAction': 'Call Back',
 },
 { 'id': 'default-5',
@@ -431,6 +432,7 @@ final List<Map<String, dynamic>> globalLeadMaps = [
 'linkedin': 'linkedin.com/in/mohammedalrashid',
 'interests': ['Corporate Plan', 'International Coverage', 'Key Man Insurance'],
 'createdAt': DateTime.now().subtract(const Duration(days: 15, hours: 2, minutes: 15)),
+'isExistingCustomer': true,
 'scheduledAction': 'Appointment',
 'scheduledActionDate': '${DateTime.now().add(const Duration(days: 2)).day}/${DateTime.now().add(const Duration(days: 2)).month}/${DateTime.now().add(const Duration(days: 2)).year}',
 'scheduledActionTime': '09:00',
@@ -737,56 +739,60 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface200,
-                    borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface200,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                'Sort By',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                Text(
+                  'Sort By',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...[
-                (_SortOption.dateNewest, Icons.calendar_today_rounded, 'Newest First'),
-                (_SortOption.dateOldest, Icons.calendar_today_outlined, 'Oldest First'),
-                (_SortOption.nameAZ, Icons.sort_by_alpha_rounded, 'Name A → Z'),
-                (_SortOption.nameZA, Icons.sort_by_alpha_rounded, 'Name Z → A'),
-                (_SortOption.dealValueHigh, Icons.trending_up_rounded, 'Deal Value: High → Low'),
-                (_SortOption.dealValueLow, Icons.trending_down_rounded, 'Deal Value: Low → High'),
-                (_SortOption.priorityHigh, Icons.priority_high_rounded, 'Priority: High First'),
-              ].map((item) {
-                final (opt, icon, label) = item;
-                final isSelected = _sortOption == opt;
-                return ListTile(
-                  dense: true,
-                  leading: Icon(icon, size: 20, color: isSelected ? AppTheme.primary : AppTheme.textSecondary),
-                  title: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, color: isSelected ? AppTheme.primary : AppTheme.textPrimary)),
-                  trailing: isSelected ? const Icon(Icons.check_rounded, color: AppTheme.primary, size: 18) : null,
-                  onTap: () {
-                    setState(() => _sortOption = opt);
-                    setSheet(() {});
-                    Navigator.pop(ctx);
-                  },
-                );
-              }),
-            ],
+                const SizedBox(height: 12),
+                ...[
+                  (_SortOption.dateNewest, Icons.calendar_today_rounded, 'Newest First'),
+                  (_SortOption.dateOldest, Icons.calendar_today_outlined, 'Oldest First'),
+                  (_SortOption.nameAZ, Icons.sort_by_alpha_rounded, 'Name A → Z'),
+                  (_SortOption.nameZA, Icons.sort_by_alpha_rounded, 'Name Z → A'),
+                  (_SortOption.dealValueHigh, Icons.trending_up_rounded, 'Deal Value: High → Low'),
+                  (_SortOption.dealValueLow, Icons.trending_down_rounded, 'Deal Value: Low → High'),
+                  (_SortOption.priorityHigh, Icons.priority_high_rounded, 'Priority: High First'),
+                ].map((item) {
+                  final (opt, icon, label) = item;
+                  final isSelected = _sortOption == opt;
+                  return ListTile(
+                    dense: true,
+                    leading: Icon(icon, size: 20, color: isSelected ? AppTheme.primary : AppTheme.textSecondary),
+                    title: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, color: isSelected ? AppTheme.primary : AppTheme.textPrimary)),
+                    trailing: isSelected ? const Icon(Icons.check_rounded, color: AppTheme.primary, size: 18) : null,
+                    onTap: () {
+                      setState(() => _sortOption = opt);
+                      setSheet(() {});
+                      Navigator.pop(ctx);
+                    },
+                  );
+                }),
+              ],
+            ),
           ),
         ),
       ),
@@ -800,8 +806,11 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => DraggableScrollableSheet(
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) => DraggableScrollableSheet(
           expand: false,
           initialChildSize: 0.8,
           maxChildSize: 0.95,
@@ -913,6 +922,7 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -1185,7 +1195,7 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
 
   Widget _buildKpiSkeleton() {
     return SizedBox(
-      height: 110,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

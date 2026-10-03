@@ -41,7 +41,11 @@ class _AppNavigationState extends State<AppNavigation> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _DialpadSheet(),
+      builder: (_) => const SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _DialpadSheet(),
+      ),
     );
   }
 
@@ -279,8 +283,11 @@ class _DialpadSheetState extends State<_DialpadSheet>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) {
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) {
           final filtered = _countryCodes.where((c) {
             final q = query.toLowerCase();
             return q.isEmpty ||
@@ -375,7 +382,8 @@ class _DialpadSheetState extends State<_DialpadSheet>
           );
         },
       ),
-    );
+    ),
+  );
   }
 
   @override

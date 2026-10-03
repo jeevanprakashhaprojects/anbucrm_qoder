@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../theme/app_theme.dart';
+import 'package:go_router/go_router.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -36,24 +37,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       appBar: AppBar(
         backgroundColor: AppTheme.surfaceLight,
         elevation: 0,
-        leading: Builder(
-          builder: (ctx) => IconButton(
-            icon: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceVariantLight,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.menu_rounded,
-                size: 20,
-                color: AppTheme.textPrimary,
-              ),
+        leading: IconButton(
+          icon: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceVariantLight,
+              borderRadius: BorderRadius.circular(10),
             ),
-            onPressed: () => Scaffold.of(ctx).openDrawer(),
-            tooltip: 'Menu',
+            child: const Icon(
+              Icons.arrow_back_rounded,
+              size: 20,
+              color: AppTheme.textPrimary,
+            ),
           ),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'Back',
         ),
         title: Text(
           'Analytics',
@@ -113,14 +112,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildPipelineTab(),
-          _buildTeamTab(),
-          _buildSourcesTab(),
-        ],
+      body: SafeArea(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildOverviewTab(),
+            _buildPipelineTab(),
+            _buildTeamTab(),
+            _buildSourcesTab(),
+          ],
+        ),
       ),
     );
   }

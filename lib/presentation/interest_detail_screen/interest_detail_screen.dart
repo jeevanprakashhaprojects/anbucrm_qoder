@@ -1039,85 +1039,89 @@ class _InterestDetailScreenState extends State<InterestDetailScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Change Status',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Change Status',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ...statuses.map((s) {
-              final color = _statusColor(s);
-              final isSelected = s == _currentStatus;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _currentStatus = s;
-                    _isCompleted = s == 'Won';
-                  });
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Status changed to $s')),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? color.withAlpha(26)
-                        : AppTheme.surfaceVariantLight,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? color : AppTheme.surface200,
+              const SizedBox(height: 16),
+              ...statuses.map((s) {
+                final color = _statusColor(s);
+                final isSelected = s == _currentStatus;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _currentStatus = s;
+                      _isCompleted = s == 'Won';
+                    });
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Status changed to $s')),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.withAlpha(26)
+                          : AppTheme.surfaceVariantLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected ? color : AppTheme.surface200,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          s,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isSelected ? color : AppTheme.textPrimary,
+                          ),
+                        ),
+                        if (isSelected) ...[
+                          const Spacer(),
+                          Icon(Icons.check_rounded, size: 16, color: color),
+                        ],
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        s,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: isSelected ? color : AppTheme.textPrimary,
-                        ),
-                      ),
-                      if (isSelected) ...[
-                        const Spacer(),
-                        Icon(Icons.check_rounded, size: 16, color: color),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ],
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -1266,68 +1270,72 @@ class _InterestDetailScreenState extends State<InterestDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: AppTheme.surfaceLight,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Add Note',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: ctrl,
-                maxLines: 4,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Write your note here...',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (ctrl.text.trim().isNotEmpty) {
-                      setState(
-                        () => _notes.insert(0, {
-                          'text': ctrl.text.trim(),
-                          'time': 'Just now',
-                        }),
-                      );
-                      Navigator.pop(ctx);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    'Save Note',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Add Note',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 14),
+                TextField(
+                  controller: ctrl,
+                  maxLines: 4,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Write your note here...',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (ctrl.text.trim().isNotEmpty) {
+                        setState(
+                          () => _notes.insert(0, {
+                            'text': ctrl.text.trim(),
+                            'time': 'Just now',
+                          }),
+                        );
+                        Navigator.pop(ctx);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Save Note',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1446,59 +1454,63 @@ class _InterestDetailScreenState extends State<InterestDetailScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Reassign Employee',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Reassign Employee',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ...employees.map(
-              (e) => ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: AppTheme.primaryContainer,
-                  child: Text(
-                    e['initials']!,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primary,
+              const SizedBox(height: 16),
+              ...employees.map(
+                (e) => ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primaryContainer,
+                    child: Text(
+                      e['initials']!,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primary,
+                      ),
                     ),
                   ),
-                ),
-                title: Text(
-                  e['name']!,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w600,
+                  title: Text(
+                    e['name']!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  subtitle: Text(
+                    '${e['role']} · ${e['id']}',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 12),
+                  ),
+                  trailing: widget.interest['assignedEmployee'] == e['name']
+                      ? const Icon(Icons.check_rounded, color: AppTheme.primary)
+                      : null,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Reassigned to ${e['name']}')),
+                    );
+                  },
                 ),
-                subtitle: Text(
-                  '${e['role']} · ${e['id']}',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12),
-                ),
-                trailing: widget.interest['assignedEmployee'] == e['name']
-                    ? const Icon(Icons.check_rounded, color: AppTheme.primary)
-                    : null,
-                onTap: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Reassigned to ${e['name']}')),
-                  );
-                },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

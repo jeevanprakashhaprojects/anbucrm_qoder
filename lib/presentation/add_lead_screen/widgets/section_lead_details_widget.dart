@@ -2266,16 +2266,20 @@ class _SectionLeadDetailsWidgetState extends State<SectionLeadDetailsWidget>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _OwnerPickerSheet(
-        selected: _selectedOwner,
-        owners: kLeadOwners,
-        onSelect: (o) {
-          setState(() {
-            _selectedOwner = o;
-            _notifyParent();
-          });
-          Navigator.pop(context);
-        },
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _OwnerPickerSheet(
+          selected: _selectedOwner,
+          owners: kLeadOwners,
+          onSelect: (o) {
+            setState(() {
+              _selectedOwner = o;
+              _notifyParent();
+            });
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }

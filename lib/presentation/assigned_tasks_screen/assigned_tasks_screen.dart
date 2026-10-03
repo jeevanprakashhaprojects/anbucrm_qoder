@@ -84,9 +84,12 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(color: AppTheme.surfaceLight, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          decoration: const BoxDecoration(color: AppTheme.surfaceLight, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -109,6 +112,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
             }),
           ],
         ),
+      ),
       ),
     );
   }
@@ -175,7 +179,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Assigned Tasks', style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Assigned Tasks', maxLines: 1, style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.textPrimary))),
                 // X/Total format
                 Text('${filtered.length}/$_totalCount tasks', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary)),
               ],
@@ -184,13 +188,9 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
           GestureDetector(
             onTap: _showSortSheet,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(color: AppTheme.surface100, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.surface200)),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.sort_rounded, size: 15, color: AppTheme.textSecondary),
-                const SizedBox(width: 4),
-                Text('Sort', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, color: AppTheme.textSecondary)),
-              ]),
+              child: const Icon(Icons.sort_rounded, size: 16, color: AppTheme.textSecondary),
             ),
           ),
           const SizedBox(width: 8),
@@ -209,7 +209,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
       ('Overdue', '$_overdueCount', Icons.warning_rounded, AppTheme.error, '$_overdueCount urgent', false),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -281,7 +281,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
   // Status filter bar — oval chips matching follow-ups design with count
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 44,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -862,16 +862,19 @@ class _TaskDetailScreenState extends State<_TaskDetailScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setModalState) => Container(
-          decoration: const BoxDecoration(
-            color: AppTheme.surfaceLight,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: EdgeInsets.only(
-            left: 20, right: 20, top: 16,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 32,
-          ),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setModalState) => Container(
+            decoration: const BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: EdgeInsets.only(
+              left: 20, right: 20, top: 16,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 32,
+            ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -952,6 +955,7 @@ class _TaskDetailScreenState extends State<_TaskDetailScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

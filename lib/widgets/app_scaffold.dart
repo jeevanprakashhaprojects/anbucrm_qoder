@@ -18,7 +18,7 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       key: appScaffoldKey,
       drawer: _AppDrawer(),
-      body: navigationShell,
+      body: SafeArea(child: navigationShell),
       bottomNavigationBar: AppNavigation(navigationShell: navigationShell),
     );
   }
@@ -91,13 +91,15 @@ class _AppDrawer extends StatelessWidget {
                     'Employees',
                     () => _comingSoon(context, 'Employees'),
                   ),
-                  _buildDrawerItemWithBadge(
+                  _buildDrawerItem(
                     context,
                     Icons.analytics_rounded,
                     'Analytics',
-                    'Coming Soon',
-                    AppTheme.warning,
-                    () => _comingSoon(context, 'Analytics'),
+                    () {
+                      Navigator.pop(context);
+                      context.push(AppRoutes.analyticsScreen);
+                    },
+                    color: const Color(0xFFF59E0B),
                   ),
                   const Divider(height: 24, indent: 16, endIndent: 16),
                   _buildSectionLabel('Automation'),

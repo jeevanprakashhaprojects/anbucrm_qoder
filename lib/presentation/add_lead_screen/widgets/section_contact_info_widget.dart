@@ -133,12 +133,16 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _CountryPickerSheet(
-        selected: widget.selected,
-        onSelect: (c) {
-          widget.onChanged(c);
-          Navigator.pop(context);
-        },
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _CountryPickerSheet(
+          selected: widget.selected,
+          onSelect: (c) {
+            widget.onChanged(c);
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }

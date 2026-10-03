@@ -136,9 +136,13 @@ class _VideoSessionScreenState extends State<VideoSessionScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ShareSheet(
-        link: _sessionLink,
-        customerName: widget.customerName ?? 'Customer',
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _ShareSheet(
+          link: _sessionLink,
+          customerName: widget.customerName ?? 'Customer',
+        ),
       ),
     );
   }

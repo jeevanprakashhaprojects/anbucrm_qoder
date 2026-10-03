@@ -68,7 +68,7 @@ class PipelineKpiWidget extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 120,
+      height: 130,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),

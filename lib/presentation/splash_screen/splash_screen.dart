@@ -202,17 +202,7 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             // App icon
                             Container(
-                              width: 88,
-                              height: 88,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppTheme.primary,
-                                    const Color(0xFF7C3AED),
-                                  ],
-                                ),
                                 borderRadius: BorderRadius.circular(24),
                                 boxShadow: [
                                   BoxShadow(
@@ -222,10 +212,14 @@ class _SplashScreenState extends State<SplashScreen>
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.trending_up_rounded,
-                                color: Colors.white,
-                                size: 44,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Image.asset(
+                                  'assets/images/anbucrm_logo.png',
+                                  width: 96,
+                                  height: 96,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 20),

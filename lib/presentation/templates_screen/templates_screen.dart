@@ -292,9 +292,12 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _TemplateCreateSheet(
-        editTemplate: editTemplate,
-        onSave: (tpl) {
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _TemplateCreateSheet(
+          editTemplate: editTemplate,
+          onSave: (tpl) {
           setState(() {
             if (editTemplate != null) {
               final idx = globalTemplateMaps.indexWhere(
@@ -309,6 +312,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
             _templates = List.from(globalTemplateMaps);
           });
         },
+      ),
       ),
     );
   }
@@ -359,8 +363,11 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _LeadSelectSheet(
-        template: tpl,
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _LeadSelectSheet(
+          template: tpl,
         onLeadSelected: (leadMap) {
           _processCopyWithLead(tpl, leadMap);
         },
@@ -378,6 +385,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
             ),
           );
         },
+      ),
       ),
     );
   }
@@ -649,12 +657,17 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Message Templates',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Message Templates',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 Text(
@@ -731,7 +744,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   Widget _buildCategoryTabs() {
     return Container(
       color: AppTheme.surfaceLight,
-      height: 44,
+      height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -852,7 +865,11 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _TemplatePreviewSheet(template: tpl),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _TemplatePreviewSheet(template: tpl),
+      ),
     );
   }
 
@@ -861,7 +878,11 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _AttributesSheet(),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: const _AttributesSheet(),
+      ),
     );
   }
 }

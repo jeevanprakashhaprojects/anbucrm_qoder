@@ -721,78 +721,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            ...options.map((o) {
-              final isSelected = o == current;
-              return GestureDetector(
-                onTap: () {
-                  onChanged(o);
-                  Navigator.pop(ctx);
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppTheme.primaryContainer
-                        : AppTheme.surfaceVariantLight,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppTheme.primary
-                          : AppTheme.surface200,
+              const SizedBox(height: 14),
+              ...options.map((o) {
+                final isSelected = o == current;
+                return GestureDetector(
+                  onTap: () {
+                    onChanged(o);
+                    Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          o,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? AppTheme.primary
-                                : AppTheme.textPrimary,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppTheme.primaryContainer
+                          : AppTheme.surfaceVariantLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppTheme.primary
+                            : AppTheme.surface200,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            o,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppTheme.primary
+                                  : AppTheme.textPrimary,
+                            ),
                           ),
                         ),
-                      ),
-                      if (isSelected)
-                        const Icon(
-                          Icons.check_rounded,
-                          size: 16,
-                          color: AppTheme.primary,
-                        ),
-                    ],
+                        if (isSelected)
+                          const Icon(
+                            Icons.check_rounded,
+                            size: 16,
+                            color: AppTheme.primary,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
-            const SizedBox(height: 8),
-          ],
+                );
+              }),
+              const SizedBox(height: 8),
+            ],
+          ),
         ),
       ),
     );
@@ -857,82 +861,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Login History',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 14),
-            ...[
-              {
-                'device': 'Samsung Galaxy S23',
-                'time': 'Today, 6:30 AM',
-                'location': 'Chennai, India',
-              },
-              {
-                'device': 'Samsung Galaxy S23',
-                'time': 'Yesterday, 9:15 PM',
-                'location': 'Chennai, India',
-              },
-              {
-                'device': 'OnePlus 11',
-                'time': 'Sep 11, 2026',
-                'location': 'Bangalore, India',
-              },
-            ].map(
-              (entry) => Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceVariantLight,
-                  borderRadius: BorderRadius.circular(10),
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Login History',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.phone_android_rounded,
-                      size: 20,
-                      color: AppTheme.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry['device']!,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            '${entry['time']} • ${entry['location']}',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              color: AppTheme.textMuted,
-                            ),
-                          ),
-                        ],
+              ),
+              const SizedBox(height: 14),
+              ...[
+                {
+                  'device': 'Samsung Galaxy S23',
+                  'time': 'Today, 6:30 AM',
+                  'location': 'Chennai, India',
+                },
+                {
+                  'device': 'Samsung Galaxy S23',
+                  'time': 'Yesterday, 9:15 PM',
+                  'location': 'Chennai, India',
+                },
+                {
+                  'device': 'OnePlus 11',
+                  'time': 'Sep 11, 2026',
+                  'location': 'Bangalore, India',
+                },
+              ].map(
+                (entry) => Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceVariantLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.phone_android_rounded,
+                        size: 20,
+                        color: AppTheme.primary,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry['device']!,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '${entry['time']} • ${entry['location']}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1052,69 +1060,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: AppTheme.surfaceLight,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Edit Profile',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Edit Profile',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Full Name'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailCtrl,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneCtrl,
-                decoration: const InputDecoration(labelText: 'Phone'),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Profile updated successfully'),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: emailCtrl,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: phoneCtrl,
+                  decoration: const InputDecoration(labelText: 'Phone'),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Profile updated successfully'),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  child: Text(
-                    'Save Changes',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                    child: Text(
+                      'Save Changes',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

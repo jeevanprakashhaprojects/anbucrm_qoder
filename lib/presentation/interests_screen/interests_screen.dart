@@ -286,136 +286,140 @@ class _InterestsScreenState extends State<InterestsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surface200,
-                      borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: StatefulBuilder(
+          builder: (ctx, setSheet) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface200,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  'Sort & Filter',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Sort By',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                ...[
-                  (
-                    _InterestSortOption.dateNewest,
-                    Icons.calendar_today_rounded,
-                    'Newest First',
-                  ),
-                  (
-                    _InterestSortOption.dateOldest,
-                    Icons.calendar_today_outlined,
-                    'Oldest First',
-                  ),
-                  (
-                    _InterestSortOption.nameAZ,
-                    Icons.sort_by_alpha_rounded,
-                    'Name A → Z',
-                  ),
-                  (
-                    _InterestSortOption.nameZA,
-                    Icons.sort_by_alpha_rounded,
-                    'Name Z → A',
-                  ),
-                  (
-                    _InterestSortOption.valueHigh,
-                    Icons.trending_up_rounded,
-                    'Value: High → Low',
-                  ),
-                  (
-                    _InterestSortOption.valueLow,
-                    Icons.trending_down_rounded,
-                    'Value: Low → High',
-                  ),
-                  (
-                    _InterestSortOption.priorityHigh,
-                    Icons.priority_high_rounded,
-                    'Priority: High First',
-                  ),
-                ].map((item) {
-                  final (opt, icon, label) = item;
-                  final isSelected = _sortOption == opt;
-                  return ListTile(
-                    dense: true,
-                    leading: Icon(
-                      icon,
-                      size: 20,
-                      color: isSelected
-                          ? AppTheme.primary
-                          : AppTheme.textSecondary,
+                  Text(
+                    'Sort & Filter',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
-                    title: Text(
-                      label,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Sort By',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  ...[
+                    (
+                      _InterestSortOption.dateNewest,
+                      Icons.calendar_today_rounded,
+                      'Newest First',
+                    ),
+                    (
+                      _InterestSortOption.dateOldest,
+                      Icons.calendar_today_outlined,
+                      'Oldest First',
+                    ),
+                    (
+                      _InterestSortOption.nameAZ,
+                      Icons.sort_by_alpha_rounded,
+                      'Name A → Z',
+                    ),
+                    (
+                      _InterestSortOption.nameZA,
+                      Icons.sort_by_alpha_rounded,
+                      'Name Z → A',
+                    ),
+                    (
+                      _InterestSortOption.valueHigh,
+                      Icons.trending_up_rounded,
+                      'Value: High → Low',
+                    ),
+                    (
+                      _InterestSortOption.valueLow,
+                      Icons.trending_down_rounded,
+                      'Value: Low → High',
+                    ),
+                    (
+                      _InterestSortOption.priorityHigh,
+                      Icons.priority_high_rounded,
+                      'Priority: High First',
+                    ),
+                  ].map((item) {
+                    final (opt, icon, label) = item;
+                    final isSelected = _sortOption == opt;
+                    return ListTile(
+                      dense: true,
+                      leading: Icon(
+                        icon,
+                        size: 20,
                         color: isSelected
                             ? AppTheme.primary
-                            : AppTheme.textPrimary,
+                            : AppTheme.textSecondary,
                       ),
-                    ),
-                    trailing: isSelected
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: AppTheme.primary,
-                            size: 18,
-                          )
-                        : null,
-                    onTap: () {
-                      setState(() => _sortOption = opt);
-                      setSheet(() {});
-                    },
-                  );
-                }),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      title: Text(
+                        label,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: isSelected
+                              ? AppTheme.primary
+                              : AppTheme.textPrimary,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'Apply',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w600,
+                      trailing: isSelected
+                          ? const Icon(
+                              Icons.check_rounded,
+                              color: AppTheme.primary,
+                              size: 18,
+                            )
+                          : null,
+                      onTap: () {
+                        setState(() => _sortOption = opt);
+                        setSheet(() {});
+                      },
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Apply',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -430,13 +434,17 @@ class _InterestsScreenState extends State<InterestsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => _AddInterestSheet(
-        onAdd: (interest) {
-          setState(() {
-            globalInterests.insert(0, interest);
-            _interests = List<Map<String, dynamic>>.from(globalInterests);
-          });
-        },
+      builder: (ctx) => SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: 8),
+        child: _AddInterestSheet(
+          onAdd: (interest) {
+            setState(() {
+              globalInterests.insert(0, interest);
+              _interests = List<Map<String, dynamic>>.from(globalInterests);
+            });
+          },
+        ),
       ),
     );
   }

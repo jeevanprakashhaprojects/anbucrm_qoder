@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/app_theme.dart';
 import '../presentation/add_lead_screen/add_lead_screen.dart';
 import '../presentation/analytics_screen/analytics_screen.dart';
 import '../presentation/buy_product_screen/buy_product_screen.dart';
@@ -71,6 +73,43 @@ class AppRoutes {
 
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.initial,
+  errorBuilder: (context, state) => Scaffold(
+    backgroundColor: AppTheme.backgroundLight,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 64, color: AppTheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'Navigation Error',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.error?.message ?? 'An unexpected error occurred',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go(AppRoutes.dashboardScreen),
+              child: const Text('Go to Dashboard'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
   routes: [
     // Splash — entry point
     GoRoute(

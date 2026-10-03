@@ -172,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           color: AppTheme.surfaceLight,
-          padding: const EdgeInsets.fromLTRB(16, 52, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Row(
             children: [
               Expanded(
@@ -386,15 +386,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     ];
     return Row(
-      children: cards.map((c) {
+      children: List.generate(cards.length, (i) {
+        final c = cards[i];
         final color = c['color'] as Color;
         final isUp = c['up'] as bool;
         return Expanded(
           child: Container(
-            margin: EdgeInsets.only(
-              right: cards.indexOf(c) < cards.length - 1 ? 8 : 0,
-            ),
-            padding: const EdgeInsets.all(12),
+            margin: EdgeInsets.only(right: i < cards.length - 1 ? 6 : 0),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(14),
@@ -404,54 +403,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: color.withAlpha(31),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(c['icon'] as IconData, size: 16, color: color),
+                  child: Icon(c['icon'] as IconData, size: 14, color: color),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   c['value'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   c['label'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
+                    fontSize: 9,
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Row(
                   children: [
                     Icon(
                       isUp
                           ? Icons.trending_up_rounded
                           : Icons.trending_down_rounded,
-                      size: 12,
+                      size: 10,
                       color: isUp ? AppTheme.success : AppTheme.error,
                     ),
                     const SizedBox(width: 2),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         c['trend'] as String,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 10,
+                          fontSize: 9,
                           color: isUp ? AppTheme.success : AppTheme.error,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                   ],
@@ -460,7 +460,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         );
-      }).toList(),
+      }),
     );
   }
 
@@ -496,14 +496,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
     ];
     return Row(
-      children: cards.map((c) {
+      children: List.generate(cards.length, (i) {
+        final c = cards[i];
         final color = c['color'] as Color;
         return Expanded(
           child: Container(
-            margin: EdgeInsets.only(
-              right: cards.indexOf(c) < cards.length - 1 ? 8 : 0,
-            ),
-            padding: const EdgeInsets.all(12),
+            margin: EdgeInsets.only(right: i < cards.length - 1 ? 6 : 0),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppTheme.surfaceLight,
               borderRadius: BorderRadius.circular(14),
@@ -513,30 +512,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: color.withAlpha(31),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(c['icon'] as IconData, size: 16, color: color),
+                  child: Icon(c['icon'] as IconData, size: 14, color: color),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   c['value'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppTheme.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   c['label'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
+                    fontSize: 9,
                     color: AppTheme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -546,7 +545,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   c['sub'] as String,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 9,
+                    fontSize: 8,
                     color: AppTheme.textMuted,
                   ),
                   maxLines: 1,
@@ -556,7 +555,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         );
-      }).toList(),
+      }),
     );
   }
 
@@ -617,40 +616,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: actions.map((a) {
-            final color = a['color'] as Color;
-            return GestureDetector(
-              onTap: () {
-                final route = a['route'] as String?;
-                if (route != null) context.push(route);
-              },
-              child: Column(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: color.withAlpha(31),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: color.withAlpha(51)),
-                    ),
-                    child: Icon(a['icon'] as IconData, color: color, size: 22),
+        SizedBox(
+          height: 90,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: actions.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, idx) {
+              final a = actions[idx];
+              final color = a['color'] as Color;
+              return GestureDetector(
+                onTap: () {
+                  final route = a['route'] as String?;
+                  if (route != null) context.push(route);
+                },
+                child: SizedBox(
+                  width: 56,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: color.withAlpha(31),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: color.withAlpha(51)),
+                        ),
+                        child: Icon(a['icon'] as IconData, color: color, size: 20),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        a['label'] as String,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    a['label'] as String,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+                ),
+              );
+            },
+          ),
         ),
         const SizedBox(height: 20),
         _buildModulesGrid(),

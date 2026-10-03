@@ -337,6 +337,39 @@ final List<Map<String, dynamic>> globalSessionMaps = [
     'cancelReason': 'Client had a family emergency and requested reschedule.',
     'isExistingCustomer': false,
   },
+  {
+    'id': 'ses-006b',
+    'title': 'Mutual Fund Portfolio Review',
+    'type': 'Video Call',
+    'status': 'Rescheduled',
+    'date': DateTime.now().add(const Duration(days: 2, hours: 1)),
+    'host': 'Jeevan Kumar',
+    'hostInitials': 'JK',
+    'participants': ['Priya Sharma'],
+    'linkedLead': 'Priya Sharma',
+    'linkedLeadId': 'default-3',
+    'customerPhone': '+91 78945 61230',
+    'preferredContact': ['Video Call', 'Email'],
+    'meetingLink': '',
+    'platform': 'Google Meet',
+    'recording': false,
+    'notes': 'Rescheduled from original date due to client request.',
+    'actionItems': ['Send updated meeting link'],
+    'outcome': '',
+    'rating': 0,
+    'agenda': 'Review mutual fund portfolio performance and rebalancing',
+    'location': 'Video Call',
+    'reminderSent': false,
+    'followUpScheduled': false,
+    'dealValue': 500000.0,
+    'priority': 'High',
+    'createdAt': DateTime.now().subtract(const Duration(days: 5)),
+    'videoCallCount': 0,
+    'callCount': 0,
+    'appointmentCount': 0,
+    'videoCallMode': 'Inbuilt',
+    'isExistingCustomer': true,
+  },
   // ─── Default Due Sessions (for testing Dues filter) ───────────────────────
   {
     'id': 'ses-007',
@@ -642,31 +675,37 @@ class _SessionsScreenState extends State<SessionsScreen> {
       _sessions.where((s) => s['type'] == 'Call Back').length;
   int get _completedCount =>
       _sessions.where((s) => s['status'] == 'Completed').length;
+  int get _rescheduledCount =>
+      _sessions.where((s) => s['status'] == 'Rescheduled').length;
 
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _FilterSheet(
-        selectedHosts: List.from(_selectedHosts),
-        selectedTypes: List.from(_selectedTypes),
-        selectedStatuses: List.from(_selectedStatuses),
-        existingCustomerFilter: _existingCustomerFilter,
-        hostOptions: _hostOptions,
-        typeOptions: _typeOptions,
-        dateFrom: _dateFrom,
-        dateTo: _dateTo,
-        onApply: (hosts, types, statuses, existingCustomer, from, to) {
-          setState(() {
-            _selectedHosts = hosts;
-            _selectedTypes = types;
-            _selectedStatuses = statuses;
-            _existingCustomerFilter = existingCustomer;
-            _dateFrom = from;
-            _dateTo = to;
-          });
-        },
+      builder: (context) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _FilterSheet(
+          selectedHosts: List.from(_selectedHosts),
+          selectedTypes: List.from(_selectedTypes),
+          selectedStatuses: List.from(_selectedStatuses),
+          existingCustomerFilter: _existingCustomerFilter,
+          hostOptions: _hostOptions,
+          typeOptions: _typeOptions,
+          dateFrom: _dateFrom,
+          dateTo: _dateTo,
+          onApply: (hosts, types, statuses, existingCustomer, from, to) {
+            setState(() {
+              _selectedHosts = hosts;
+              _selectedTypes = types;
+              _selectedStatuses = statuses;
+              _existingCustomerFilter = existingCustomer;
+              _dateFrom = from;
+              _dateTo = to;
+            });
+          },
+        ),
       ),
     );
   }
@@ -675,9 +714,13 @@ class _SessionsScreenState extends State<SessionsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SortSheet(
-        current: _sortOption,
-        onSelect: (opt) => setState(() => _sortOption = opt),
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _SortSheet(
+          current: _sortOption,
+          onSelect: (opt) => setState(() => _sortOption = opt),
+        ),
       ),
     );
   }
@@ -689,9 +732,12 @@ class _SessionsScreenState extends State<SessionsScreen> {
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _NewSessionSheet(
-        agents: _kAgents,
-        onSave: (sessionData) {
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _NewSessionSheet(
+          agents: _kAgents,
+          onSave: (sessionData) {
           // Check: max 1 active session per customer
           final customerName = sessionData['linkedLead'] as String? ?? '';
           final customerId = sessionData['linkedLeadId'] as String? ?? '';
@@ -776,6 +822,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
             ),
           );
         },
+        ),
       ),
     );
   }
@@ -849,62 +896,62 @@ class _SessionsScreenState extends State<SessionsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
       itemCount: items.length,
       itemBuilder: (ctx, i) {
-        final item = items[i];
-        if (item is Map && item.containsKey('_header')) {
-          final header = item['_header'] as String;
-          return Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 6),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.error.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.error.withAlpha(60)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.warning_rounded,
-                        size: 12,
-                        color: AppTheme.error,
+            final item = items[i];
+            if (item is Map && item.containsKey('_header')) {
+              final header = item['_header'] as String;
+              return Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
                       ),
-                      const SizedBox(width: 5),
-                      Text(
-                        header,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.error,
-                        ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.error.withAlpha(20),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.error.withAlpha(60)),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.warning_rounded,
+                            size: 12,
+                            color: AppTheme.error,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            header,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Divider(
+                        color: AppTheme.error.withAlpha(40),
+                        height: 1,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Divider(
-                    color: AppTheme.error.withAlpha(40),
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        final s = item as Map<String, dynamic>;
-        return _SessionCard(
-          session: s,
-          index: dues.indexOf(s),
-          onUpdate: () => setState(() {
-            _sessions = List.from(globalSessionMaps);
-          }),
-        );
+              );
+            }
+            final s = item as Map<String, dynamic>;
+            return _SessionCard(
+              session: s,
+              index: dues.indexOf(s),
+              onUpdate: () => setState(() {
+                _sessions = List.from(globalSessionMaps);
+              }),
+            );
       },
     );
   }
@@ -1012,73 +1059,73 @@ class _SessionsScreenState extends State<SessionsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
       itemCount: items.length,
       itemBuilder: (ctx, i) {
-        final item = items[i];
-        if (item is Map && item.containsKey('_header')) {
-          final header = item['_header'] as String;
-          final isPast = item['_isPast'] as bool;
-          final isToday = item['_isToday'] as bool;
-          final isOverdue = item['_isOverdue'] as bool? ?? false;
-          final headerColor = isOverdue
-              ? AppTheme.error
-              : isToday
-              ? AppTheme.primary
-              : isPast
-              ? AppTheme.textMuted
-              : AppTheme.success;
-          final headerIcon = isOverdue
-              ? Icons.warning_rounded
-              : isToday
-              ? Icons.today_rounded
-              : isPast
-              ? Icons.history_rounded
-              : Icons.calendar_today_rounded;
-          return Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 6),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: headerColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: headerColor.withAlpha(60)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(headerIcon, size: 12, color: headerColor),
-                      const SizedBox(width: 5),
-                      Text(
-                        header,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: headerColor,
-                        ),
+            final item = items[i];
+            if (item is Map && item.containsKey('_header')) {
+              final header = item['_header'] as String;
+              final isPast = item['_isPast'] as bool;
+              final isToday = item['_isToday'] as bool;
+              final isOverdue = item['_isOverdue'] as bool? ?? false;
+              final headerColor = isOverdue
+                  ? AppTheme.error
+                  : isToday
+                  ? AppTheme.primary
+                  : isPast
+                  ? AppTheme.textMuted
+                  : AppTheme.success;
+              final headerIcon = isOverdue
+                  ? Icons.warning_rounded
+                  : isToday
+                  ? Icons.today_rounded
+                  : isPast
+                  ? Icons.history_rounded
+                  : Icons.calendar_today_rounded;
+              return Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 6),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
                       ),
-                    ],
-                  ),
+                      decoration: BoxDecoration(
+                        color: headerColor.withAlpha(20),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: headerColor.withAlpha(60)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(headerIcon, size: 12, color: headerColor),
+                          const SizedBox(width: 5),
+                          Text(
+                            header,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: headerColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Divider(color: headerColor.withAlpha(40), height: 1),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Divider(color: headerColor.withAlpha(40), height: 1),
-                ),
-              ],
-            ),
-          );
-        }
-        final s = item as Map<String, dynamic>;
-        final idx = filtered.indexOf(s);
-        return _SessionCard(
-          session: s,
-          index: idx,
-          onUpdate: () => setState(() {
-            _sessions = List.from(globalSessionMaps);
-          }),
-        );
+              );
+            }
+            final s = item as Map<String, dynamic>;
+            final idx = filtered.indexOf(s);
+            return _SessionCard(
+              session: s,
+              index: idx,
+              onUpdate: () => setState(() {
+                _sessions = List.from(globalSessionMaps);
+              }),
+            );
       },
     );
   }
@@ -1159,12 +1206,17 @@ class _SessionsScreenState extends State<SessionsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Sessions',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Sessions',
+                    maxLines: 1,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
                 // X/Total format
@@ -1194,14 +1246,12 @@ class _SessionsScreenState extends State<SessionsScreen> {
           ),
           _HeaderButton(
             icon: Icons.filter_list_rounded,
-            label: 'Filter',
             hasActive: _hasActiveFilters,
             onTap: _showFilterSheet,
           ),
           const SizedBox(width: 6),
           _HeaderButton(
             icon: Icons.sort_rounded,
-            label: 'Sort',
             hasActive: false,
             onTap: _showSortSheet,
           ),
@@ -1311,6 +1361,14 @@ class _SessionsScreenState extends State<SessionsScreen> {
         false,
       ),
       _KpiData(
+        'Rescheduled',
+        '$_rescheduledCount',
+        Icons.schedule_rounded,
+        const Color(0xFF8B5CF6),
+        '$_rescheduledCount total',
+        false,
+      ),
+      _KpiData(
         'Cancelled',
         '$cancelledCount',
         Icons.cancel_rounded,
@@ -1320,7 +1378,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
       ),
     ];
     return SizedBox(
-      height: 108,
+      height: 118,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1335,7 +1393,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return SizedBox(
-      height: 44,
+      height: 50,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -2261,32 +2319,36 @@ class _SessionCardState extends State<_SessionCard>
                                       context: context,
                                       isScrollControlled: true,
                                       backgroundColor: Colors.transparent,
-                                      builder: (_) => _RescheduleFromCancelSheet(
-                                        session: s,
-                                        cancelReason: reason,
-                                        onSave: (sessionData) {
-                                          globalSessionMaps.insert(
-                                            0,
-                                            sessionData,
-                                          );
-                                          widget.onUpdate();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: const Text(
-                                                'Session rescheduled successfully!',
+                                      builder: (_) => SafeArea(
+                                        top: false,
+                                        minimum: EdgeInsets.only(bottom: 8),
+                                        child: _RescheduleFromCancelSheet(
+                                          session: s,
+                                          cancelReason: reason,
+                                          onSave: (sessionData) {
+                                            globalSessionMaps.insert(
+                                              0,
+                                              sessionData,
+                                            );
+                                            widget.onUpdate();
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: const Text(
+                                                  'Session rescheduled successfully!',
+                                                ),
+                                                backgroundColor: AppTheme.success,
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
                                               ),
-                                              backgroundColor: AppTheme.success,
-                                              behavior:
-                                                  SnackBarBehavior.floating,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                            );
+                                          },
+                                        ),
                                       ),
                                     );
                                   },
@@ -2324,7 +2386,10 @@ class _SessionCardState extends State<_SessionCard>
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => _ScheduledActionSheet(
+        builder: (_) => SafeArea(
+          top: false,
+          minimum: EdgeInsets.only(bottom: 8),
+          child: _ScheduledActionSheet(
           session: s,
           onSave: (actionData) {
             final customerName = s['linkedLead'] as String;
@@ -2447,13 +2512,17 @@ class _SessionCardState extends State<_SessionCard>
             );
           },
         ),
+        ),
       );
     }
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -2574,6 +2643,7 @@ class _SessionCardState extends State<_SessionCard>
             const SizedBox(height: 16),
           ],
         ),
+      ),
       ),
     );
   }
@@ -2707,9 +2777,12 @@ class _SessionCardState extends State<_SessionCard>
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CompleteSessionSheet(
-        session: s,
-        onComplete:
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: _CompleteSessionSheet(
+          session: s,
+          onComplete:
             (
               outcome,
               rating,
@@ -2840,8 +2913,9 @@ class _SessionCardState extends State<_SessionCard>
               }
               widget.onUpdate();
             },
-      ),
-    );
+        ),
+        ),
+      );
   }
 
   void _showSessionDetailsSheet(BuildContext context, Map<String, dynamic> s) {
@@ -2865,7 +2939,10 @@ class _SessionCardState extends State<_SessionCard>
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => _ScheduledActionSheet(
+        builder: (_) => SafeArea(
+          top: false,
+          minimum: EdgeInsets.only(bottom: 8),
+          child: _ScheduledActionSheet(
           session: s,
           onSave: (actionData) {
             final customerName = s['linkedLead'] as String;
@@ -2998,6 +3075,7 @@ class _SessionCardState extends State<_SessionCard>
             );
           },
         ),
+        ),
       );
     }
 
@@ -3005,7 +3083,10 @@ class _SessionCardState extends State<_SessionCard>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: DraggableScrollableSheet(
         initialChildSize: 0.85,
         minChildSize: 0.5,
         maxChildSize: 0.95,
@@ -3692,6 +3773,7 @@ class _SessionCardState extends State<_SessionCard>
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -5228,17 +5310,21 @@ class _SessionCardState extends State<_SessionCard>
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => _TemplatePickerSheet(
-          actionLabel: actionLabel,
-          templates: templates,
-          customerName: customerName,
-          isWhatsApp: platform?.toLowerCase() == 'whatsapp',
-          onUseTemplate: (templateBody) {
-            logAction(actionKey, actionLabel);
-          },
-          onCustomMessage: () {
-            logAction(actionKey, actionLabel);
-          },
+        builder: (_) => SafeArea(
+          top: false,
+          minimum: EdgeInsets.only(bottom: 8),
+          child: _TemplatePickerSheet(
+            actionLabel: actionLabel,
+            templates: templates,
+            customerName: customerName,
+            isWhatsApp: platform?.toLowerCase() == 'whatsapp',
+            onUseTemplate: (templateBody) {
+              logAction(actionKey, actionLabel);
+            },
+            onCustomMessage: () {
+              logAction(actionKey, actionLabel);
+            },
+          ),
         ),
       );
     }
@@ -5491,41 +5577,45 @@ class _SessionCardState extends State<_SessionCard>
                                       context: context,
                                       isScrollControlled: true,
                                       backgroundColor: Colors.transparent,
-                                      builder: (_) => _RescheduleFromCancelSheet(
-                                        session: s,
-                                        cancelReason: reason,
-                                        onSave: (sessionData) {
-                                          globalSessionMaps.insert(
-                                            0,
-                                            sessionData,
-                                          );
-                                          _logSessionActivityToLead(
-                                            s['linkedLeadId'] as String? ?? '',
-                                            customerName,
-                                            'Session Rescheduled',
-                                            'Session rescheduled after cancellation for ${sessionData['type']}',
-                                          );
-                                          widget.onUpdate();
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: const Text(
-                                                  'Session rescheduled successfully!',
-                                                ),
-                                                backgroundColor:
-                                                    AppTheme.success,
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                              ),
+                                      builder: (_) => SafeArea(
+                                        top: false,
+                                        minimum: EdgeInsets.only(bottom: 8),
+                                        child: _RescheduleFromCancelSheet(
+                                          session: s,
+                                          cancelReason: reason,
+                                          onSave: (sessionData) {
+                                            globalSessionMaps.insert(
+                                              0,
+                                              sessionData,
                                             );
-                                          }
-                                        },
+                                            _logSessionActivityToLead(
+                                              s['linkedLeadId'] as String? ?? '',
+                                              customerName,
+                                              'Session Rescheduled',
+                                              'Session rescheduled after cancellation for ${sessionData['type']}',
+                                            );
+                                            widget.onUpdate();
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: const Text(
+                                                    'Session rescheduled successfully!',
+                                                  ),
+                                                  backgroundColor:
+                                                      AppTheme.success,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(10),
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
                                       ),
                                     );
                                   },
@@ -5566,7 +5656,10 @@ class _SessionCardState extends State<_SessionCard>
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => _ScheduledActionSheet(
+        builder: (_) => SafeArea(
+          top: false,
+          minimum: EdgeInsets.only(bottom: 8),
+          child: _ScheduledActionSheet(
           session: s,
           isActiveSession: isActiveSession,
           onSave: (actionData) {
@@ -5712,6 +5805,7 @@ class _SessionCardState extends State<_SessionCard>
               );
             }
           },
+        ),
         ),
       );
     }
@@ -5895,10 +5989,13 @@ class _SessionCardState extends State<_SessionCard>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.65,
-        maxChildSize: 0.92,
+      builder: (_) => SafeArea(
+        top: false,
+        minimum: EdgeInsets.only(bottom: 8),
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.65,
+          maxChildSize: 0.92,
         builder: (_, ctrl) => Container(
           decoration: const BoxDecoration(
             color: AppTheme.surfaceLight,
@@ -6275,6 +6372,7 @@ class _SessionCardState extends State<_SessionCard>
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -11445,13 +11543,11 @@ class _SortSheet extends StatelessWidget {
 
 class _HeaderButton extends StatelessWidget {
   final IconData icon;
-  final String label;
   final bool hasActive;
   final VoidCallback onTap;
 
   const _HeaderButton({
     required this.icon,
-    required this.label,
     required this.hasActive,
     required this.onTap,
   });
@@ -11461,7 +11557,7 @@ class _HeaderButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: hasActive
               ? AppTheme.primary.withAlpha(20)
@@ -11473,35 +11569,10 @@ class _HeaderButton extends StatelessWidget {
                 : AppTheme.surface200,
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
-              ),
-            ),
-            if (hasActive) ...[
-              const SizedBox(width: 4),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
+        child: Icon(
+          icon,
+          size: 16,
+          color: hasActive ? AppTheme.primary : AppTheme.textSecondary,
         ),
       ),
     );
