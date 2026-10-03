@@ -20,6 +20,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
   String _selectedFilter = 'All';
   String _sortBy = 'Due Date';
   List<Map<String, dynamic>> _tasks = [];
+  final ScrollController _scrollController = ScrollController();
 
   static const _statusFilters = ['All', 'Pending', 'In Progress', 'Completed', 'Overdue'];
   static const _sortOptions = ['Due Date', 'Priority', 'Progress', 'Assigned Date'];
@@ -28,6 +29,12 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
   void initState() {
     super.initState();
     _loadTasks();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTasks() async {
@@ -120,55 +127,76 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredTasks;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildKpiRow(),
-            _buildStatusFilterBar(),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filtered.isEmpty
-                  ? _buildEmpty()
-                  : RefreshIndicator(
-                      onRefresh: _loadTasks,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                        itemCount: filtered.length,
-                        itemBuilder: (_, i) => _TaskCard(
-                          task: filtered[i],
-                          onUpdate: () => setState(() { _tasks = List.from(globalAssignmentTasks); }),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: RefreshIndicator(
+          onRefresh: _loadTasks,
+          child: _isLoading
+              ? CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                  _buildSliverAppBar(filtered),
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+              )
+            : CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  _buildSliverAppBar(filtered),
+                  SliverToBoxAdapter(child: _buildKpiRow()),
+                  SliverToBoxAdapter(child: _buildStatusFilterBar()),
+                  if (filtered.isEmpty)
+                    SliverFillRemaining(
+                      child: _buildEmpty(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(16, 8, 16, navBarHeight + 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (ctx, i) => _TaskCard(
+                            task: filtered[i],
+                            onUpdate: () => setState(() { _tasks = List.from(globalAssignmentTasks); }),
+                          ),
+                          childCount: filtered.length,
                         ),
                       ),
                     ),
-            ),
-          ],
-        ),
+                ],
+              ),
+      ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    final filtered = _filteredTasks;
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
+  Widget _buildSliverAppBar(List<Map<String, dynamic>> filtered) {
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      backgroundColor: AppTheme.surfaceLight,
+      elevation: 0,
+      scrolledUnderElevation: 1,
+      shadowColor: AppTheme.surface200,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_rounded, size: 22),
+        color: AppTheme.textPrimary,
+        onPressed: () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          } else {
+            context.go(AppRoutes.dashboardScreen);
+          }
+        },
+      ),
+      title: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go(AppRoutes.dashboardScreen);
-              }
-            },
-          ),
           Container(
             width: 32, height: 32,
             decoration: BoxDecoration(color: AppTheme.success.withAlpha(31), borderRadius: BorderRadius.circular(10)),
@@ -180,22 +208,23 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Assigned Tasks', maxLines: 1, style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.textPrimary))),
-                // X/Total format
                 Text('${filtered.length}/$_totalCount tasks', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary)),
               ],
             ),
           ),
-          GestureDetector(
-            onTap: _showSortSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: AppTheme.surface100, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.surface200)),
-              child: const Icon(Icons.sort_rounded, size: 16, color: AppTheme.textSecondary),
-            ),
-          ),
-          const SizedBox(width: 8),
         ],
       ),
+      actions: [
+        GestureDetector(
+          onTap: _showSortSheet,
+          child: Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: AppTheme.surface100, borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.surface200)),
+            child: const Icon(Icons.sort_rounded, size: 16, color: AppTheme.textSecondary),
+          ),
+        ),
+      ],
     );
   }
 
@@ -221,7 +250,7 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
           return GestureDetector(
             onTap: () => setState(() => _selectedFilter == label ? _selectedFilter = 'All' : _selectedFilter = label),
             child: Container(
-              width: 120,
+              width: 110,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isSelected ? color.withAlpha(20) : AppTheme.surfaceLight,
@@ -253,12 +282,16 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
                             color: trendUp ? AppTheme.success : AppTheme.warning,
                           ),
                           const SizedBox(width: 2),
-                          Text(
-                            trend,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                              color: trendUp ? AppTheme.success : AppTheme.warning,
+                          Flexible(
+                            child: Text(
+                              trend,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                                color: trendUp ? AppTheme.success : AppTheme.warning,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -281,10 +314,10 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
   // Status filter bar — oval chips matching follow-ups design with count
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 50,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _statusFilters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
@@ -309,26 +342,28 @@ class _AssignedTasksScreenState extends State<AssignedTasksScreen> {
               count = _overdueCount;
               break;
           }
-          return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = f),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: selected ? AppTheme.success : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: selected ? AppTheme.success : AppTheme.surface200),
-              ),
-              child: Text(
-                '$f ($count)',
-                style: GoogleFonts.plusJakartaSans(
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedFilter = f),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: selected ? AppTheme.success : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: selected ? AppTheme.success : AppTheme.surface200),
+                ),
+                child: Text(
+                  '$f ($count)',
+                  style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: selected ? Colors.white : AppTheme.textSecondary,
                 ),
               ),
             ),
-          );
+          ),
+        );
         },
       ),
     );
@@ -423,7 +458,9 @@ class _TaskCard extends StatelessWidget {
               child: Row(children: [
                 Icon(Icons.warning_rounded, size: 13, color: AppTheme.error),
                 const SizedBox(width: 6),
-                Text('OVERDUE — Due ${_formatDate(dueDate)}', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.error)),
+                Expanded(
+                  child: Text('OVERDUE — Due ${_formatDate(dueDate)}', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.error), overflow: TextOverflow.ellipsis, maxLines: 2),
+                ),
               ]),
             ),
           Padding(
@@ -476,11 +513,15 @@ class _TaskCard extends StatelessWidget {
                   children: [
                     Icon(Icons.person_rounded, size: 13, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
-                    Text('By: ${task['assignedBy']}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary)),
+                    Flexible(
+                      child: Text('By: ${task['assignedBy']}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary), overflow: TextOverflow.ellipsis, maxLines: 1),
+                    ),
                     const SizedBox(width: 12),
                     Icon(Icons.calendar_today_rounded, size: 13, color: AppTheme.textMuted),
                     const SizedBox(width: 4),
-                    Text(_formatDate(assignedDate), style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary)),
+                    Flexible(
+                      child: Text(_formatDate(assignedDate), style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppTheme.textSecondary), overflow: TextOverflow.ellipsis, maxLines: 1),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -488,7 +529,9 @@ class _TaskCard extends StatelessWidget {
                   children: [
                     Icon(Icons.event_rounded, size: 13, color: _isOverdue ? AppTheme.error : AppTheme.textMuted),
                     const SizedBox(width: 4),
-                    Text('Due: ${_formatDate(dueDate)}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _isOverdue ? AppTheme.error : AppTheme.textSecondary, fontWeight: _isOverdue ? FontWeight.w600 : FontWeight.w400)),
+                    Flexible(
+                      child: Text('Due: ${_formatDate(dueDate)}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _isOverdue ? AppTheme.error : AppTheme.textSecondary, fontWeight: _isOverdue ? FontWeight.w600 : FontWeight.w400), overflow: TextOverflow.ellipsis, maxLines: 1),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),

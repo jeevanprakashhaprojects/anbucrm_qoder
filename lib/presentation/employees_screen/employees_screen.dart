@@ -1298,69 +1298,175 @@ class _EmployeesScreenState extends State<EmployeesScreen>
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredEmployees;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildKpiRow(),
-            _buildStatusFilterBar(),
-            if (_hasActiveFilters) _buildActiveFilterChips(),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filtered.isEmpty
-                  ? _buildEmpty()
-                  : RefreshIndicator(
-                      onRefresh: _loadEmployees,
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                        itemCount: filtered.length,
-                        itemBuilder: (ctx, i) => _EmployeeCard(
-                          employee: filtered[i],
-                          index: i,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EmployeeDetailPage(employee: filtered[i]),
-                              ),
-                            ).then(
-                              (_) => setState(
-                                () =>
-                                    _employees = List.from(globalEmployeeMaps),
-                              ),
-                            );
-                          },
-                          onToggleStatus: (emp) {
-                            setState(() {
-                              final idx = globalEmployeeMaps.indexWhere(
-                                (e) => e['id'] == emp['id'],
-                              );
-                              if (idx >= 0) {
-                                if (emp['status'] == 'Active') {
-                                  globalEmployeeMaps[idx]['status'] =
-                                      'Inactive';
-                                  // isArchived stays false — inactive shows in Inactive filter
-                                  globalEmployeeMaps[idx]['isArchived'] = false;
-                                } else {
-                                  globalEmployeeMaps[idx]['status'] = 'Active';
-                                  globalEmployeeMaps[idx]['isArchived'] = false;
-                                }
-                              }
-                              _employees = List.from(globalEmployeeMaps);
-                            });
-                          },
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: CustomScrollView(
+          controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              color: AppTheme.textPrimary,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  context.go(AppRoutes.dashboardScreen);
+                }
+              },
+            ),
+            title: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF059669).withAlpha(31),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.badge_rounded,
+                    color: Color(0xFF059669),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Employees',
+                          maxLines: 1,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
                       ),
-                    ),
+                      Text(
+                        '${filtered.length} of $_totalCount employees',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive
+                      ? Icons.search_off_rounded
+                      : Icons.search_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 22,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                }),
+              ),
+              _EHeaderBtn(
+                icon: Icons.filter_list_rounded,
+                hasActive: _hasActiveFilters,
+                onTap: _showFilterSheet,
+              ),
+              const SizedBox(width: 6),
+              _EHeaderBtn(
+                icon: Icons.sort_rounded,
+                hasActive: false,
+                onTap: _showSortSheet,
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (_isSearchActive) _buildSearchBar(),
+                _buildKpiRow(),
+                _buildStatusFilterBar(),
+                if (_hasActiveFilters) _buildActiveFilterChips(),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmpty(),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, navBarHeight + 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => _EmployeeCard(
+                    employee: filtered[i],
+                    index: i,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              EmployeeDetailPage(employee: filtered[i]),
+                        ),
+                      ).then(
+                        (_) => setState(
+                          () =>
+                              _employees = List.from(globalEmployeeMaps),
+                        ),
+                      );
+                    },
+                    onToggleStatus: (emp) {
+                      setState(() {
+                        final idx = globalEmployeeMaps.indexWhere(
+                          (e) => e['id'] == emp['id'],
+                        );
+                        if (idx >= 0) {
+                          if (emp['status'] == 'Active') {
+                            globalEmployeeMaps[idx]['status'] =
+                                'Inactive';
+                            globalEmployeeMaps[idx]['isArchived'] = false;
+                          } else {
+                            globalEmployeeMaps[idx]['status'] = 'Active';
+                            globalEmployeeMaps[idx]['isArchived'] = false;
+                          }
+                        }
+                        _employees = List.from(globalEmployeeMaps);
+                      });
+                    },
+                  ),
+                  childCount: filtered.length,
+                ),
+              ),
+            ),
+        ],
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddEmployeeSheet,
@@ -1374,96 +1480,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go(AppRoutes.dashboardScreen);
-              }
-            },
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFF059669).withAlpha(31),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.badge_rounded,
-              color: Color(0xFF059669),
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Employees',
-                    maxLines: 1,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${_filteredEmployees.length} of $_totalCount employees',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
-              color: AppTheme.textSecondary,
-              size: 22,
-            ),
-            onPressed: () => setState(() {
-              _isSearchActive = !_isSearchActive;
-              if (!_isSearchActive) {
-                _searchQuery = '';
-                _searchController.clear();
-              }
-            }),
-          ),
-          _EHeaderBtn(
-            icon: Icons.filter_list_rounded,
-            hasActive: _hasActiveFilters,
-            onTap: _showFilterSheet,
-          ),
-          const SizedBox(width: 6),
-          _EHeaderBtn(
-            icon: Icons.sort_rounded,
-            hasActive: false,
-            onTap: _showSortSheet,
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
+      );
   }
 
   Widget _buildSearchBar() {
@@ -1510,7 +1527,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
         '$_totalCount',
         Icons.badge_rounded,
         const Color(0xFF059669),
-        '+${_totalCount > 0 ? (_totalCount * 0.1).round() : 0} this month',
+        '+${_totalCount > 0 ? (_totalCount * 0.1).round() : 0}',
         true,
       ),
       _EKpiData(
@@ -1518,7 +1535,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
         '$_activeCount',
         Icons.check_circle_rounded,
         AppTheme.primary,
-        '${_totalCount > 0 ? ((_activeCount / _totalCount) * 100).round() : 0}% of total',
+        '${_totalCount > 0 ? ((_activeCount / _totalCount) * 100).round() : 0}%',
         true,
       ),
       _EKpiData(
@@ -1526,7 +1543,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
         '$_inactiveCount',
         Icons.pause_circle_rounded,
         AppTheme.warning,
-        '$_inactiveCount on hold',
+        '-$_inactiveCount',
         false,
       ),
       _EKpiData(
@@ -1534,7 +1551,7 @@ class _EmployeesScreenState extends State<EmployeesScreen>
         '$_archivedCount',
         Icons.archive_rounded,
         AppTheme.textMuted,
-        '$_archivedCount archived',
+        '-$_archivedCount',
         false,
       ),
     ];
@@ -1552,37 +1569,39 @@ class _EmployeesScreenState extends State<EmployeesScreen>
 
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 50,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _statusFilters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final f = _statusFilters[i];
           final selected = _selectedFilter == f;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = f),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFF059669)
-                    : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedFilter = f),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
                   color: selected
                       ? const Color(0xFF059669)
-                      : AppTheme.surface200,
+                      : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF059669)
+                        : AppTheme.surface200,
+                  ),
                 ),
-              ),
-              child: Text(
-                f,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: selected ? Colors.white : AppTheme.textSecondary,
+                child: Text(
+                  f,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: selected ? Colors.white : AppTheme.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -5035,7 +5054,7 @@ class _EKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: 110,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
@@ -5065,28 +5084,34 @@ class _EKpiCard extends StatelessWidget {
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
               if (data.sub.isNotEmpty)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      data.trendUp
-                          ? Icons.trending_up_rounded
-                          : Icons.trending_down_rounded,
-                      size: 11,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      data.sub,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: data.trendUp
-                            ? AppTheme.success
-                            : AppTheme.warning,
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.sub,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp
+                                ? AppTheme.success
+                                : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           ),
@@ -5131,12 +5156,16 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              color: AppTheme.primary,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppTheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),

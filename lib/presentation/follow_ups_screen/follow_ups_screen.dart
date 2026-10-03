@@ -600,17 +600,14 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
   ];
 
   // Whether a non-default filter is active (hides horizontal chips)
-  bool get _isFilterActive =>
-      _selectedStatusFilter != 'All' && _selectedStatusFilter != 'Today'
-      ? true
-      : _hasActiveFilters;
+  bool get _isFilterActive => _hasActiveFilters;
 
   Widget _buildStatusFilterBar() {
     return SizedBox(
-      height: 50,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _statusFilterOptions.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
@@ -657,19 +654,20 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
                   .length;
               break;
           }
-          return GestureDetector(
-            onTap: () => setState(() => _selectedStatusFilter = f),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: selected ? AppTheme.warning : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: selected ? AppTheme.warning : AppTheme.surface200,
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedStatusFilter = f),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: selected ? AppTheme.warning : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: selected ? AppTheme.warning : AppTheme.surface200,
+                  ),
                 ),
-              ),
-              child: Text(
+                child: Text(
                 '$f ($count)',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
@@ -678,7 +676,8 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
                 ),
               ),
             ),
-          );
+          ),
+        );
         },
       ),
     );
@@ -935,31 +934,235 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredFollowUps;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(filtered.length),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildKpiRow(),
-            // Hide horizontal filter chips when a specific filter is active
-            if (!_isFilterActive) _buildStatusFilterBar(),
-            if (_isFilterActive) _buildFollowUpActiveFilterIndicator(),
-            if (_hasActiveFilters) _buildActiveFilterChips(),
-            if (_hasActiveFilters) _buildFilteredCountBanner(filtered.length),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filtered.isEmpty
-                  ? _buildEmpty()
-                  : RefreshIndicator(
-                      onRefresh: _loadFollowUps,
-                      child: _buildSectionedList(filtered),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: RefreshIndicator(
+          onRefresh: _loadFollowUps,
+          child: CustomScrollView(
+            controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              backgroundColor: AppTheme.surfaceLight,
+              elevation: 0,
+              scrolledUnderElevation: 1,
+              shadowColor: AppTheme.surface200,
+              automaticallyImplyLeading: false,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, size: 22),
+                color: AppTheme.textPrimary,
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    context.go(AppRoutes.dashboardScreen);
+                  }
+                },
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppTheme.warning.withAlpha(31),
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: Icon(
+                      Icons.repeat_rounded,
+                      color: AppTheme.warning,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Follow Ups',
+                            maxLines: 1,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${filtered.length}/$_totalCount shown',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    _isSearchActive
+                        ? Icons.search_off_rounded
+                        : Icons.search_rounded,
+                    color: AppTheme.textSecondary,
+                    size: 22,
+                  ),
+                  onPressed: () => setState(() {
+                    _isSearchActive = !_isSearchActive;
+                    if (!_isSearchActive) {
+                      _searchQuery = '';
+                      _searchController.clear();
+                    }
+                  }),
+                ),
+                _HeaderBtn(
+                  icon: Icons.filter_list_rounded,
+                  hasActive: _hasActiveFilters,
+                  onTap: _showFilterSheet,
+                ),
+                const SizedBox(width: 6),
+                _HeaderBtn(
+                  icon: Icons.sort_rounded,
+                  hasActive: false,
+                  onTap: _showSortSheet,
+                ),
+                const SizedBox(width: 4),
+              ],
             ),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  if (_isSearchActive) _buildSearchBar(),
+                  _buildKpiRow(),
+                  if (!_isFilterActive) _buildStatusFilterBar(),
+                  if (_isFilterActive) _buildFollowUpActiveFilterIndicator(),
+                  if (_hasActiveFilters) _buildActiveFilterChips(),
+                  if (_hasActiveFilters)
+                    _buildFilteredCountBanner(filtered.length),
+                ],
+              ),
+            ),
+            if (_isLoading)
+              const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (filtered.isEmpty)
+              SliverFillRemaining(child: _buildEmpty())
+            else
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(16, 4, 16, navBarHeight + 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (ctx, i) {
+                      final items = _buildSectionedItems(filtered);
+                      final item = items[i];
+                      if (item is String) {
+                        final isToday = item.startsWith('Today');
+                        final isOverdue = item.contains('Overdue') ||
+                            item.startsWith('Yesterday');
+                        return Container(
+                          margin: const EdgeInsets.only(top: 12, bottom: 6),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isToday
+                                      ? AppTheme.primary.withAlpha(20)
+                                      : isOverdue
+                                          ? AppTheme.error.withAlpha(20)
+                                          : AppTheme.surface200,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isToday
+                                        ? AppTheme.primary.withAlpha(60)
+                                        : isOverdue
+                                            ? AppTheme.error.withAlpha(60)
+                                            : AppTheme.surface200,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isToday
+                                          ? Icons.today_rounded
+                                          : isOverdue
+                                              ? Icons.warning_rounded
+                                              : Icons.calendar_today_rounded,
+                                      size: 12,
+                                      color: isToday
+                                          ? AppTheme.primary
+                                          : isOverdue
+                                              ? AppTheme.error
+                                              : AppTheme.textSecondary,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        item,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: isToday
+                                              ? AppTheme.primary
+                                              : isOverdue
+                                                  ? AppTheme.error
+                                                  : AppTheme.textSecondary,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Divider(
+                                  color: isToday
+                                      ? AppTheme.primary.withAlpha(40)
+                                      : isOverdue
+                                          ? AppTheme.error.withAlpha(40)
+                                          : AppTheme.surface200,
+                                  height: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      final f = item as Map<String, dynamic>;
+                      final idx = filtered.indexOf(f);
+                      return _FollowUpCard(
+                        followUp: f,
+                        index: idx,
+                        onUpdate: () => setState(() {
+                          _followUps = List.from(globalFollowUpMaps);
+                        }),
+                      );
+                    },
+                    childCount: _buildSectionedItems(filtered).length,
+                  ),
+                ),
+              ),
           ],
         ),
+      ),
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
@@ -991,7 +1194,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
           ),
         ],
       ),
-    );
+      );
   }
 
   Widget _buildFilteredCountBanner(int count) {
@@ -1016,12 +1219,16 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
                   color: AppTheme.warning,
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  '$count follow-up${count == 1 ? '' : 's'} found',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.warning,
+                Flexible(
+                  child: Text(
+                    '$count follow-up${count == 1 ? '' : 's'} found',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.warning,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
@@ -1164,96 +1371,6 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
     );
   }
 
-  Widget _buildHeader(int filteredCount) {
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go(AppRoutes.dashboardScreen);
-              }
-            },
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppTheme.warning.withAlpha(31),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.repeat_rounded,
-              color: AppTheme.warning,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Follow Ups',
-                    maxLines: 1,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                // X/Total format
-                Text(
-                  '$filteredCount/$_totalCount shown',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
-              color: AppTheme.textSecondary,
-              size: 22,
-            ),
-            onPressed: () => setState(() {
-              _isSearchActive = !_isSearchActive;
-              if (!_isSearchActive) {
-                _searchQuery = '';
-                _searchController.clear();
-              }
-            }),
-          ),
-          _HeaderBtn(
-            icon: Icons.filter_list_rounded,
-            hasActive: _hasActiveFilters,
-            onTap: _showFilterSheet,
-          ),
-          const SizedBox(width: 6),
-          _HeaderBtn(
-            icon: Icons.sort_rounded,
-            hasActive: false,
-            onTap: _showSortSheet,
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSearchBar() {
     return Container(
       color: AppTheme.surfaceLight,
@@ -1305,7 +1422,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
         '$_todayCount',
         Icons.today_rounded,
         AppTheme.primary,
-        '$_todayCount due',
+        '-$_todayCount',
         false,
       ),
       _KpiData(
@@ -1313,7 +1430,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
         '$_overdueCount',
         Icons.warning_rounded,
         AppTheme.error,
-        '$_overdueCount urgent',
+        '-$_overdueCount',
         false,
       ),
       _KpiData(
@@ -1321,7 +1438,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
         '$_upcomingCount',
         Icons.schedule_rounded,
         const Color(0xFF0891B2),
-        'scheduled',
+        '-$_upcomingCount',
         false,
       ),
       _KpiData(
@@ -1533,9 +1650,8 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
     }
   }
 
-  Widget _buildSectionedList(List<Map<String, dynamic>> filtered) {
-    // Build sections: group by DATE only (not time), items sorted asc by time within each date
-    final List<dynamic> items = []; // String = header, Map = card
+  List<dynamic> _buildSectionedItems(List<Map<String, dynamic>> filtered) {
+    final List<dynamic> items = [];
     String? lastDateKey;
     for (final f in filtered) {
       final dueDate = f['dueDate'] as DateTime;
@@ -1559,7 +1675,6 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       final dateStr =
           '${dueDate.day} ${months[dueDate.month - 1]} ${dueDate.year}';
 
-      // Date-only key for grouping
       String dateKey;
       if (due == today) {
         dateKey = 'Today';
@@ -1580,99 +1695,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
       }
       items.add(f);
     }
-
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
-            final item = items[i];
-        if (item is String) {
-          final isToday = item.startsWith('Today');
-          final isOverdue =
-              item.contains('Overdue') || item.startsWith('Yesterday');
-          return Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 6),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isToday
-                        ? AppTheme.primary.withAlpha(20)
-                        : isOverdue
-                        ? AppTheme.error.withAlpha(20)
-                        : AppTheme.surface200,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isToday
-                          ? AppTheme.primary.withAlpha(60)
-                          : isOverdue
-                          ? AppTheme.error.withAlpha(60)
-                          : AppTheme.surface200,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isToday
-                            ? Icons.today_rounded
-                            : isOverdue
-                            ? Icons.warning_rounded
-                            : Icons.calendar_today_rounded,
-                        size: 12,
-                        color: isToday
-                            ? AppTheme.primary
-                            : isOverdue
-                            ? AppTheme.error
-                            : AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        item,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: isToday
-                              ? AppTheme.primary
-                              : isOverdue
-                              ? AppTheme.error
-                              : AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Divider(
-                    color: isToday
-                        ? AppTheme.primary.withAlpha(40)
-                        : isOverdue
-                        ? AppTheme.error.withAlpha(40)
-                        : AppTheme.surface200,
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        final f = item as Map<String, dynamic>;
-        final idx = filtered.indexOf(f);
-        return _FollowUpCard(
-          followUp: f,
-          index: idx,
-          onUpdate: () => setState(() {
-            _followUps = List.from(globalFollowUpMaps);
-          }),
-        );
-      },
-    );
+    return items;
   }
 
   void _showNewFollowUpSheet() {
@@ -7284,12 +7307,16 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              color: AppTheme.primary,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppTheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),
@@ -7329,7 +7356,7 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: 110,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
@@ -7358,26 +7385,32 @@ class _KpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              Row(
-                children: [
-                  Icon(
-                    data.trendUp
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    size: 11,
-                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
+              if (data.trend.isNotEmpty)
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.trend,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    data.trend,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
           const SizedBox(height: 6),

@@ -1080,27 +1080,127 @@ class _RemindersScreenState extends State<RemindersScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredReminders;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildKpiRow(),
-            if (_isMultiSelectMode) _buildMultiselectBar(),
-            if (_hasActiveFilters) _buildActiveFilterChips(),
-            if (_hasActiveFilters) _buildFilteredCountBanner(filtered.length),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: _loadReminders,
-                      child: _buildSectionedList(),
-                    ),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: CustomScrollView(
+          controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              color: AppTheme.textPrimary,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  context.go(AppRoutes.dashboardScreen);
+                }
+              },
             ),
-          ],
-        ),
+            title: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0891B2).withAlpha(31),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.alarm_rounded,
+                    color: Color(0xFF0891B2),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Reminders',
+                          maxLines: 1,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${filtered.length}/$_totalCount active',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 22,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                }),
+              ),
+              _HeaderBtn(
+                icon: Icons.filter_list_rounded,
+                hasActive: _hasActiveFilters,
+                onTap: _showFilterSheet,
+              ),
+              const SizedBox(width: 6),
+              _HeaderBtn(
+                icon: Icons.sort_rounded,
+                hasActive: false,
+                onTap: _showSortSheet,
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (_isSearchActive) _buildSearchBar(),
+                _buildKpiRow(),
+                if (_isMultiSelectMode) _buildMultiselectBar(),
+                if (_hasActiveFilters) _buildActiveFilterChips(),
+                if (_hasActiveFilters) _buildFilteredCountBanner(filtered.length),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            _buildSectionedList(),
+        ],
+      ),
       ),
       floatingActionButton: _isMultiSelectMode
           ? null
@@ -1223,108 +1323,21 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   color: Color(0xFF0891B2),
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  '$count reminder${count == 1 ? '' : 's'} found',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF0891B2),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    final filtered = _filteredReminders;
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go(AppRoutes.dashboardScreen);
-              }
-            },
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0891B2).withAlpha(31),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.alarm_rounded,
-              color: Color(0xFF0891B2),
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
+                Flexible(
                   child: Text(
-                    'Reminders',
-                    maxLines: 1,
+                    '$count reminder${count == 1 ? '' : 's'} found',
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF0891B2),
                     ),
-                  ),
-                ),
-                // X/Total format
-                Text(
-                  '${filtered.length}/$_totalCount active',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: Icon(
-              _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
-              color: AppTheme.textSecondary,
-              size: 22,
-            ),
-            onPressed: () => setState(() {
-              _isSearchActive = !_isSearchActive;
-              if (!_isSearchActive) {
-                _searchQuery = '';
-                _searchController.clear();
-              }
-            }),
-          ),
-          _HeaderBtn(
-            icon: Icons.filter_list_rounded,
-            hasActive: _hasActiveFilters,
-            onTap: _showFilterSheet,
-          ),
-          const SizedBox(width: 4),
-          _HeaderBtn(
-            icon: Icons.sort_rounded,
-            hasActive: false,
-            onTap: _showSortSheet,
-          ),
-          const SizedBox(width: 4),
         ],
       ),
     );
@@ -1382,7 +1395,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         '$_dueTodayCount',
         Icons.today_rounded,
         AppTheme.warning,
-        '$_dueTodayCount due',
+        '-$_dueTodayCount',
         false,
       ),
       _KpiData(
@@ -1390,7 +1403,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         '$_overdueCount',
         Icons.warning_rounded,
         AppTheme.error,
-        '$_overdueCount urgent',
+        '-$_overdueCount',
         false,
       ),
       _KpiData(
@@ -1398,7 +1411,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         '$_upcomingCount',
         Icons.schedule_rounded,
         const Color(0xFF8B5CF6),
-        'scheduled',
+        '-$_upcomingCount',
         false,
       ),
       _KpiData(
@@ -1406,7 +1419,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         '$_completedCount',
         Icons.check_circle_rounded,
         AppTheme.success,
-        '+done',
+        '+$_completedCount',
         true,
       ),
     ];
@@ -1548,86 +1561,89 @@ class _RemindersScreenState extends State<RemindersScreen> {
         dueToday.isEmpty &&
         upcoming.isEmpty &&
         completed.isEmpty) {
-      return _buildEmpty();
+      return SliverFillRemaining(
+        child: _buildEmpty(),
+      );
     }
 
-    return ListView(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-      children: [
-        if (overdue.isNotEmpty) ...[
-          Container(key: _overdueKey),
-          _buildSectionHeader('🔴 Overdue', overdue.length, AppTheme.error),
-          ..._buildDateGroupedCards(overdue),
-          const SizedBox(height: 8),
-        ],
-        if (dueToday.isNotEmpty) ...[
-          Container(key: _dueTodayKey),
-          _buildSectionHeader(
-            '🟠 Due Today',
-            dueToday.length,
-            AppTheme.warning,
-          ),
-          ..._buildDateGroupedCards(dueToday),
-          const SizedBox(height: 8),
-        ],
-        if (upcoming.isNotEmpty) ...[
-          Container(key: _upcomingKey),
-          _buildSectionHeader(
-            '🔵 Upcoming',
-            upcoming.length,
-            const Color(0xFF0891B2),
-          ),
-          ..._buildDateGroupedCards(upcoming),
-          const SizedBox(height: 8),
-        ],
-        if (completed.isNotEmpty) ...[
-          Container(key: _completedKey),
-          GestureDetector(
-            onTap: () => setState(() => _showCompleted = !_showCompleted),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppTheme.success.withAlpha(15),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.success.withAlpha(50)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 16,
-                    color: AppTheme.success,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _showCompleted
-                        ? 'Hide completed reminders'
-                        : 'View ${completed.length} completed reminder${completed.length == 1 ? '' : 's'}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.paddingOf(context).bottom + 16),
+      sliver: SliverList(
+        delegate: SliverChildListDelegate([
+          if (overdue.isNotEmpty) ...[
+            Container(key: _overdueKey),
+            _buildSectionHeader('🔴 Overdue', overdue.length, AppTheme.error),
+            ..._buildDateGroupedCards(overdue),
+            const SizedBox(height: 8),
+          ],
+          if (dueToday.isNotEmpty) ...[
+            Container(key: _dueTodayKey),
+            _buildSectionHeader(
+              '🟠 Due Today',
+              dueToday.length,
+              AppTheme.warning,
+            ),
+            ..._buildDateGroupedCards(dueToday),
+            const SizedBox(height: 8),
+          ],
+          if (upcoming.isNotEmpty) ...[
+            Container(key: _upcomingKey),
+            _buildSectionHeader(
+              '🔵 Upcoming',
+              upcoming.length,
+              const Color(0xFF0891B2),
+            ),
+            ..._buildDateGroupedCards(upcoming),
+            const SizedBox(height: 8),
+          ],
+          if (completed.isNotEmpty) ...[
+            Container(key: _completedKey),
+            GestureDetector(
+              onTap: () => setState(() => _showCompleted = !_showCompleted),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withAlpha(15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.success.withAlpha(50)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: 16,
                       color: AppTheme.success,
                     ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    _showCompleted
-                        ? Icons.expand_less_rounded
-                        : Icons.arrow_forward_ios_rounded,
-                    size: 13,
-                    color: AppTheme.success,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Text(
+                      _showCompleted
+                          ? 'Hide completed reminders'
+                          : 'View ${completed.length} completed reminder${completed.length == 1 ? '' : 's'}',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.success,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      _showCompleted
+                          ? Icons.expand_less_rounded
+                          : Icons.arrow_forward_ios_rounded,
+                      size: 13,
+                      color: AppTheme.success,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          if (_showCompleted) ...[
-            const SizedBox(height: 8),
-            ..._buildDateGroupedCards(completed),
+            if (_showCompleted) ...[
+              const SizedBox(height: 8),
+              ..._buildDateGroupedCards(completed),
+            ],
           ],
-        ],
-      ],
+        ]),
+      ),
     );
   }
 
@@ -1862,7 +1878,7 @@ class _KpiCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 120,
+        width: 110,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppTheme.surfaceLight,
@@ -1891,30 +1907,32 @@ class _KpiCard extends StatelessWidget {
                   ),
                   child: Icon(data.icon, size: 14, color: data.color),
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      data.isPositive
-                          ? Icons.trending_up_rounded
-                          : Icons.trending_down_rounded,
-                      size: 11,
-                      color: data.isPositive
-                          ? AppTheme.success
-                          : AppTheme.warning,
+                if (data.subtitle.isNotEmpty)
+                  Flexible(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          data.isPositive ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                          size: 11,
+                          color: data.isPositive ? AppTheme.success : AppTheme.warning,
+                        ),
+                        const SizedBox(width: 2),
+                        Flexible(
+                          child: Text(
+                            data.subtitle,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 8,
+                              fontWeight: FontWeight.w600,
+                              color: data.isPositive ? AppTheme.success : AppTheme.warning,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 2),
-                    Text(
-                      data.subtitle,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: data.isPositive
-                            ? AppTheme.success
-                            : AppTheme.warning,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -6410,12 +6428,16 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.primary,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.primary,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),

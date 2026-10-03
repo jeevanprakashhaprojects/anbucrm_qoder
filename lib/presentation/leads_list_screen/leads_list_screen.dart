@@ -930,9 +930,11 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width >= 600;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
+      extendBody: true,
       floatingActionButton: GestureDetector(
         onLongPress: _generateFiveRandomLeads,
         onDoubleTap: _generateFiveRandomLeads,
@@ -946,11 +948,13 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        color: AppTheme.primary,
-        child: CustomScrollView(
-          controller: _scrollController,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          color: AppTheme.primary,
+          child: CustomScrollView(
+            controller: _scrollController,
           slivers: [
             // App Bar — same design as call logs header with Filter + Sort buttons
             SliverAppBar(
@@ -1106,7 +1110,7 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
             else
               isTablet
                   ? SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                      padding: EdgeInsets.fromLTRB(16, 4, 16, navBarHeight + 16),
                       sliver: SliverGrid(
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.6, crossAxisSpacing: 12, mainAxisSpacing: 12),
                         delegate: SliverChildBuilderDelegate(
@@ -1119,7 +1123,8 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
           ],
         ),
       ),
-    );
+      ),
+  );
   }
 
   // ─── Grouped list with date section headers (descending) ─────────────────
@@ -1156,7 +1161,7 @@ class _LeadsListScreenState extends State<LeadsListScreen> {
         ));
       }
     }
-    items.add(const SizedBox(height: 100));
+    items.add(SizedBox(height: MediaQuery.paddingOf(context).bottom + 16));
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -1219,18 +1224,22 @@ class _DateSectionHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryContainer,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.primary,
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.primary,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ),
@@ -1395,13 +1404,13 @@ class _AssignedToFilterState extends State<_AssignedToFilter> {
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      Text(role, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textSecondary)),
+                      Flexible(child: Text(role, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppTheme.textSecondary), overflow: TextOverflow.ellipsis, maxLines: 1)),
                       if (id.isNotEmpty) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(color: _idBgColor(id), borderRadius: BorderRadius.circular(6)),
-                          child: Text(id, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: _idColor(id))),
+                          child: Text(id, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: _idColor(id)), overflow: TextOverflow.ellipsis, maxLines: 1),
                         ),
                       ],
                     ],
@@ -1433,7 +1442,9 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary)),
+          Flexible(
+            child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primary), overflow: TextOverflow.ellipsis, maxLines: 1),
+          ),
           const SizedBox(width: 4),
           GestureDetector(onTap: onRemove, child: const Icon(Icons.close_rounded, size: 12, color: AppTheme.primary)),
         ],

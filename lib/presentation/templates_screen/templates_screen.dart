@@ -259,6 +259,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   String _searchQuery = '';
   bool _isSearchActive = false;
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
   List<Map<String, dynamic>> _templates = [];
 
   @override
@@ -270,6 +271,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -578,34 +580,137 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildCategoryTabs(),
-            _buildStatsRow(filtered.length),
-            Expanded(
-              child: filtered.isEmpty
-                  ? _buildEmpty()
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                      itemCount: filtered.length,
-                      itemBuilder: (_, i) => _TemplateCard(
-                        template: filtered[i],
-                        onEdit: () =>
-                            _showCreateSheet(editTemplate: filtered[i]),
-                        onDelete: () =>
-                            _deleteTemplate(filtered[i]['id'] as String),
-                        onCopyAndUse: () => _copyAndUseTemplate(filtered[i]),
-                        onPreview: () => _showPreviewSheet(filtered[i]),
-                      ),
-                    ),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: CustomScrollView(
+          controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              color: AppTheme.textPrimary,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  context.go('/dashboard-screen');
+                }
+              },
             ),
-          ],
-        ),
+            title: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withAlpha(31),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.library_books_rounded,
+                    color: AppTheme.primary,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Message Templates',
+                          maxLines: 1,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${filtered.length} template${filtered.length != 1 ? 's' : ''}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive
+                      ? Icons.search_off_rounded
+                      : Icons.search_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 22,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                }),
+              ),
+              IconButton(
+                icon: const Icon(Icons.info_outline_rounded, size: 22),
+                color: AppTheme.textSecondary,
+                onPressed: () => _showAttributesSheet(),
+                tooltip: 'Available Attributes',
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (_isSearchActive) _buildSearchBar(),
+                _buildCategoryTabs(),
+                _buildStatsRow(filtered.length),
+              ],
+            ),
+          ),
+          if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmpty(),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, navBarHeight + 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) => _TemplateCard(
+                    template: filtered[i],
+                    onEdit: () =>
+                        _showCreateSheet(editTemplate: filtered[i]),
+                    onDelete: () =>
+                        _deleteTemplate(filtered[i]['id'] as String),
+                    onCopyAndUse: () => _copyAndUseTemplate(filtered[i]),
+                    onPreview: () => _showPreviewSheet(filtered[i]),
+                  ),
+                  childCount: filtered.length,
+                ),
+              ),
+            ),
+        ],
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(),
@@ -619,91 +724,9 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
           ),
         ),
       ),
-    );
+      );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go('/dashboard-screen');
-              }
-            },
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withAlpha(31),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.library_books_rounded,
-              color: AppTheme.primary,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Message Templates',
-                    maxLines: 1,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                Text(
-                  'Create & manage reusable templates',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
-              color: AppTheme.textSecondary,
-              size: 22,
-            ),
-            onPressed: () => setState(() {
-              _isSearchActive = !_isSearchActive;
-              if (!_isSearchActive) {
-                _searchQuery = '';
-                _searchController.clear();
-              }
-            }),
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline_rounded, size: 22),
-            color: AppTheme.textSecondary,
-            onPressed: () => _showAttributesSheet(),
-            tooltip: 'Available Attributes',
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSearchBar() {
     return Container(
@@ -744,33 +767,35 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   Widget _buildCategoryTabs() {
     return Container(
       color: AppTheme.surfaceLight,
-      height: 50,
+      height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _kCategories.length,
         itemBuilder: (_, i) {
           final cat = _kCategories[i];
           final isSelected = _selectedCategory == cat;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primary : AppTheme.surface100,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? AppTheme.primary : AppTheme.surface200,
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedCategory = cat),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppTheme.primary : AppTheme.surface100,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? AppTheme.primary : AppTheme.surface200,
+                  ),
                 ),
-              ),
-              child: Text(
-                cat,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : AppTheme.textSecondary,
+                child: Text(
+                  cat,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : AppTheme.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -790,23 +815,23 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(
         children: [
-          _StatPill(
+          Flexible(child: _StatPill(
             label: '$count Templates',
             icon: Icons.library_books_rounded,
             color: AppTheme.primary,
-          ),
+          )),
           const SizedBox(width: 8),
-          _StatPill(
+          Flexible(child: _StatPill(
             label: '$totalUsage Uses',
             icon: Icons.send_rounded,
             color: AppTheme.success,
-          ),
+          )),
           const SizedBox(width: 8),
-          _StatPill(
+          Flexible(child: _StatPill(
             label: '${_kAttributes.length} Attributes',
             icon: Icons.code_rounded,
             color: AppTheme.warning,
-          ),
+          )),
         ],
       ),
     );
@@ -2762,12 +2787,16 @@ class _StatPill extends StatelessWidget {
         children: [
           Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

@@ -459,14 +459,18 @@ class _InterestsScreenState extends State<InterestsScreen> {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.width >= 600;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        color: AppTheme.primary,
-        child: CustomScrollView(
-          controller: _scrollController,
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          color: AppTheme.primary,
+          child: CustomScrollView(
+            controller: _scrollController,
           slivers: [
             // App Bar
             SliverAppBar(
@@ -638,7 +642,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             else
               isTablet
                   ? SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                      padding: EdgeInsets.fromLTRB(16, 4, 16, navBarHeight + 16),
                       sliver: SliverGrid(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
@@ -660,7 +664,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                       ),
                     )
                   : SliverPadding(
-                      padding: const EdgeInsets.only(bottom: 100),
+                      padding: EdgeInsets.only(bottom: navBarHeight + 16),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) => _InterestCardWidget(
@@ -677,6 +681,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
           ],
         ),
       ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddInterestDialog,
         icon: const Icon(Icons.add_rounded),
@@ -684,7 +689,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
       ),
-    );
+      );
   }
 
   Widget _buildKpiSkeleton() {
@@ -727,7 +732,7 @@ class _InterestKpiWidget extends StatelessWidget {
         value: '$total',
         icon: Icons.star_rounded,
         color: AppTheme.primary,
-        trend: 'All interests',
+        trend: '+$total',
         trendUp: true,
       ),
       _KpiData(
@@ -735,7 +740,7 @@ class _InterestKpiWidget extends StatelessWidget {
         value: '$newCount',
         icon: Icons.fiber_new_rounded,
         color: AppTheme.secondary,
-        trend: '+$newCount new',
+        trend: '+$newCount',
         trendUp: true,
       ),
       _KpiData(
@@ -743,7 +748,7 @@ class _InterestKpiWidget extends StatelessWidget {
         value: '$inProgress',
         icon: Icons.timeline_rounded,
         color: const Color(0xFF8B5CF6),
-        trend: 'Active',
+        trend: '+$inProgress',
         trendUp: true,
       ),
       _KpiData(
@@ -751,7 +756,7 @@ class _InterestKpiWidget extends StatelessWidget {
         value: '$quoted',
         icon: Icons.request_quote_rounded,
         color: AppTheme.warning,
-        trend: 'Pending',
+        trend: '-$quoted',
         trendUp: false,
       ),
       _KpiData(
@@ -759,7 +764,7 @@ class _InterestKpiWidget extends StatelessWidget {
         value: '$won',
         icon: Icons.emoji_events_rounded,
         color: AppTheme.success,
-        trend: 'Converted',
+        trend: '+$won',
         trendUp: true,
       ),
     ];
@@ -830,26 +835,32 @@ class _KpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              Row(
-                children: [
-                  Icon(
-                    data.trendUp
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    size: 11,
-                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
+              if (data.trend.isNotEmpty)
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.trend,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    data.trend,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
           const SizedBox(height: 6),
@@ -1218,11 +1229,15 @@ class _InterestCardWidgetState extends State<_InterestCardWidget>
                             color: AppTheme.textMuted,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            phone,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary,
+                          Flexible(
+                            child: Text(
+                              phone,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -1285,12 +1300,16 @@ class _InterestCardWidgetState extends State<_InterestCardWidget>
                             size: 13,
                             color: AppTheme.success,
                           ),
-                          Text(
-                            _formatValue(estimatedValue),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.success,
+                          Flexible(
+                            child: Text(
+                              _formatValue(estimatedValue),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.success,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                           const SizedBox(width: 10),

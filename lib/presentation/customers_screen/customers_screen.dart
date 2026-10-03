@@ -78,13 +78,17 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        color: AppTheme.primary,
-        child: CustomScrollView(
-          slivers: [
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: RefreshIndicator(
+          onRefresh: _refresh,
+          color: AppTheme.primary,
+          child: CustomScrollView(
+            slivers: [
             SliverAppBar(
               expandedHeight: 0,
               floating: true,
@@ -162,25 +166,31 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       size: 28,
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${_customers.length} Converted Customers',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_customers.length} Converted Customers',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                        ),
-                        Text(
-                          'Leads with Won / Result status',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: Colors.white.withAlpha(200),
+                          Text(
+                            'Leads with Won / Result status',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: Colors.white.withAlpha(200),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -223,7 +233,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.only(bottom: 100),
+                padding: EdgeInsets.only(bottom: navBarHeight + 16),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) =>
@@ -234,6 +244,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

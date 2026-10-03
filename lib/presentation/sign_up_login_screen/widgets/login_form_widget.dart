@@ -51,18 +51,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     // TODO: Replace with [Riverpod/Bloc] auth provider for production
     await Future.delayed(const Duration(milliseconds: 1200));
 
-    if (widget.isLogin) {
-      final emailOk = _emailController.text.trim() == _demoEmail;
-      final passOk = _passwordController.text == _demoPassword;
-      if (!emailOk || !passOk) {
-        setState(() {
-          _isLoading = false;
-          _wrongCredentials = true;
-        });
-        return;
-      }
-    }
-
+    // Demo mode: always succeed
     setState(() {
       _isLoading = false;
       _showSuccess = true;

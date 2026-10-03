@@ -405,27 +405,315 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredDates;
+    final hasFilter = _selectedDateTypes.isNotEmpty;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(filtered.length),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildKpiRow(),
-            _buildTimeFilter(),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filtered.isEmpty
-                  ? _buildEmpty()
-                  : RefreshIndicator(
-                      onRefresh: _loadDates,
-                      child: _buildSectionedList(filtered),
-                    ),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: CustomScrollView(
+          controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              color: AppTheme.textPrimary,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  context.go(AppRoutes.dashboardScreen);
+                }
+              },
             ),
-          ],
-        ),
+            title: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B5CF6).withAlpha(31),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.cake_rounded,
+                    color: Color(0xFF8B5CF6),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Important Dates',
+                          maxLines: 1,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            '${filtered.length} dates',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 11,
+                              color: hasFilter
+                                  ? const Color(0xFF8B5CF6)
+                                  : AppTheme.textSecondary,
+                              fontWeight: hasFilter
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                          if (hasFilter) ...[
+                            const SizedBox(width: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF8B5CF6).withAlpha(20),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'filtered',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 9,
+                                  color: const Color(0xFF8B5CF6),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 22,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                }),
+              ),
+              GestureDetector(
+                onTap: _showFilterSheet,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: hasFilter
+                        ? const Color(0xFF8B5CF6).withAlpha(20)
+                        : AppTheme.surface100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: hasFilter
+                          ? const Color(0xFF8B5CF6).withAlpha(80)
+                          : AppTheme.surface200,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.filter_list_rounded,
+                    size: 16,
+                    color: hasFilter
+                        ? const Color(0xFF8B5CF6)
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: _showSortSheet,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _sortBy != 'Date (Ascending)'
+                        ? const Color(0xFF8B5CF6).withAlpha(20)
+                        : AppTheme.surface100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _sortBy != 'Date (Ascending)'
+                          ? const Color(0xFF8B5CF6).withAlpha(80)
+                          : AppTheme.surface200,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.sort_rounded,
+                    size: 16,
+                    color: _sortBy != 'Date (Ascending)'
+                        ? const Color(0xFF8B5CF6)
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (_isSearchActive) _buildSearchBar(),
+                _buildKpiRow(),
+                _buildTimeFilter(),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmpty(),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 4, 16, navBarHeight + 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (ctx, i) {
+                    final items = _buildSectionedItems(filtered);
+                    final item = items[i];
+                    if (item is Map && item['_type'] == 'section') {
+                      final label = item['label'] as String;
+                      final isToday = label == 'Today';
+                      final isOverdue = label == 'Overdue';
+                      final isTomorrow = label == 'Tomorrow';
+                      final isCompleted = label == 'Completed';
+                      final headerColor = isOverdue
+                          ? AppTheme.error
+                          : isToday
+                          ? AppTheme.primary
+                          : isTomorrow
+                          ? AppTheme.warning
+                          : isCompleted
+                          ? const Color(0xFF059669)
+                          : const Color(0xFF8B5CF6);
+                      final headerIcon = isOverdue
+                          ? Icons.warning_rounded
+                          : isToday
+                          ? Icons.today_rounded
+                          : isTomorrow
+                          ? Icons.help_outline
+                          : isCompleted
+                          ? Icons.check_circle_rounded
+                          : Icons.calendar_today_rounded;
+                      return Container(
+                        margin: const EdgeInsets.only(top: 14, bottom: 4),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: headerColor.withAlpha(20),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: headerColor.withAlpha(60)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(headerIcon, size: 12, color: headerColor),
+                                  const SizedBox(width: 5),
+                                  Flexible(
+                                    child: Text(
+                                      label,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: headerColor,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Divider(color: headerColor.withAlpha(40), height: 1),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    if (item is Map && item['_type'] == 'dateType') {
+                      final label = item['label'] as String;
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 4, left: 4),
+                        child: Row(
+                          children: [
+                            Icon(_typeIcon(label), size: 13, color: _typeColor(label)),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                label,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: _typeColor(label),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Divider(
+                                color: _typeColor(label).withAlpha(30),
+                                height: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    final d = item as Map<String, dynamic>;
+                    return _ImportantDateCard(
+                      dateItem: d,
+                      onUpdate: () => setState(() {
+                        _dates = List.from(globalImportantDateMaps);
+                      }),
+                      nextOccurrence: _nextOccurrence(d['date'] as DateTime),
+                      isToday: _isToday(d['date'] as DateTime),
+                      isOverdue: _isOverdue(d['date'] as DateTime),
+                    );
+                  },
+                  childCount: _buildSectionedItems(filtered).length,
+                ),
+              ),
+            ),
+        ],
+      ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddDateSheet,
@@ -439,167 +727,75 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
           ),
         ),
       ),
-    );
+      );
   }
 
-  Widget _buildHeader(int count) {
-    final hasFilter = _selectedDateTypes.isNotEmpty;
-    return Container(
-      color: AppTheme.surfaceLight,
-      padding: const EdgeInsets.fromLTRB(4, 12, 8, 12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            color: AppTheme.textPrimary,
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              } else {
-                context.go(AppRoutes.dashboardScreen);
-              }
-            },
-          ),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B5CF6).withAlpha(31),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.cake_rounded,
-              color: Color(0xFF8B5CF6),
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Important Dates',
-                    maxLines: 1,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '$count dates',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        color: hasFilter
-                            ? const Color(0xFF8B5CF6)
-                            : AppTheme.textSecondary,
-                        fontWeight: hasFilter
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                      ),
-                    ),
-                    if (hasFilter) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF8B5CF6).withAlpha(20),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'filtered',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9,
-                            color: const Color(0xFF8B5CF6),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Icon(
-              _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
-              color: AppTheme.textSecondary,
-              size: 22,
-            ),
-            onPressed: () => setState(() {
-              _isSearchActive = !_isSearchActive;
-              if (!_isSearchActive) {
-                _searchQuery = '';
-                _searchController.clear();
-              }
-            }),
-          ),
-          // Filter button
-          GestureDetector(
-            onTap: _showFilterSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: hasFilter
-                    ? const Color(0xFF8B5CF6).withAlpha(20)
-                    : AppTheme.surface100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: hasFilter
-                      ? const Color(0xFF8B5CF6).withAlpha(80)
-                      : AppTheme.surface200,
-                ),
-              ),
-              child: Icon(
-                Icons.filter_list_rounded,
-                size: 16,
-                color: hasFilter
-                    ? const Color(0xFF8B5CF6)
-                    : AppTheme.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          // Sort button
-          GestureDetector(
-            onTap: _showSortSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: _sortBy != 'Date (Ascending)'
-                    ? const Color(0xFF8B5CF6).withAlpha(20)
-                    : AppTheme.surface100,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _sortBy != 'Date (Ascending)'
-                      ? const Color(0xFF8B5CF6).withAlpha(80)
-                      : AppTheme.surface200,
-                ),
-              ),
-              child: Icon(
-                Icons.sort_rounded,
-                size: 16,
-                color: _sortBy != 'Date (Ascending)'
-                    ? const Color(0xFF8B5CF6)
-                    : AppTheme.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
+  List<dynamic> _buildSectionedItems(List<Map<String, dynamic>> filtered) {
+    final grouped = <String, Map<String, List<Map<String, dynamic>>>>{};
+    final sectionOrder = <String>[];
+
+    for (final d in filtered) {
+      final date = d['date'] as DateTime;
+      final next = _nextOccurrence(date);
+      String section;
+
+      if (_isOverdue(date)) {
+        section = 'Overdue';
+      } else if (_isToday(date)) {
+        section = 'Today';
+      } else if (next.year == DateTime.now().year &&
+          next.month == DateTime.now().month &&
+          next.day == DateTime.now().day + 1) {
+        section = 'Tomorrow';
+      } else if (d['tags']?.contains('Completed') == true) {
+        section = 'Completed';
+      } else if (next.isBefore(DateTime.now())) {
+        section = 'Overdue';
+      } else if (next.year == DateTime.now().year &&
+          next.month == DateTime.now().month &&
+          next.day == DateTime.now().day) {
+        section = 'Today';
+      } else {
+        final months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        section = '${next.day} ${months[next.month - 1]} ${next.year}';
+      }
+
+      final dateType = d['dateType'] as String;
+      if (!grouped.containsKey(section)) {
+        grouped[section] = {};
+        sectionOrder.add(section);
+      }
+      if (!grouped[section]!.containsKey(dateType)) {
+        grouped[section]![dateType] = [];
+      }
+      grouped[section]![dateType]!.add(d);
+    }
+
+    final List<dynamic> items = [];
+    for (final section in sectionOrder) {
+      items.add({'_type': 'section', 'label': section});
+      final typeMap = grouped[section]!;
+      for (final dateType in typeMap.keys) {
+        items.add({'_type': 'dateType', 'label': dateType, 'section': section});
+        for (final d in typeMap[dateType]!) {
+          items.add(d);
+        }
+      }
+    }
+    return items;
   }
 
   void _showFilterSheet() {
@@ -719,7 +915,7 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
         itemBuilder: (_, i) {
           final (label, count, icon, color, sub) = kpis[i];
           return Container(
-            width: 120,
+            width: 110,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppTheme.surfaceLight,
@@ -749,23 +945,29 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
                       ),
                       child: Icon(icon, size: 14, color: color),
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.trending_down_rounded,
-                          size: 11,
-                          color: AppTheme.warning,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          sub,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.trending_down_rounded,
+                            size: 11,
                             color: AppTheme.warning,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 2),
+                          Flexible(
+                            child: Text(
+                              sub,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                                color: AppTheme.warning,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -797,37 +999,39 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
 
   Widget _buildTimeFilter() {
     return SizedBox(
-      height: 50,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _timeFilters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final tf = _timeFilters[i];
           final selected = _selectedTimeFilter == tf;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedTimeFilter = tf),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFF8B5CF6)
-                    : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTimeFilter = tf),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
                   color: selected
                       ? const Color(0xFF8B5CF6)
-                      : AppTheme.surface200,
+                      : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF8B5CF6)
+                        : AppTheme.surface200,
+                  ),
                 ),
-              ),
-              child: Text(
-                tf,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: selected ? Colors.white : AppTheme.textSecondary,
+                child: Text(
+                  tf,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: selected ? Colors.white : AppTheme.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -862,182 +1066,6 @@ class _ImportantDatesScreenState extends State<ImportantDatesScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSectionedList(List<Map<String, dynamic>> filtered) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-
-    final Map<String, Map<String, List<Map<String, dynamic>>>> grouped = {};
-    final List<String> sectionOrder = [];
-
-    for (final d in filtered) {
-      final date = d['date'] as DateTime;
-      final next = _nextOccurrence(date);
-      final nextDay = DateTime(next.year, next.month, next.day);
-      final dateType = d['dateType'] as String? ?? 'Other';
-
-      String section;
-      if (_isCompleted(d)) {
-        section = 'Completed';
-      } else if (nextDay.isBefore(today)) {
-        section = 'Overdue';
-      } else if (nextDay == today) {
-        section = 'Today';
-      } else if (nextDay == tomorrow) {
-        section = 'Tomorrow';
-      } else if (next.difference(today).inDays <= 7) {
-        section = 'This Week';
-      } else if (next.month == now.month && next.year == now.year) {
-        section = 'This Month';
-      } else {
-        const months = [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
-        section = '${next.day} ${months[next.month - 1]} ${next.year}';
-      }
-
-      if (!grouped.containsKey(section)) {
-        grouped[section] = {};
-        sectionOrder.add(section);
-      }
-      if (!grouped[section]!.containsKey(dateType)) {
-        grouped[section]![dateType] = [];
-      }
-      grouped[section]![dateType]!.add(d);
-    }
-
-    final List<dynamic> items = [];
-    for (final section in sectionOrder) {
-      items.add({'_type': 'section', 'label': section});
-      final typeMap = grouped[section]!;
-      for (final dateType in typeMap.keys) {
-        items.add({'_type': 'dateType', 'label': dateType, 'section': section});
-        for (final d in typeMap[dateType]!) {
-          items.add(d);
-        }
-      }
-    }
-
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
-        final item = items[i];
-        if (item is Map && item['_type'] == 'section') {
-          final label = item['label'] as String;
-          final isToday = label == 'Today';
-          final isOverdue = label == 'Overdue';
-          final isTomorrow = label == 'Tomorrow';
-          final isCompleted = label == 'Completed';
-          final headerColor = isOverdue
-              ? AppTheme.error
-              : isToday
-              ? AppTheme.primary
-              : isTomorrow
-              ? AppTheme.warning
-              : isCompleted
-              ? const Color(0xFF059669)
-              : const Color(0xFF8B5CF6);
-          final headerIcon = isOverdue
-              ? Icons.warning_rounded
-              : isToday
-              ? Icons.today_rounded
-              : isTomorrow
-              ? Icons.help_outline
-              : isCompleted
-              ? Icons.check_circle_rounded
-              : Icons.calendar_today_rounded;
-          return Container(
-            margin: const EdgeInsets.only(top: 14, bottom: 4),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: headerColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: headerColor.withAlpha(60)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(headerIcon, size: 12, color: headerColor),
-                      const SizedBox(width: 5),
-                      Text(
-                        label,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: headerColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Divider(color: headerColor.withAlpha(40), height: 1),
-                ),
-              ],
-            ),
-          );
-        }
-        if (item is Map && item['_type'] == 'dateType') {
-          final label = item['label'] as String;
-          return Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 4, left: 4),
-            child: Row(
-              children: [
-                Icon(_typeIcon(label), size: 13, color: _typeColor(label)),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: _typeColor(label),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Divider(
-                    color: _typeColor(label).withAlpha(30),
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        final d = item as Map<String, dynamic>;
-        return _ImportantDateCard(
-          dateItem: d,
-          onUpdate: () => setState(() {
-            _dates = List.from(globalImportantDateMaps);
-          }),
-          nextOccurrence: _nextOccurrence(d['date'] as DateTime),
-          isToday: _isToday(d['date'] as DateTime),
-          isOverdue: _isOverdue(d['date'] as DateTime),
-        );
-      },
     );
   }
 
@@ -1367,12 +1395,16 @@ class _ImportantDateCard extends StatelessWidget {
                       color: Color(0xFF8B5CF6),
                     ),
                     const SizedBox(width: 5),
-                    Text(
-                      '🎉 Today! Don\'t forget to wish!',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF8B5CF6),
+                    Expanded(
+                      child: Text(
+                        '🎉 Today! Don\'t forget to wish!',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF8B5CF6),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ),
                   ],
@@ -1400,12 +1432,16 @@ class _ImportantDateCard extends StatelessWidget {
                       color: AppTheme.error,
                     ),
                     const SizedBox(width: 5),
-                    Text(
-                      'Overdue — ${_timeUntil(nextOccurrence)}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.error,
+                    Expanded(
+                      child: Text(
+                        'Overdue — ${_timeUntil(nextOccurrence)}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.error,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ),
                   ],
@@ -1466,11 +1502,15 @@ class _ImportantDateCard extends StatelessWidget {
                                     color: AppTheme.textMuted,
                                   ),
                                   const SizedBox(width: 3),
-                                  Text(
-                                    phone,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 11,
-                                      color: AppTheme.textMuted,
+                                  Flexible(
+                                    child: Text(
+                                      phone,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ),
                                 ],

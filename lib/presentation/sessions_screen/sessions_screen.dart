@@ -890,12 +890,12 @@ class _SessionsScreenState extends State<SessionsScreen> {
       }
       items.add(s);
     }
-    if (items.isEmpty) return _buildEmpty();
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
+    if (items.isEmpty) return SliverToBoxAdapter(child: _buildEmpty());
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(16, 4, 16, MediaQuery.paddingOf(context).bottom + 16),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (ctx, i) {
             final item = items[i];
             if (item is Map && item.containsKey('_header')) {
               final header = item['_header'] as String;
@@ -922,12 +922,16 @@ class _SessionsScreenState extends State<SessionsScreen> {
                             color: AppTheme.error,
                           ),
                           const SizedBox(width: 5),
-                          Text(
-                            header,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.error,
+                          Flexible(
+                            child: Text(
+                              header,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.error,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -952,7 +956,10 @@ class _SessionsScreenState extends State<SessionsScreen> {
                 _sessions = List.from(globalSessionMaps);
               }),
             );
-      },
+          },
+          childCount: items.length,
+        ),
+      ),
     );
   }
 
@@ -1054,11 +1061,11 @@ class _SessionsScreenState extends State<SessionsScreen> {
       items.add(s);
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(16, 4, 16, MediaQuery.paddingOf(context).bottom + 16),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (ctx, i) {
             final item = items[i];
             if (item is Map && item.containsKey('_header')) {
               final header = item['_header'] as String;
@@ -1098,12 +1105,16 @@ class _SessionsScreenState extends State<SessionsScreen> {
                         children: [
                           Icon(headerIcon, size: 12, color: headerColor),
                           const SizedBox(width: 5),
-                          Text(
-                            header,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: headerColor,
+                          Flexible(
+                            child: Text(
+                              header,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: headerColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -1126,49 +1137,152 @@ class _SessionsScreenState extends State<SessionsScreen> {
                 _sessions = List.from(globalSessionMaps);
               }),
             );
-      },
+          },
+          childCount: items.length,
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredSessions;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            if (_isSearchActive) _buildSearchBar(),
-            _buildKpiRow(),
-            // Always show horizontal filter chips (hide only when filter sheet filters are active)
-            if (!_isFilterActive) _buildStatusFilterBar(),
-            // When filter sheet filter is active, show compact filter indicator
-            if (_isFilterActive) _buildActiveFilterIndicator(),
-            if (_hasActiveFilters) _buildActiveFilterChips(),
-            if (_hasActiveFilters || _selectedFilter != 'All')
-              _buildFilteredCountBanner(filtered.length),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filtered.isEmpty
-                  ? _buildEmpty()
-                  : RefreshIndicator(
-                      onRefresh: _loadSessions,
-                      child: _selectedFilter == 'Dues'
-                          ? _buildDuesSectionedList(filtered)
-                          : _buildSectionedList(filtered),
-                    ),
+      extendBody: true,
+      body: Padding(
+        padding: EdgeInsets.only(bottom: navBarHeight),
+        child: CustomScrollView(
+          controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              color: AppTheme.textPrimary,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  context.go(AppRoutes.dashboardScreen);
+                }
+              },
             ),
-          ],
-        ),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B5CF6).withAlpha(31),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.event_note_rounded,
+                    color: Color(0xFF8B5CF6),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Sessions',
+                        maxLines: 1,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${_filteredSessions.length}/$_totalSessions sessions',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive ? Icons.search_off_rounded : Icons.search_rounded,
+                  color: AppTheme.textSecondary,
+                  size: 22,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  }
+                }),
+              ),
+              _HeaderButton(
+                icon: Icons.filter_list_rounded,
+                hasActive: _hasActiveFilters,
+                onTap: _showFilterSheet,
+              ),
+              const SizedBox(width: 6),
+              _HeaderButton(
+                icon: Icons.sort_rounded,
+                hasActive: false,
+                onTap: _showSortSheet,
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                if (_isSearchActive) _buildSearchBar(),
+                _buildKpiRow(),
+                if (!_isFilterActive) _buildStatusFilterBar(),
+                if (_isFilterActive) _buildActiveFilterIndicator(),
+                if (_hasActiveFilters) _buildActiveFilterChips(),
+                if (_hasActiveFilters || _selectedFilter != 'All')
+                  _buildFilteredCountBanner(filtered.length),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (filtered.isEmpty)
+            SliverFillRemaining(
+              child: _buildEmpty(),
+            )
+          else
+            _selectedFilter == 'Dues'
+                ? _buildDuesSectionedList(filtered)
+                : _buildSectionedList(filtered),
+        ],
+      ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddSessionSheet,
         backgroundColor: AppTheme.primary,
         child: const Icon(Icons.add_rounded, color: Colors.white),
       ),
-    );
+      );
   }
 
   Widget _buildHeader() {
@@ -1317,7 +1431,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_totalSessions',
         Icons.event_note_rounded,
         AppTheme.primary,
-        '$_totalSessions total',
+        '+$_totalSessions',
         false,
       ),
       _KpiData(
@@ -1325,7 +1439,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_videoCallCount',
         Icons.videocam_rounded,
         const Color(0xFF0891B2),
-        '$_videoCallCount total',
+        '+$_videoCallCount',
         false,
       ),
       _KpiData(
@@ -1333,7 +1447,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_appointmentCount',
         Icons.people_rounded,
         const Color(0xFF8B5CF6),
-        '$_appointmentCount total',
+        '+$_appointmentCount',
         false,
       ),
       _KpiData(
@@ -1341,7 +1455,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_callBackCount',
         Icons.phone_callback_rounded,
         AppTheme.success,
-        '$_callBackCount total',
+        '+$_callBackCount',
         false,
       ),
       _KpiData(
@@ -1349,7 +1463,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_completedCount',
         Icons.check_circle_rounded,
         AppTheme.warning,
-        '+${_completedCount > 0 ? _completedCount : 0}',
+        '+$_completedCount',
         true,
       ),
       _KpiData(
@@ -1357,7 +1471,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$dueCount',
         Icons.warning_rounded,
         AppTheme.error,
-        '$dueCount overdue',
+        '-$dueCount',
         false,
       ),
       _KpiData(
@@ -1365,7 +1479,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$_rescheduledCount',
         Icons.schedule_rounded,
         const Color(0xFF8B5CF6),
-        '$_rescheduledCount total',
+        '-$_rescheduledCount',
         false,
       ),
       _KpiData(
@@ -1373,7 +1487,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         '$cancelledCount',
         Icons.cancel_rounded,
         AppTheme.textMuted,
-        '$cancelledCount total',
+        '-$cancelledCount',
         false,
       ),
     ];
@@ -1393,10 +1507,10 @@ class _SessionsScreenState extends State<SessionsScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return SizedBox(
-      height: 50,
+      height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _statusFilters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
@@ -1444,24 +1558,26 @@ class _SessionsScreenState extends State<SessionsScreen> {
               count = _sessions.where((s) => s['status'] == 'Cancelled').length;
               break;
           }
-          return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = f),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: selected ? AppTheme.primary : AppTheme.surfaceLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: selected ? AppTheme.primary : AppTheme.surface200,
+          return Center(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedFilter = f),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: selected ? AppTheme.primary : AppTheme.surfaceLight,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: selected ? AppTheme.primary : AppTheme.surface200,
+                  ),
                 ),
-              ),
-              child: Text(
-                '$f ($count)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: selected ? Colors.white : AppTheme.textSecondary,
+                child: Text(
+                  '$f ($count)',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: selected ? Colors.white : AppTheme.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -11603,7 +11719,7 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: 110,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
@@ -11632,26 +11748,32 @@ class _KpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              Row(
-                children: [
-                  Icon(
-                    data.trendUp
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    size: 11,
-                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
+              if (data.trend.isNotEmpty)
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.trend,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    data.trend,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
           const SizedBox(height: 6),
@@ -11783,12 +11905,16 @@ class _CountChip extends StatelessWidget {
         children: [
           Icon(icon, size: 11, color: color),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
@@ -11923,12 +12049,16 @@ class _ActiveFilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              color: AppTheme.primary,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppTheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),

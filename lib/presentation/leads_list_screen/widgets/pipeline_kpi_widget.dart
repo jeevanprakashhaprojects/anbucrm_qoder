@@ -54,7 +54,7 @@ class PipelineKpiWidget extends StatelessWidget {
         value: '$followUpLeads',
         icon: Icons.repeat_rounded,
         color: AppTheme.warning,
-        trend: '$followUpLeads due',
+        trend: '-$followUpLeads',
         trendUp: false,
       ),
       _KpiData(
@@ -62,7 +62,7 @@ class PipelineKpiWidget extends StatelessWidget {
         value: '$negotiations',
         icon: Icons.handshake_rounded,
         color: const Color(0xFF0891B2),
-        trend: '$negotiations active',
+        trend: '+$negotiations',
         trendUp: true,
       ),
     ];
@@ -133,26 +133,32 @@ class _KpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              Row(
-                children: [
-                  Icon(
-                    data.trendUp
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    size: 11,
-                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
+              if (data.trend.isNotEmpty)
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.trend,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    data.trend,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
           const SizedBox(height: 6),

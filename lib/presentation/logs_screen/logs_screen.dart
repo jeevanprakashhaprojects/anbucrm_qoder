@@ -676,211 +676,240 @@ class _LogsScreenState extends State<LogsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('🔵 LogsScreen.build() called');
     final grouped = _groupedLogs;
+    final navBarHeight = MediaQuery.paddingOf(context).bottom;
+    print(' grouped.length: ${grouped.length}, navBarHeight: $navBarHeight');
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar — same design as leads header
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            backgroundColor: AppTheme.backgroundLight,
-            elevation: 0,
-            scrolledUnderElevation: 1,
-            shadowColor: AppTheme.surface200,
-            leading: Builder(
-              builder: (ctx) => IconButton(
-                icon: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceVariantLight,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.menu_rounded,
-                    size: 20,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                onPressed: () => appScaffoldKey.currentState?.openDrawer(),
-              ),
-            ),
-            title: _isSearchActive
-                ? Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceVariantLight,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppTheme.primary.withAlpha(120),
+    try {
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        extendBody: true,
+        body: Padding(
+          padding: EdgeInsets.only(bottom: navBarHeight),
+          child: CustomScrollView(
+            slivers: [
+              // App Bar
+              SliverAppBar(
+                expandedHeight: 0,
+                floating: true,
+                snap: true,
+                backgroundColor: AppTheme.backgroundLight,
+                elevation: 0,
+                scrolledUnderElevation: 1,
+                shadowColor: AppTheme.surface200,
+                leading: Builder(
+                  builder: (ctx) => IconButton(
+                    icon: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceVariantLight,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        hintText: 'Search calls, leads, notes...',
-                        hintStyle: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppTheme.textMuted,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        isDense: true,
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
-                          size: 18,
-                          color: AppTheme.textMuted,
-                        ),
-                      ),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
+                      child: const Icon(
+                        Icons.menu_rounded,
+                        size: 20,
                         color: AppTheme.textPrimary,
                       ),
-                      onChanged: (v) => setState(() => _searchQuery = v),
                     ),
-                  )
-                : Text(
-                    'Call Logs',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                      letterSpacing: -0.3,
-                    ),
+                    onPressed: () => appScaffoldKey.currentState?.openDrawer(),
                   ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  _isSearchActive ? Icons.close_rounded : Icons.search_rounded,
-                  color: AppTheme.textPrimary,
                 ),
-                onPressed: () => setState(() {
-                  _isSearchActive = !_isSearchActive;
-                  if (!_isSearchActive) {
-                    _searchCtrl.clear();
-                    _searchQuery = '';
-                  }
-                }),
-              ),
-              // Filter button
-              IconButton(
-                icon: Stack(
-                  children: [
-                    Icon(
-                      Icons.filter_list_rounded,
-                      color: _hasActiveFilters
+                title: _isSearchActive
+                    ? Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceVariantLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppTheme.primary.withAlpha(120),
+                          ),
+                        ),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: 'Search calls, leads, notes...',
+                            hintStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              color: AppTheme.textMuted,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            isDense: true,
+                            prefixIcon: const Icon(
+                              Icons.search_rounded,
+                              size: 18,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            color: AppTheme.textPrimary,
+                          ),
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                        ),
+                      )
+                    : Text(
+                        'Call Logs',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      _isSearchActive
+                          ? Icons.close_rounded
+                          : Icons.search_rounded,
+                      color: AppTheme.textPrimary,
+                    ),
+                    onPressed: () => setState(() {
+                      _isSearchActive = !_isSearchActive;
+                      if (!_isSearchActive) {
+                        _searchCtrl.clear();
+                        _searchQuery = '';
+                      }
+                    }),
+                  ),
+                  // Filter button
+                  IconButton(
+                    icon: Stack(
+                      children: [
+                        Icon(
+                          Icons.filter_list_rounded,
+                          color: _hasActiveFilters
+                              ? AppTheme.primary
+                              : AppTheme.textPrimary,
+                        ),
+                        if (_hasActiveFilters)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.error,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    onPressed: () => _showFilterSheet(),
+                  ),
+                  // Sort button
+                  IconButton(
+                    icon: Icon(
+                      Icons.sort_rounded,
+                      color: _sortOption != 'Newest First'
                           ? AppTheme.primary
                           : AppTheme.textPrimary,
                     ),
-                    if (_hasActiveFilters)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.error,
-                            shape: BoxShape.circle,
+                    onPressed: () => _showSortSheet(),
+                  ),
+                ],
+              ),
+
+              // Stats row
+              SliverToBoxAdapter(child: _buildStatsRow()),
+
+              // Active filter chips
+              if (_hasActiveFilters)
+                SliverToBoxAdapter(child: _buildActiveFilterChips()),
+
+              // Results count
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Text(
+                    '${_filteredLogs.length} call${_filteredLogs.length != 1 ? 's' : ''}${_dateFilter == 'Today' && _dateFrom == null && _dateTo == null ? ' today' : ''}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Call log list with date headers
+              if (grouped.isEmpty)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.call_outlined,
+                          size: 48,
+                          color: AppTheme.textMuted,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No calls found',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textSecondary,
                           ),
                         ),
-                      ),
-                  ],
+                        const SizedBox(height: 6),
+                        Text(
+                          'Try adjusting your filters',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.only(bottom: navBarHeight + 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) {
+                        final item = grouped[i];
+                        if (item is String) return _buildDateHeader(item);
+                        // TEMP: Simple container to test
+                        return Container(
+                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text('Call log ${(item as CallLogEntry).phoneNumber}'),
+                        );
+                      },
+                      childCount: grouped.length,
+                    ),
+                  ),
                 ),
-                onPressed: () => _showFilterSheet(),
-              ),
-              // Sort button
-              IconButton(
-                icon: Icon(
-                  Icons.sort_rounded,
-                  color: _sortOption != 'Newest First'
-                      ? AppTheme.primary
-                      : AppTheme.textPrimary,
-                ),
-                onPressed: () => _showSortSheet(),
-              ),
             ],
           ),
-
-          // Stats row — box card design same as leads stats
-          SliverToBoxAdapter(child: _buildStatsRow()),
-
-          // Active filter chips
-          if (_hasActiveFilters)
-            SliverToBoxAdapter(child: _buildActiveFilterChips()),
-
-          // Results count
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text(
-                '${_filteredLogs.length} call${_filteredLogs.length != 1 ? 's' : ''}${_dateFilter == 'Today' && _dateFrom == null && _dateTo == null ? ' today' : ''}',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-            ),
-          ),
-
-          // Call log list with date headers
-          if (grouped.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.call_outlined,
-                      size: 48,
-                      color: AppTheme.textMuted,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'No calls found',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Try adjusting your filters',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        color: AppTheme.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.only(bottom: 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((ctx, i) {
-                  final item = grouped[i];
-                  if (item is String) return _buildDateHeader(item);
-                  return _CallLogCard(
-                    entry: item as CallLogEntry,
-                    onTap: () => _showCallDetail(item),
-                  );
-                }, childCount: grouped.length),
-              ),
-            ),
-        ],
-      ),
-    );
+        ),
+      );
+    } catch (e, stack) {
+      print('🔴 LogsScreen.build() EXCEPTION: $e');
+      print(' Stack: $stack');
+      return Scaffold(
+        body: Center(
+          child: Text('Error: $e'),
+        ),
+      );
+    }
   }
 
   Widget _buildDateHeader(String dateStr) {
@@ -926,6 +955,8 @@ class _LogsScreenState extends State<LogsScreen> {
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primary,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 8),
@@ -942,7 +973,7 @@ class _LogsScreenState extends State<LogsScreen> {
         value: '$_todayTotalCount',
         icon: Icons.today_rounded,
         color: AppTheme.primary,
-        trend: 'total calls',
+        trend: '+$_todayTotalCount',
         trendUp: true,
       ),
       _LogsKpiData(
@@ -950,7 +981,7 @@ class _LogsScreenState extends State<LogsScreen> {
         value: '$_todayConnectedCount',
         icon: Icons.call_rounded,
         color: AppTheme.success,
-        trend: 'answered',
+        trend: '+$_todayConnectedCount',
         trendUp: true,
       ),
       _LogsKpiData(
@@ -958,7 +989,7 @@ class _LogsScreenState extends State<LogsScreen> {
         value: '$_todayAppointmentCount',
         icon: Icons.event_available_rounded,
         color: const Color(0xFF8B5CF6),
-        trend: 'booked',
+        trend: '+$_todayAppointmentCount',
         trendUp: true,
       ),
       _LogsKpiData(
@@ -966,7 +997,7 @@ class _LogsScreenState extends State<LogsScreen> {
         value: '$_todayFollowUpsCount',
         icon: Icons.schedule_rounded,
         color: AppTheme.warning,
-        trend: 'pending',
+        trend: '-$_todayFollowUpsCount',
         trendUp: false,
       ),
       _LogsKpiData(
@@ -974,7 +1005,7 @@ class _LogsScreenState extends State<LogsScreen> {
         value: '$_todayMissedCount',
         icon: Icons.call_missed_rounded,
         color: AppTheme.error,
-        trend: 'no answer',
+        trend: '-$_todayMissedCount',
         trendUp: false,
       ),
     ];
@@ -1862,26 +1893,32 @@ class _LogsKpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              Row(
-                children: [
-                  Icon(
-                    data.trendUp
-                        ? Icons.trending_up_rounded
-                        : Icons.trending_down_rounded,
-                    size: 11,
-                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
+              if (data.trend.isNotEmpty)
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                        size: 11,
+                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                      ),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: Text(
+                          data.trend,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 2),
-                  Text(
-                    data.trend,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                    ),
-                  ),
-                ],
-              ),
+                ),
             ],
           ),
           const SizedBox(height: 6),
@@ -2054,6 +2091,8 @@ class _CallLogCard extends StatelessWidget {
                           fontSize: 11,
                           color: AppTheme.textMuted,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ],
                   ),
@@ -2080,17 +2119,19 @@ class _CallLogCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                _InfoBadge(label: entry.direction, color: _directionColor),
-                const SizedBox(width: 6),
-                _InfoBadge(label: entry.callType, color: AppTheme.primary),
-                const SizedBox(width: 6),
-                _InfoBadge(
-                  label: entry.formattedDuration,
-                  color: AppTheme.textSecondary,
-                ),
-              ],
+            Flexible(
+              child: Row(
+                children: [
+                  Flexible(child: _InfoBadge(label: entry.direction, color: _directionColor)),
+                  const SizedBox(width: 6),
+                  Flexible(child: _InfoBadge(label: entry.callType, color: AppTheme.primary)),
+                  const SizedBox(width: 6),
+                  Flexible(child: _InfoBadge(
+                    label: entry.formattedDuration,
+                    color: AppTheme.textSecondary,
+                  )),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -2431,12 +2472,16 @@ class _ActiveChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primary,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primary,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           const SizedBox(width: 4),
