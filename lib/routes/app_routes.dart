@@ -33,6 +33,7 @@ import '../widgets/app_scaffold.dart';
 import '../presentation/important_dates_screen/important_dates_screen.dart';
 import '../presentation/assign_leads_screen/assign_leads_screen.dart';
 import '../presentation/assigned_tasks_screen/assigned_tasks_screen.dart';
+import '../presentation/whatsapp_automation/whatsapp_automation_screen.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -69,6 +70,7 @@ class AppRoutes {
   static const String importantDatesScreen = '/important-dates-screen';
   static const String assignLeadsScreen = '/assign-leads-screen';
   static const String assignedTasksScreen = '/assigned-tasks-screen';
+  static const String whatsappAutomationScreen = '/whatsapp-automation-screen';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -612,6 +614,24 @@ final GoRouter appRouter = GoRouter(
           transitionDuration: const Duration(milliseconds: 350),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappAutomationScreen,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const WhatsAppAutomationScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
     ),
     // Main app shell — 4 tabs: Dashboard | Leads | Logs | Settings
     StatefulShellRoute.indexedStack(

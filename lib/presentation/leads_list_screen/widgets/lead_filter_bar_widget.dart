@@ -29,12 +29,12 @@ class LeadFilterBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 58,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         itemCount: _filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
         itemBuilder: (context, i) {
           final filter = _filters[i];
           final isSelected = selectedFilter == filter;
@@ -53,7 +53,7 @@ class LeadFilterBarWidget extends StatelessWidget {
             onTap: () => onFilterChanged(filter),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
                 color: isSelected ? color : AppTheme.surfaceLight,
                 borderRadius: BorderRadius.circular(20),
@@ -77,22 +77,22 @@ class LeadFilterBarWidget extends StatelessWidget {
                   if (filter == 'Won') ...[
                     const Icon(
                       Icons.emoji_events_rounded,
-                      size: 12,
+                      size: 11,
                       color: Colors.white,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                   ] else if (filter == 'Lost') ...[
                     const Icon(
                       Icons.cancel_rounded,
-                      size: 12,
+                      size: 11,
                       color: Colors.white,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                   ],
                   Text(
                     filter,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: isSelected ? Colors.white : AppTheme.textSecondary,
                     ),

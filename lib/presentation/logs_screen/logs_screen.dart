@@ -422,6 +422,18 @@ class _LogsScreenState extends State<LogsScreen> {
   List<String> _selectedCallTypes = [];
   List<String> _selectedStatuses = [];
   String _sortOption = 'Newest First';
+  String _statusFilter = 'All';
+
+  static const _statusFilters = [
+    'All',
+    'Connected',
+    'No Answer',
+    'Busy',
+    'Switched Off',
+    'Voicemail',
+    'Interested',
+    'Appointment Set',
+  ];
 
   static const _directions = ['All', 'Incoming', 'Outgoing', 'Missed'];
   static const _callTypes = [
@@ -472,6 +484,13 @@ class _LogsScreenState extends State<LogsScreen> {
       }
       if (_directionFilter != 'All' && log.direction != _directionFilter) {
         return false;
+      }
+      if (_statusFilter != 'All') {
+        if (_statusFilter == 'Voicemail') {
+          if (!log.callStatus.contains('Voicemail')) return false;
+        } else {
+          if (log.callStatus != _statusFilter) return false;
+        }
       }
       if (_selectedEmployees.isNotEmpty &&
           !_selectedEmployees.contains(log.agentName)) {
@@ -572,6 +591,7 @@ class _LogsScreenState extends State<LogsScreen> {
       _dateFrom != null ||
       _dateTo != null ||
       _directionFilter != 'All' ||
+      _statusFilter != 'All' ||
       _selectedEmployees.isNotEmpty ||
       _selectedCallTypes.isNotEmpty ||
       _selectedStatuses.isNotEmpty;
@@ -582,6 +602,7 @@ class _LogsScreenState extends State<LogsScreen> {
       _dateFrom = null;
       _dateTo = null;
       _directionFilter = 'All';
+      _statusFilter = 'All';
       _selectedEmployees = [];
       _selectedCallTypes = [];
       _selectedStatuses = [];
@@ -589,6 +610,8 @@ class _LogsScreenState extends State<LogsScreen> {
   }
 
   // Stats computed from today's calls only
+  int get _totalCount => globalCallLogs.length;
+
   int get _todayConnectedCount {
     final now = DateTime.now();
     return globalCallLogs
@@ -653,6 +676,84 @@ class _LogsScreenState extends State<LogsScreen> {
         .length;
   }
 
+  int get _todayIncomingCount {
+    final now = DateTime.now();
+    return globalCallLogs
+        .where(
+          (l) =>
+              l.callDateTime.day == now.day &&
+              l.callDateTime.month == now.month &&
+              l.callDateTime.year == now.year &&
+              l.direction == 'Incoming',
+        )
+        .length;
+  }
+
+  int get _todayOutgoingCount {
+    final now = DateTime.now();
+    return globalCallLogs
+        .where(
+          (l) =>
+              l.callDateTime.day == now.day &&
+              l.callDateTime.month == now.month &&
+              l.callDateTime.year == now.year &&
+              l.direction == 'Outgoing',
+        )
+        .length;
+  }
+
+  int get _todayIncomingConnectedCount {
+    final now = DateTime.now();
+    return globalCallLogs
+        .where(
+          (l) =>
+              l.callDateTime.day == now.day &&
+              l.callDateTime.month == now.month &&
+              l.callDateTime.year == now.year &&
+              l.direction == 'Incoming' &&
+              l.callStatus.startsWith('Connected'),
+        )
+        .length;
+  }
+
+  int get _todayOutgoingConnectedCount {
+    final now = DateTime.now();
+    return globalCallLogs
+        .where(
+          (l) =>
+              l.callDateTime.day == now.day &&
+              l.callDateTime.month == now.month &&
+              l.callDateTime.year == now.year &&
+              l.direction == 'Outgoing' &&
+              l.callStatus.startsWith('Connected'),
+        )
+        .length;
+  }
+
+  String get _todayAverageDuration {
+    final now = DateTime.now();
+    final todayLogs = globalCallLogs
+        .where(
+          (l) =>
+              l.callDateTime.day == now.day &&
+              l.callDateTime.month == now.month &&
+              l.callDateTime.year == now.year &&
+              l.durationSeconds > 0,
+        )
+        .toList();
+    if (todayLogs.isEmpty) return '0s';
+    final totalSeconds = todayLogs.fold<int>(
+      0,
+      (sum, l) => sum + l.durationSeconds,
+    );
+    final avgSeconds = totalSeconds ~/ todayLogs.length;
+    final m = avgSeconds ~/ 60;
+    final s = avgSeconds % 60;
+    if (m == 0) return '${s}s';
+    if (s == 0) return '${m}m';
+    return '${m}m ${s}s';
+  }
+
   @override
   void dispose() {
     _searchCtrl.dispose();
@@ -676,240 +777,219 @@ class _LogsScreenState extends State<LogsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('🔵 LogsScreen.build() called');
     final grouped = _groupedLogs;
-    final navBarHeight = MediaQuery.paddingOf(context).bottom;
-    print(' grouped.length: ${grouped.length}, navBarHeight: $navBarHeight');
 
-    try {
-      return Scaffold(
-        backgroundColor: AppTheme.backgroundLight,
-        extendBody: true,
-        body: Padding(
-          padding: EdgeInsets.only(bottom: navBarHeight),
-          child: CustomScrollView(
-            slivers: [
-              // App Bar
-              SliverAppBar(
-                expandedHeight: 0,
-                floating: true,
-                snap: true,
-                backgroundColor: AppTheme.backgroundLight,
-                elevation: 0,
-                scrolledUnderElevation: 1,
-                shadowColor: AppTheme.surface200,
-                leading: Builder(
-                  builder: (ctx) => IconButton(
-                    icon: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppTheme.surfaceVariantLight,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.menu_rounded,
-                        size: 20,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    onPressed: () => appScaffoldKey.currentState?.openDrawer(),
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
+      body: CustomScrollView(
+        slivers: [
+          // App Bar — same design as leads header
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            backgroundColor: AppTheme.backgroundLight,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            shadowColor: AppTheme.surface200,
+            leading: Builder(
+              builder: (ctx) => IconButton(
+                icon: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceVariantLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.menu_rounded,
+                    size: 20,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
-                title: _isSearchActive
-                    ? Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceVariantLight,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppTheme.primary.withAlpha(120),
-                          ),
+                onPressed: () => appScaffoldKey.currentState?.openDrawer(),
+              ),
+            ),
+            title: _isSearchActive
+                ? Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceVariantLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primary.withAlpha(120),
+                      ),
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Search calls, leads, notes...',
+                        hintStyle: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: AppTheme.textMuted,
                         ),
-                        child: TextField(
-                          controller: _searchCtrl,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: 'Search calls, leads, notes...',
-                            hintStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              color: AppTheme.textMuted,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            isDense: true,
-                            prefixIcon: const Icon(
-                              Icons.search_rounded,
-                              size: 18,
-                              color: AppTheme.textMuted,
-                            ),
-                          ),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            color: AppTheme.textPrimary,
-                          ),
-                          onChanged: (v) => setState(() => _searchQuery = v),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
                         ),
-                      )
-                    : Text(
-                        'Call Logs',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                          letterSpacing: -0.3,
+                        isDense: true,
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          size: 18,
+                          color: AppTheme.textMuted,
                         ),
                       ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      _isSearchActive
-                          ? Icons.close_rounded
-                          : Icons.search_rounded,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        color: AppTheme.textPrimary,
+                      ),
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                    ),
+                  )
+                : Text(
+                    'Call Logs',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
+                      letterSpacing: -0.3,
                     ),
-                    onPressed: () => setState(() {
-                      _isSearchActive = !_isSearchActive;
-                      if (!_isSearchActive) {
-                        _searchCtrl.clear();
-                        _searchQuery = '';
-                      }
-                    }),
                   ),
-                  // Filter button
-                  IconButton(
-                    icon: Stack(
-                      children: [
-                        Icon(
-                          Icons.filter_list_rounded,
-                          color: _hasActiveFilters
-                              ? AppTheme.primary
-                              : AppTheme.textPrimary,
-                        ),
-                        if (_hasActiveFilters)
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.error,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    onPressed: () => _showFilterSheet(),
-                  ),
-                  // Sort button
-                  IconButton(
-                    icon: Icon(
-                      Icons.sort_rounded,
-                      color: _sortOption != 'Newest First'
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isSearchActive ? Icons.close_rounded : Icons.search_rounded,
+                  color: AppTheme.textPrimary,
+                ),
+                onPressed: () => setState(() {
+                  _isSearchActive = !_isSearchActive;
+                  if (!_isSearchActive) {
+                    _searchCtrl.clear();
+                    _searchQuery = '';
+                  }
+                }),
+              ),
+              // Filter button
+              IconButton(
+                icon: Stack(
+                  children: [
+                    Icon(
+                      Icons.filter_list_rounded,
+                      color: _hasActiveFilters
                           ? AppTheme.primary
                           : AppTheme.textPrimary,
                     ),
-                    onPressed: () => _showSortSheet(),
-                  ),
-                ],
-              ),
-
-              // Stats row
-              SliverToBoxAdapter(child: _buildStatsRow()),
-
-              // Active filter chips
-              if (_hasActiveFilters)
-                SliverToBoxAdapter(child: _buildActiveFilterChips()),
-
-              // Results count
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Text(
-                    '${_filteredLogs.length} call${_filteredLogs.length != 1 ? 's' : ''}${_dateFilter == 'Today' && _dateFrom == null && _dateTo == null ? ' today' : ''}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
+                    if (_hasActiveFilters)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.error,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+                onPressed: () => _showFilterSheet(),
               ),
-
-              // Call log list with date headers
-              if (grouped.isEmpty)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.call_outlined,
-                          size: 48,
-                          color: AppTheme.textMuted,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No calls found',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Try adjusting your filters',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            color: AppTheme.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: EdgeInsets.only(bottom: navBarHeight + 16),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (ctx, i) {
-                        final item = grouped[i];
-                        if (item is String) return _buildDateHeader(item);
-                        // TEMP: Simple container to test
-                        return Container(
-                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text('Call log ${(item as CallLogEntry).phoneNumber}'),
-                        );
-                      },
-                      childCount: grouped.length,
-                    ),
-                  ),
+              // Sort button
+              IconButton(
+                icon: Icon(
+                  Icons.sort_rounded,
+                  color: _sortOption != 'Newest First'
+                      ? AppTheme.primary
+                      : AppTheme.textPrimary,
                 ),
+                onPressed: () => _showSortSheet(),
+              ),
             ],
           ),
-        ),
-      );
-    } catch (e, stack) {
-      print('🔴 LogsScreen.build() EXCEPTION: $e');
-      print(' Stack: $stack');
-      return Scaffold(
-        body: Center(
-          child: Text('Error: $e'),
-        ),
-      );
-    }
+
+          // Stats row — box card design same as leads stats
+          SliverToBoxAdapter(child: _buildStatsRow()),
+
+          // Status filter bar (pinned like leads)
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _LogsFilterBarDelegate(
+              child: _buildStatusFilterBar(),
+            ),
+          ),
+
+          // Active filter chips
+          if (_hasActiveFilters)
+            SliverToBoxAdapter(child: _buildActiveFilterChips()),
+
+          // Results count
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Text(
+                '${_filteredLogs.length} call${_filteredLogs.length != 1 ? 's' : ''}${_dateFilter == 'Today' && _dateFrom == null && _dateTo == null ? ' today' : ''}',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
+          ),
+
+          // Call log list with date headers
+          if (grouped.isEmpty)
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.call_outlined,
+                      size: 48,
+                      color: AppTheme.textMuted,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No calls found',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Try adjusting your filters',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((ctx, i) {
+                  final item = grouped[i];
+                  if (item is String) return _buildDateHeader(item);
+                  return _CallLogCard(
+                    entry: item as CallLogEntry,
+                    onTap: () => _showCallDetail(item),
+                  );
+                }, childCount: grouped.length),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDateHeader(String dateStr) {
@@ -955,8 +1035,6 @@ class _LogsScreenState extends State<LogsScreen> {
                 fontWeight: FontWeight.w700,
                 color: AppTheme.primary,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
             ),
           ),
           const SizedBox(width: 8),
@@ -969,43 +1047,59 @@ class _LogsScreenState extends State<LogsScreen> {
   Widget _buildStatsRow() {
     final kpis = [
       _LogsKpiData(
+        label: 'All',
+        value: '$_totalCount',
+        icon: Icons.list_alt_rounded,
+        color: const Color(0xFF8B5CF6),
+        trend: 'total calls',
+        trendUp: true,
+      ),
+      _LogsKpiData(
         label: 'Today',
         value: '$_todayTotalCount',
         icon: Icons.today_rounded,
         color: AppTheme.primary,
-        trend: '+$_todayTotalCount',
+        trend: 'total calls',
         trendUp: true,
       ),
       _LogsKpiData(
-        label: 'Connected',
-        value: '$_todayConnectedCount',
+        label: 'Incoming',
+        value: '$_todayIncomingCount',
+        icon: Icons.call_received_rounded,
+        color: AppTheme.success,
+        trend: 'received',
+        trendUp: true,
+      ),
+      _LogsKpiData(
+        label: 'Outgoing',
+        value: '$_todayOutgoingCount',
+        icon: Icons.call_made_rounded,
+        color: AppTheme.primary,
+        trend: 'made',
+        trendUp: true,
+      ),
+      _LogsKpiData(
+        label: 'In. Connected',
+        value: '$_todayIncomingConnectedCount',
         icon: Icons.call_rounded,
         color: AppTheme.success,
-        trend: '+$_todayConnectedCount',
+        trend: 'answered',
         trendUp: true,
       ),
       _LogsKpiData(
-        label: 'Sessions',
-        value: '$_todayAppointmentCount',
-        icon: Icons.event_available_rounded,
-        color: const Color(0xFF8B5CF6),
-        trend: '+$_todayAppointmentCount',
+        label: 'Out. Connected',
+        value: '$_todayOutgoingConnectedCount',
+        icon: Icons.call_rounded,
+        color: AppTheme.success,
+        trend: 'answered',
         trendUp: true,
-      ),
-      _LogsKpiData(
-        label: 'Follow Ups',
-        value: '$_todayFollowUpsCount',
-        icon: Icons.schedule_rounded,
-        color: AppTheme.warning,
-        trend: '-$_todayFollowUpsCount',
-        trendUp: false,
       ),
       _LogsKpiData(
         label: 'Missed',
         value: '$_todayMissedCount',
         icon: Icons.call_missed_rounded,
         color: AppTheme.error,
-        trend: '-$_todayMissedCount',
+        trend: 'no answer',
         trendUp: false,
       ),
     ];
@@ -1018,6 +1112,94 @@ class _LogsScreenState extends State<LogsScreen> {
         itemCount: kpis.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, i) => _LogsKpiCard(data: kpis[i]),
+      ),
+    );
+  }
+
+  Widget _buildStatusFilterBar() {
+    return SizedBox(
+      height: 48,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        itemCount: _statusFilters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        itemBuilder: (context, i) {
+          final filter = _statusFilters[i];
+          final isSelected = _statusFilter == filter;
+          Color color;
+          if (filter == 'All') {
+            color = AppTheme.primary;
+          } else if (filter == 'Connected') {
+            color = AppTheme.success;
+          } else if (filter == 'No Answer') {
+            color = AppTheme.error;
+          } else if (filter == 'Busy' || filter == 'Switched Off') {
+            color = AppTheme.warning;
+          } else if (filter == 'Appointment Set') {
+            color = AppTheme.primary;
+          } else if (filter == 'Interested') {
+            color = const Color(0xFF059669);
+          } else if (filter == 'Voicemail') {
+            color = const Color(0xFF8B5CF6);
+          } else {
+            color = AppTheme.textSecondary;
+          }
+
+          return GestureDetector(
+            onTap: () => setState(() => _statusFilter = filter),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: isSelected ? color : AppTheme.surfaceLight,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? color : AppTheme.surface200,
+                  width: 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: color.withAlpha(64),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (filter == 'No Answer') ...[
+                    const Icon(
+                      Icons.phone_disabled_rounded,
+                      size: 11,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 3),
+                  ] else if (filter == 'Appointment Set') ...[
+                    const Icon(
+                      Icons.event_rounded,
+                      size: 11,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 3),
+                  ],
+                  Text(
+                    filter,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          isSelected ? Colors.white : AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1049,6 +1231,11 @@ class _LogsScreenState extends State<LogsScreen> {
             _ActiveChip(
               label: _directionFilter,
               onRemove: () => setState(() => _directionFilter = 'All'),
+            ),
+          if (_statusFilter != 'All')
+            _ActiveChip(
+              label: _statusFilter,
+              onRemove: () => setState(() => _statusFilter = 'All'),
             ),
           ..._selectedEmployees.map(
             (e) => _ActiveChip(
@@ -1110,12 +1297,9 @@ class _LogsScreenState extends State<LogsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => SafeArea(
-        top: false,
-        minimum: EdgeInsets.only(bottom: 8),
-        child: StatefulBuilder(
-          builder: (ctx, setSheet) {
-            return DraggableScrollableSheet(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          return DraggableScrollableSheet(
             expand: false,
             initialChildSize: 0.85,
             maxChildSize: 0.95,
@@ -1446,7 +1630,6 @@ class _LogsScreenState extends State<LogsScreen> {
           );
         },
       ),
-      ),
     );
   }
 
@@ -1456,11 +1639,8 @@ class _LogsScreenState extends State<LogsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => SafeArea(
-        top: false,
-        minimum: EdgeInsets.only(bottom: 8),
-        child: StatefulBuilder(
-          builder: (ctx, setSheet) => Padding(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1526,7 +1706,6 @@ class _LogsScreenState extends State<LogsScreen> {
           ),
         ),
       ),
-      ),
     );
   }
 
@@ -1535,11 +1714,7 @@ class _LogsScreenState extends State<LogsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => SafeArea(
-        top: false,
-        minimum: EdgeInsets.only(bottom: 8),
-        child: _CallDetailSheet(entry: entry),
-      ),
+      builder: (_) => _CallDetailSheet(entry: entry),
     );
   }
 }
@@ -1864,7 +2039,7 @@ class _LogsKpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 130,
+      width: 145,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceLight,
@@ -1893,32 +2068,26 @@ class _LogsKpiCard extends StatelessWidget {
                 ),
                 child: Icon(data.icon, size: 14, color: data.color),
               ),
-              if (data.trend.isNotEmpty)
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        data.trendUp ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-                        size: 11,
-                        color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                      ),
-                      const SizedBox(width: 2),
-                      Flexible(
-                        child: Text(
-                          data.trend,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                            color: data.trendUp ? AppTheme.success : AppTheme.warning,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ],
+              Row(
+                children: [
+                  Icon(
+                    data.trendUp
+                        ? Icons.trending_up_rounded
+                        : Icons.trending_down_rounded,
+                    size: 11,
+                    color: data.trendUp ? AppTheme.success : AppTheme.warning,
                   ),
-                ),
+                  const SizedBox(width: 2),
+                  Text(
+                    data.trend,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w500,
+                      color: data.trendUp ? AppTheme.success : AppTheme.warning,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -2091,8 +2260,6 @@ class _CallLogCard extends StatelessWidget {
                           fontSize: 11,
                           color: AppTheme.textMuted,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
                       ),
                     ],
                   ),
@@ -2119,19 +2286,17 @@ class _CallLogCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Flexible(
-              child: Row(
-                children: [
-                  Flexible(child: _InfoBadge(label: entry.direction, color: _directionColor)),
-                  const SizedBox(width: 6),
-                  Flexible(child: _InfoBadge(label: entry.callType, color: AppTheme.primary)),
-                  const SizedBox(width: 6),
-                  Flexible(child: _InfoBadge(
-                    label: entry.formattedDuration,
-                    color: AppTheme.textSecondary,
-                  )),
-                ],
-              ),
+            Row(
+              children: [
+                _InfoBadge(label: entry.direction, color: _directionColor),
+                const SizedBox(width: 6),
+                _InfoBadge(label: entry.callType, color: AppTheme.primary),
+                const SizedBox(width: 6),
+                _InfoBadge(
+                  label: entry.formattedDuration,
+                  color: AppTheme.textSecondary,
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Row(
@@ -2392,6 +2557,38 @@ class _CallDetailSheet extends StatelessWidget {
   }
 }
 
+// ─── Logs Filter Bar Delegate (pinned status filter) ─────────────────────────
+
+class _LogsFilterBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  _LogsFilterBarDelegate({required this.child});
+
+  @override
+  double get maxExtent => 48.0;
+
+  @override
+  double get minExtent => 48.0;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: AppTheme.backgroundLight,
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(
+    _LogsFilterBarDelegate oldDelegate,
+  ) {
+    return true;
+  }
+}
+
 // ─── Helper Widgets ───────────────────────────────────────────────────────────
 
 class _InfoBadge extends StatelessWidget {
@@ -2472,16 +2669,12 @@ class _ActiveChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
-              ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primary,
             ),
           ),
           const SizedBox(width: 4),

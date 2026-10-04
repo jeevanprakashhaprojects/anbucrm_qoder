@@ -117,7 +117,10 @@ class _AppDrawer extends StatelessWidget {
                     context,
                     Icons.chat_rounded,
                     'WhatsApp Automation',
-                    () => _comingSoon(context, 'WhatsApp Automation'),
+                    () {
+                      Navigator.pop(context);
+                      context.push(AppRoutes.whatsappAutomationScreen);
+                    },
                     color: const Color(0xFF25D366),
                   ),
                   _buildDrawerItem(
