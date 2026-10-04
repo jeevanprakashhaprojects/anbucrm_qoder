@@ -155,7 +155,7 @@ class _SectionSocialWidgetState extends State<SectionSocialWidget> {
       'key': 'tiktok',
       'icon': Icons.music_note_rounded,
       'color': 0xFF010101,
-      'hint': 'tiktok.com/@channel',
+      'hint': 'tiktok.com/@username',
     },
   ];
 
@@ -305,7 +305,7 @@ class _SectionSocialWidgetState extends State<SectionSocialWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Social Profiles ────────────────────────────────
+        // ── Social Profiles ────────────────────────────────────────────────
         Text(
           'Social Profiles & Website',
           style: GoogleFonts.plusJakartaSans(
