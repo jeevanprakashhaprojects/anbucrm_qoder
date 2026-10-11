@@ -1,0 +1,183 @@
+{
+  "id": "call_003",
+  "scenario": "New policy enquiry - Jeevan Anand",
+  "agent": "Anbarasan",
+  "customer": "Mr Ramesh",
+  "outcome": "new_lead",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 32.34,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd I am Anbarasan from LIC",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "I am Anbarasan from LIC"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 5.95
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe \u0b9a\u0bca\u0bb2\u0bcd\u0bb2\u0bc1\u0b99\u0bcd\u0b95 I called about a new policy",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0b9a\u0bca\u0bb2\u0bcd\u0bb2\u0bc1\u0b99\u0bcd\u0b95"
+        },
+        {
+          "lang": "english",
+          "text": "I called about a new policy"
+        }
+      ],
+      "start_sec": 6.49,
+      "end_sec": 9.54
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Which plan are you interested in sir",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Which plan are you interested in sir"
+        }
+      ],
+      "start_sec": 10.04,
+      "end_sec": 12.0
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "Jeevan Anand \u0baa\u0ba4\u0bcd\u0ba4\u0bbf \u0b9a\u0bca\u0bb2\u0bcd\u0bb2\u0bc1\u0b99\u0bcd\u0b95",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Jeevan Anand"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0baa\u0ba4\u0bcd\u0ba4\u0bbf \u0b9a\u0bca\u0bb2\u0bcd\u0bb2\u0bc1\u0b99\u0bcd\u0b95"
+        }
+      ],
+      "start_sec": 12.6,
+      "end_sec": 14.62
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Good choice sir \u0b9a\u0bae\u0bcd \u0b85\u0bb7\u0bcd\u0baf\u0bc2\u0bb0\u0bcd\u0b9f\u0bcd \u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Good choice sir"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b9a\u0bae\u0bcd \u0b85\u0bb7\u0bcd\u0baf\u0bc2\u0bb0\u0bcd\u0b9f\u0bcd \u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1"
+        }
+      ],
+      "start_sec": 15.17,
+      "end_sec": 17.75
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "ten lakh",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "ten lakh"
+        }
+      ],
+      "start_sec": 18.14,
+      "end_sec": 18.79
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "\u0baa\u0bcd\u0bb0\u0bc0\u0bae\u0bbf\u0baf\u0bae\u0bcd around eighty five thousand per year \u0b87\u0bb0\u0bc1\u0baa\u0ba4\u0bc1 \u0bb5\u0bb0\u0bc1\u0bb7\u0ba4\u0bcd\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bc1",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0baa\u0bcd\u0bb0\u0bc0\u0bae\u0bbf\u0baf\u0bae\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "around eighty five thousand per year"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b87\u0bb0\u0bc1\u0baa\u0ba4\u0bc1 \u0bb5\u0bb0\u0bc1\u0bb7\u0ba4\u0bcd\u0ba4\u0bc1\u0b95\u0bcd\u0b95\u0bc1"
+        }
+      ],
+      "start_sec": 19.43,
+      "end_sec": 23.75
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "Okay \u0bb5\u0bbe\u0b9f\u0bcd\u0bb8\u0bcd\u0b85\u0baa\u0bcd\u0bb2 \u0b9f\u0bc0\u0b9f\u0bcd\u0b9f\u0bc6\u0baf\u0bbf\u0bb2\u0bcd\u0bb8\u0bcd \u0b85\u0ba9\u0bc1\u0baa\u0bcd\u0baa\u0bc1\u0b99\u0bcd\u0b95",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Okay"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0bbe\u0b9f\u0bcd\u0bb8\u0bcd\u0b85\u0baa\u0bcd\u0bb2 \u0b9f\u0bc0\u0b9f\u0bcd\u0b9f\u0bc6\u0baf\u0bbf\u0bb2\u0bcd\u0bb8\u0bcd \u0b85\u0ba9\u0bc1\u0baa\u0bcd\u0baa\u0bc1\u0b99\u0bcd\u0b95"
+        }
+      ],
+      "start_sec": 24.37,
+      "end_sec": 26.94
+    },
+    {
+      "index": 8,
+      "speaker": "agent",
+      "text": "Sure sir \u0baa\u0bcd\u0bb0\u0bcb\u0bb7\u0bb0\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0baa\u0bcd\u0bb0\u0bc0\u0bae\u0bbf\u0baf\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd\u0b9f\u0bcd \u0b85\u0ba9\u0bc1\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bbf\u0bb1\u0bc7\u0ba9\u0bcd",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Sure sir"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0baa\u0bcd\u0bb0\u0bcb\u0bb7\u0bb0\u0bcd \u0bae\u0bb1\u0bcd\u0bb1\u0bc1\u0bae\u0bcd \u0baa\u0bcd\u0bb0\u0bc0\u0bae\u0bbf\u0baf\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd\u0b9f\u0bcd \u0b85\u0ba9\u0bc1\u0baa\u0bcd\u0baa\u0bc1\u0b95\u0bbf\u0bb1\u0bc7\u0ba9\u0bcd"
+        }
+      ],
+      "start_sec": 27.48,
+      "end_sec": 30.95
+    },
+    {
+      "index": 9,
+      "speaker": "customer",
+      "text": "\u0ba8\u0ba9\u0bcd\u0bb1\u0bbf",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0ba8\u0ba9\u0bcd\u0bb1\u0bbf"
+        }
+      ],
+      "start_sec": 31.34,
+      "end_sec": 31.84
+    }
+  ],
+  "expected_summary": "Mr Ramesh enquired about a new Jeevan Anand policy with sum assured of 10 lakh. Agent Anbarasan quoted approximately Rs 85,000 per year for 20 years. Customer requested details on WhatsApp. Outcome: new lead, brochure to be sent.",
+  "expected_entities": {
+    "plan": "Jeevan Anand",
+    "sum_assured_lakh": 10,
+    "premium_approx": 85000,
+    "term_years": 20,
+    "follow_up": "send brochure on WhatsApp"
+  }
+}

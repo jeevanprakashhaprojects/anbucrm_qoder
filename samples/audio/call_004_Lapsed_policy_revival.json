@@ -1,0 +1,196 @@
+{
+  "id": "call_004",
+  "scenario": "Lapsed policy revival",
+  "agent": "Anbarasan",
+  "customer": "Mr Kumar",
+  "outcome": "appointment_scheduled",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 32.88,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd Is this Mr Kumar",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "Is this Mr Kumar"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 5.01
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe \u0baa\u0bc7\u0b9a\u0bc1\u0b95\u0bbf\u0bb1\u0bc7\u0ba9\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0baa\u0bc7\u0b9a\u0bc1\u0b95\u0bbf\u0bb1\u0bc7\u0ba9\u0bcd"
+        }
+      ],
+      "start_sec": 5.45,
+      "end_sec": 6.68
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "\u0b9a\u0bbe\u0bb0\u0bcd \u0b89\u0b99\u0bcd\u0b95 \u0baa\u0bbe\u0bb2\u0bbf\u0b9a\u0bbf lapsed two years ago \u0bb0\u0bbf\u0bb5\u0bc8\u0bb5\u0bcd \u0baa\u0ba3\u0bcd\u0ba3\u0bb2\u0bbe\u0bae\u0bbe",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b9a\u0bbe\u0bb0\u0bcd \u0b89\u0b99\u0bcd\u0b95 \u0baa\u0bbe\u0bb2\u0bbf\u0b9a\u0bbf"
+        },
+        {
+          "lang": "english",
+          "text": "lapsed two years ago"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0bb0\u0bbf\u0bb5\u0bc8\u0bb5\u0bcd \u0baa\u0ba3\u0bcd\u0ba3\u0bb2\u0bbe\u0bae\u0bbe"
+        }
+      ],
+      "start_sec": 7.19,
+      "end_sec": 10.97
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe \u0b8e\u0baa\u0bcd\u0baa\u0b9f\u0bbf",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0b8e\u0baa\u0bcd\u0baa\u0b9f\u0bbf"
+        }
+      ],
+      "start_sec": 11.61,
+      "end_sec": 12.53
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Need medical test and back premiums with interest",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Need medical test and back premiums with interest"
+        }
+      ],
+      "start_sec": 13.14,
+      "end_sec": 16.03
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0b86\u0b95\u0bc1\u0bae\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0b86\u0b95\u0bc1\u0bae\u0bcd"
+        }
+      ],
+      "start_sec": 16.72,
+      "end_sec": 17.8
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Around thirty five thousand \u0bb5\u0b9f\u0bcd\u0b9f\u0bbf \u0b9a\u0bc7\u0bb0\u0bcd\u0ba4\u0bcd\u0ba4\u0bc1",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Around thirty five thousand"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0b9f\u0bcd\u0b9f\u0bbf \u0b9a\u0bc7\u0bb0\u0bcd\u0ba4\u0bcd\u0ba4\u0bc1"
+        }
+      ],
+      "start_sec": 18.21,
+      "end_sec": 20.87
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "\u0b9a\u0bb0\u0bbf \u0b8e\u0ba9\u0bcd\u0ba9 \u0b9f\u0bbe\u0b95\u0bc1\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd\u0bb8\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b9a\u0bb0\u0bbf \u0b8e\u0ba9\u0bcd\u0ba9 \u0b9f\u0bbe\u0b95\u0bc1\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd\u0bb8\u0bcd"
+        }
+      ],
+      "start_sec": 21.37,
+      "end_sec": 22.95
+    },
+    {
+      "index": 8,
+      "speaker": "agent",
+      "text": "ID proof, address proof, medical certificate",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "ID proof, address proof, medical certificate"
+        }
+      ],
+      "start_sec": 23.5,
+      "end_sec": 26.78
+    },
+    {
+      "index": 9,
+      "speaker": "customer",
+      "text": "\u0ba8\u0bbe\u0bb3\u0bc8\u0b95\u0bcd\u0b95\u0bc1 \u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bcd \u0bb5\u0bb0\u0bb2\u0bbe\u0bae\u0bbe",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0ba8\u0bbe\u0bb3\u0bc8\u0b95\u0bcd\u0b95\u0bc1 \u0baa\u0bbf\u0bb0\u0bbe\u0ba9\u0bcd\u0b9a\u0bcd \u0bb5\u0bb0\u0bb2\u0bbe\u0bae\u0bbe"
+        }
+      ],
+      "start_sec": 27.41,
+      "end_sec": 29.19
+    },
+    {
+      "index": 10,
+      "speaker": "agent",
+      "text": "Tomorrow ten AM",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Tomorrow ten AM"
+        }
+      ],
+      "start_sec": 29.7,
+      "end_sec": 30.72
+    },
+    {
+      "index": 11,
+      "speaker": "customer",
+      "text": "\u0b93\u0b95\u0bc7 \u0bb5\u0bb0\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b93\u0b95\u0bc7 \u0bb5\u0bb0\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd"
+        }
+      ],
+      "start_sec": 31.34,
+      "end_sec": 32.18
+    }
+  ],
+  "expected_summary": "Mr Kumar's policy lapsed 2 years ago. Agent explained revival requires medical test and back premiums with interest, approximately Rs 35,000. Documents needed: ID proof, address proof, medical certificate. Appointment scheduled for tomorrow 10 AM at branch. Outcome: appointment scheduled.",
+  "expected_entities": {
+    "lapsed_years": 2,
+    "revival_cost_approx": 35000,
+    "documents": [
+      "ID proof",
+      "address proof",
+      "medical certificate"
+    ],
+    "appointment": "tomorrow 10 AM"
+  }
+}

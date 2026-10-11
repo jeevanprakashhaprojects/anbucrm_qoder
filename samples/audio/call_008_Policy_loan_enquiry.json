@@ -1,0 +1,172 @@
+{
+  "id": "call_008",
+  "scenario": "Policy loan enquiry",
+  "agent": "Anbarasan",
+  "customer": "Mr Iyer",
+  "outcome": "appointment_scheduled",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 30.62,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd You called about a loan",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "You called about a loan"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 5.39
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe I need two lakh",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe"
+        },
+        {
+          "lang": "english",
+          "text": "I need two lakh"
+        }
+      ],
+      "start_sec": 6.0,
+      "end_sec": 7.62
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Your policy value is five lakh \u0b8e\u0ba3\u0bcd\u0baa\u0ba4\u0bc1 \u0b9a\u0ba4\u0bb5\u0bc0\u0ba4\u0bae\u0bcd \u0bb5\u0bb0\u0bc8\u0b95\u0bcd\u0b95\u0bc1\u0bae\u0bcd \u0b95\u0b9f\u0ba9\u0bcd \u0b95\u0bbf\u0b9f\u0bc8\u0b95\u0bcd\u0b95\u0bc1\u0bae\u0bcd",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Your policy value is five lakh"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b8e\u0ba3\u0bcd\u0baa\u0ba4\u0bc1 \u0b9a\u0ba4\u0bb5\u0bc0\u0ba4\u0bae\u0bcd \u0bb5\u0bb0\u0bc8\u0b95\u0bcd\u0b95\u0bc1\u0bae\u0bcd \u0b95\u0b9f\u0ba9\u0bcd \u0b95\u0bbf\u0b9f\u0bc8\u0b95\u0bcd\u0b95\u0bc1\u0bae\u0bcd"
+        }
+      ],
+      "start_sec": 8.3,
+      "end_sec": 13.07
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "So four lakh",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "So four lakh"
+        }
+      ],
+      "start_sec": 13.63,
+      "end_sec": 14.58
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Yes but two lakh is fine \u0bb5\u0b9f\u0bcd\u0b9f\u0bbf \u0b92\u0ba9\u0bcd\u0baa\u0ba4\u0bc1 \u0b9a\u0ba4\u0bb5\u0bc0\u0ba4\u0bae\u0bcd",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Yes but two lakh is fine"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0b9f\u0bcd\u0b9f\u0bbf \u0b92\u0ba9\u0bcd\u0baa\u0ba4\u0bc1 \u0b9a\u0ba4\u0bb5\u0bc0\u0ba4\u0bae\u0bcd"
+        }
+      ],
+      "start_sec": 15.01,
+      "end_sec": 18.4
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0ba8\u0bc7\u0bb0\u0bae\u0bcd \u0b86\u0b95\u0bc1\u0bae\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0ba8\u0bc7\u0bb0\u0bae\u0bcd \u0b86\u0b95\u0bc1\u0bae\u0bcd"
+        }
+      ],
+      "start_sec": 18.85,
+      "end_sec": 20.29
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Three to four days after documents",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Three to four days after documents"
+        }
+      ],
+      "start_sec": 20.88,
+      "end_sec": 22.95
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "\u0b8e\u0ba9\u0bcd\u0ba9 \u0b9f\u0bbe\u0b95\u0bc1\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd\u0bb8\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b8e\u0ba9\u0bcd\u0ba9 \u0b9f\u0bbe\u0b95\u0bc1\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd\u0bb8\u0bcd"
+        }
+      ],
+      "start_sec": 23.41,
+      "end_sec": 24.68
+    },
+    {
+      "index": 8,
+      "speaker": "agent",
+      "text": "ID, policy bond, loan application form",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "ID, policy bond, loan application form"
+        }
+      ],
+      "start_sec": 25.18,
+      "end_sec": 28.12
+    },
+    {
+      "index": 9,
+      "speaker": "customer",
+      "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0bbe\u0bb3\u0bc8\u0b95\u0bcd\u0b95\u0bc1 \u0bb5\u0bb0\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0bbe\u0bb3\u0bc8\u0b95\u0bcd\u0b95\u0bc1 \u0bb5\u0bb0\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd"
+        }
+      ],
+      "start_sec": 28.76,
+      "end_sec": 30.08
+    }
+  ],
+  "expected_summary": "Mr Iyer requested a policy loan of Rs 2 lakh. Agent explained policy value is Rs 5 lakh, can get up to 80% (Rs 4 lakh), but 2 lakh is fine. Interest rate 9% per year, processing takes 3-4 days after documents. Customer will visit branch tomorrow. Outcome: appointment scheduled.",
+  "expected_entities": {
+    "loan_amount_requested": 200000,
+    "policy_value": 500000,
+    "max_loan_percent": 80,
+    "interest_rate_percent": 9,
+    "processing_days": "3-4",
+    "documents": [
+      "ID",
+      "policy bond",
+      "loan application form"
+    ]
+  }
+}

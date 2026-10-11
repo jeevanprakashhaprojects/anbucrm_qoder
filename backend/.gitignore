@@ -1,0 +1,4 @@
+.env
+serviceAccount.json
+node_modules/
+npm-debug.log*

@@ -1,0 +1,86 @@
+{
+  "total_calls": 10,
+  "total_duration_sec": 253.15,
+  "calls": [
+    {
+      "id": "call_003",
+      "scenario": "New policy enquiry - Jeevan Anand",
+      "outcome": "new_lead",
+      "duration_sec": 32.34,
+      "wav_file": "call_003_New_policy_enquiry___Jeevan_Anand.wav",
+      "json_file": "call_003_New_policy_enquiry___Jeevan_Anand.json"
+    },
+    {
+      "id": "call_004",
+      "scenario": "Lapsed policy revival",
+      "outcome": "appointment_scheduled",
+      "duration_sec": 32.88,
+      "wav_file": "call_004_Lapsed_policy_revival.wav",
+      "json_file": "call_004_Lapsed_policy_revival.json"
+    },
+    {
+      "id": "call_005",
+      "scenario": "Maturity claim - lost policy bond",
+      "outcome": "needs_documents",
+      "duration_sec": 26.19,
+      "wav_file": "call_005_Maturity_claim___lost_policy_bond.wav",
+      "json_file": "call_005_Maturity_claim___lost_policy_bond.json"
+    },
+    {
+      "id": "call_006",
+      "scenario": "Wrong number",
+      "outcome": "wrong_number",
+      "duration_sec": 8.84,
+      "wav_file": "call_006_Wrong_number.wav",
+      "json_file": "call_006_Wrong_number.json"
+    },
+    {
+      "id": "call_007",
+      "scenario": "Survival benefit reminder",
+      "outcome": "information_given",
+      "duration_sec": 22.22,
+      "wav_file": "call_007_Survival_benefit_reminder.wav",
+      "json_file": "call_007_Survival_benefit_reminder.json"
+    },
+    {
+      "id": "call_008",
+      "scenario": "Policy loan enquiry",
+      "outcome": "appointment_scheduled",
+      "duration_sec": 30.62,
+      "wav_file": "call_008_Policy_loan_enquiry.wav",
+      "json_file": "call_008_Policy_loan_enquiry.json"
+    },
+    {
+      "id": "call_009",
+      "scenario": "Nominee change request",
+      "outcome": "appointment_scheduled",
+      "duration_sec": 26.06,
+      "wav_file": "call_009_Nominee_change_request.wav",
+      "json_file": "call_009_Nominee_change_request.json"
+    },
+    {
+      "id": "call_010",
+      "scenario": "Missed call follow-up - payment receipt",
+      "outcome": "resolved",
+      "duration_sec": 25.86,
+      "wav_file": "call_010_Missed_call_follow_up___payment_receipt.wav",
+      "json_file": "call_010_Missed_call_follow_up___payment_receipt.json"
+    },
+    {
+      "id": "call_011",
+      "scenario": "Payment received confirmation",
+      "outcome": "resolved",
+      "duration_sec": 21.17,
+      "wav_file": "call_011_Payment_received_confirmation.wav",
+      "json_file": "call_011_Payment_received_confirmation.json"
+    },
+    {
+      "id": "call_012",
+      "scenario": "Frustrated customer - frequent calls",
+      "outcome": "de_escalated",
+      "duration_sec": 26.97,
+      "wav_file": "call_012_Frustrated_customer___frequent_calls.wav",
+      "json_file": "call_012_Frustrated_customer___frequent_calls.json"
+    }
+  ]
+}

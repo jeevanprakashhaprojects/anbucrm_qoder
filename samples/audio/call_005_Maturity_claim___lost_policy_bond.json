@@ -1,0 +1,132 @@
+{
+  "id": "call_005",
+  "scenario": "Maturity claim - lost policy bond",
+  "agent": "Anbarasan",
+  "customer": "Mr Sharma",
+  "outcome": "needs_documents",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 26.19,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd Your policy matured last month",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "Your policy matured last month"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 6.01
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe \u0b95\u0bcd\u0bb3\u0bc8\u0bae\u0bcd \u0b8e\u0baa\u0bcd\u0baa\u0b9f\u0bbf \u0baa\u0ba3\u0bcd\u0bb1\u0ba4\u0bc1",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0b95\u0bcd\u0bb3\u0bc8\u0bae\u0bcd \u0b8e\u0baa\u0bcd\u0baa\u0b9f\u0bbf \u0baa\u0ba3\u0bcd\u0bb1\u0ba4\u0bc1"
+        }
+      ],
+      "start_sec": 6.55,
+      "end_sec": 8.32
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Need original policy bond, ID proof, bank details",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Need original policy bond, ID proof, bank details"
+        }
+      ],
+      "start_sec": 8.91,
+      "end_sec": 12.89
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "\u0baa\u0bbe\u0bb2\u0bbf\u0b9a\u0bbf \u0baa\u0bbe\u0ba3\u0bcd\u0b9f\u0bcd \u0ba4\u0bca\u0bb2\u0bc8\u0b9e\u0bcd\u0b9a\u0bc1\u0b9f\u0bc1\u0b9a\u0bcd\u0b9a\u0bc1",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0baa\u0bbe\u0bb2\u0bbf\u0b9a\u0bbf \u0baa\u0bbe\u0ba3\u0bcd\u0b9f\u0bcd \u0ba4\u0bca\u0bb2\u0bc8\u0b9e\u0bcd\u0b9a\u0bc1\u0b9f\u0bc1\u0b9a\u0bcd\u0b9a\u0bc1"
+        }
+      ],
+      "start_sec": 13.51,
+      "end_sec": 15.27
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Need to file FIR and get duplicate",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Need to file FIR and get duplicate"
+        }
+      ],
+      "start_sec": 15.86,
+      "end_sec": 18.27
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0ba8\u0bc7\u0bb0\u0bae\u0bcd \u0b86\u0b95\u0bc1\u0bae\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b8e\u0bb5\u0bcd\u0bb5\u0bb3\u0bb5\u0bc1 \u0ba8\u0bc7\u0bb0\u0bae\u0bcd \u0b86\u0b95\u0bc1\u0bae\u0bcd"
+        }
+      ],
+      "start_sec": 18.83,
+      "end_sec": 20.27
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Two to three weeks for duplicate \u0b85\u0baa\u0bcd\u0baa\u0bc1\u0bb1\u0bae\u0bcd \u0b95\u0bcd\u0bb3\u0bc8\u0bae\u0bcd \u0b9a\u0bc6\u0b9f\u0bcd\u0b9f\u0bbf\u0bb2\u0bcd\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Two to three weeks for duplicate"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b85\u0baa\u0bcd\u0baa\u0bc1\u0bb1\u0bae\u0bcd \u0b95\u0bcd\u0bb3\u0bc8\u0bae\u0bcd \u0b9a\u0bc6\u0b9f\u0bcd\u0b9f\u0bbf\u0bb2\u0bcd\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd"
+        }
+      ],
+      "start_sec": 20.69,
+      "end_sec": 24.26
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0ba9\u0bcd\u0bb1\u0bbf",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0ba9\u0bcd\u0bb1\u0bbf"
+        }
+      ],
+      "start_sec": 24.73,
+      "end_sec": 25.5
+    }
+  ],
+  "expected_summary": "Mr Sharma's policy matured last month. Customer wants to claim but lost the original policy bond. Agent explained need to file FIR and get duplicate, which takes 2-3 weeks, then claim settlement can proceed. Outcome: needs documents.",
+  "expected_entities": {
+    "maturity_status": "matured last month",
+    "issue": "policy bond lost",
+    "required_action": "file FIR for duplicate",
+    "timeline_weeks": "2-3"
+  }
+}

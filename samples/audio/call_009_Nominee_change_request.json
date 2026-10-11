@@ -1,0 +1,161 @@
+{
+  "id": "call_009",
+  "scenario": "Nominee change request",
+  "agent": "Anbarasan",
+  "customer": "Mrs Lakshmi",
+  "outcome": "appointment_scheduled",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 26.06,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0bae\u0bc7\u0b9f\u0bae\u0bcd You want to change nominee",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0bae\u0bc7\u0b9f\u0bae\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "You want to change nominee"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 5.63
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe I want to add my son",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe"
+        },
+        {
+          "lang": "english",
+          "text": "I want to add my son"
+        }
+      ],
+      "start_sec": 6.3,
+      "end_sec": 8.23
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Current nominee is your husband",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Current nominee is your husband"
+        }
+      ],
+      "start_sec": 8.82,
+      "end_sec": 10.55
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "Yes but I want fifty fifty share",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Yes but I want fifty fifty share"
+        }
+      ],
+      "start_sec": 10.9,
+      "end_sec": 13.08
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Okay need to visit branch with ID and relationship proof",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Okay need to visit branch with ID and relationship proof"
+        }
+      ],
+      "start_sec": 13.5,
+      "end_sec": 17.09
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "When",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "When"
+        }
+      ],
+      "start_sec": 17.62,
+      "end_sec": 18.05
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Any weekday ten to five",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Any weekday ten to five"
+        }
+      ],
+      "start_sec": 18.65,
+      "end_sec": 20.36
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "Saturday",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Saturday"
+        }
+      ],
+      "start_sec": 20.83,
+      "end_sec": 21.54
+    },
+    {
+      "index": 8,
+      "speaker": "agent",
+      "text": "Saturday ten to one only",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Saturday ten to one only"
+        }
+      ],
+      "start_sec": 21.89,
+      "end_sec": 23.7
+    },
+    {
+      "index": 9,
+      "speaker": "customer",
+      "text": "Okay this Saturday",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Okay this Saturday"
+        }
+      ],
+      "start_sec": 24.26,
+      "end_sec": 25.48
+    }
+  ],
+  "expected_summary": "Mrs Lakshmi wants to change nominee from husband to 50-50 share between husband and son. Agent explained need to visit branch with ID and relationship proof. Saturday hours are 10 AM to 1 PM. Appointment scheduled for this Saturday. Outcome: appointment scheduled.",
+  "expected_entities": {
+    "current_nominee": "husband",
+    "requested_change": "add son with 50-50 share",
+    "documents": [
+      "ID",
+      "relationship proof"
+    ],
+    "appointment": "this Saturday 10-1"
+  }
+}

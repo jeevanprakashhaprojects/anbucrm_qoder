@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "192082441122",
+    "project_id": "anbucrm-2026",
+    "storage_bucket": "anbucrm-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192082441122:android:8fec8421d71c38377138fb",
+        "android_client_info": {
+          "package_name": "com.example.anbucrm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyihQ_3ztakKgF6qwAx108frDaWtQU0o8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

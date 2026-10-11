@@ -75,7 +75,7 @@ class _AppDrawer extends StatelessWidget {
                     Icons.people_alt_rounded,
                     'Customers',
                     () {
-                      Navigator.pop(context);
+
                       context.push(AppRoutes.customersScreen);
                     },
                   ),
@@ -96,7 +96,7 @@ class _AppDrawer extends StatelessWidget {
                     Icons.analytics_rounded,
                     'Analytics',
                     () {
-                      Navigator.pop(context);
+
                       context.push(AppRoutes.analyticsScreen);
                     },
                     color: const Color(0xFFF59E0B),
@@ -108,7 +108,7 @@ class _AppDrawer extends StatelessWidget {
                     Icons.library_books_rounded,
                     'Templates',
                     () {
-                      Navigator.pop(context);
+
                       context.push(AppRoutes.templatesScreen);
                     },
                     color: AppTheme.primary,
@@ -118,7 +118,7 @@ class _AppDrawer extends StatelessWidget {
                     Icons.chat_rounded,
                     'WhatsApp Automation',
                     () {
-                      Navigator.pop(context);
+
                       context.push(AppRoutes.whatsappAutomationScreen);
                     },
                     color: const Color(0xFF25D366),
@@ -128,7 +128,7 @@ class _AppDrawer extends StatelessWidget {
                     Icons.videocam_rounded,
                     'Video Session',
                     () {
-                      Navigator.pop(context);
+
                       context.push(AppRoutes.videoSessionScreen);
                     },
                     color: const Color(0xFF0891B2),
@@ -382,7 +382,7 @@ class _AppDrawer extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.pop(context);
+        appScaffoldKey.currentState?.closeDrawer();
         onTap();
       },
     );
@@ -436,7 +436,7 @@ class _AppDrawer extends StatelessWidget {
         ],
       ),
       onTap: () {
-        Navigator.pop(context);
+        appScaffoldKey.currentState?.closeDrawer();
         onTap();
       },
     );
@@ -460,7 +460,7 @@ class _AppDrawer extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              Navigator.pop(context);
+              appScaffoldKey.currentState?.closeDrawer();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Opening support chat...')),
               );

@@ -1,0 +1,91 @@
+{
+  "id": "call_001",
+  "scenario": "LIC premium renewal reminder - outbound agent call",
+  "agent": "T G Anbarasan",
+  "customer": "Mr Kumar",
+  "outcome": "promise_to_pay",
+  "source": "synthetic (macOS `say`, Indian English voices Rishi + Tara)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 54.42,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "Good morning sir, this is Anbarasan calling from LIC. Am I speaking with Mr Kumar?",
+      "start_sec": 3.1,
+      "end_sec": 8.9
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "Yes, speaking. Who is this?",
+      "start_sec": 9.42,
+      "end_sec": 11.6
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Sir, this is a reminder about your LIC policy. Your premium of four thousand five hundred rupees is due on the twentieth of October.",
+      "start_sec": 12.22,
+      "end_sec": 21.13
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "Oh, I completely forgot about it. Is there any grace period?",
+      "start_sec": 21.7,
+      "end_sec": 25.66
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Yes sir, you have thirty days grace period. But if you pay before the due date you will avoid the late fee.",
+      "start_sec": 26.04,
+      "end_sec": 32.52
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "Okay, how do I pay? Can I pay it online?",
+      "start_sec": 32.92,
+      "end_sec": 36.24
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Yes, you can pay through the LIC portal, or I can send you a payment link on WhatsApp.",
+      "start_sec": 36.85,
+      "end_sec": 42.77
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "Please send the link on WhatsApp. I will pay it this evening.",
+      "start_sec": 43.07,
+      "end_sec": 46.6
+    },
+    {
+      "index": 8,
+      "speaker": "agent",
+      "text": "Sure sir, I will send it within five minutes. Thank you for your time.",
+      "start_sec": 47.19,
+      "end_sec": 51.95
+    },
+    {
+      "index": 9,
+      "speaker": "customer",
+      "text": "Thank you. Bye.",
+      "start_sec": 52.53,
+      "end_sec": 53.95
+    }
+  ],
+  "expected_summary": "Agent Anbarasan called Mr Kumar to remind him that his LIC premium of Rs 4,500 is due on 20 October. The customer had forgotten and asked about the grace period; the agent explained it is 30 days but paying before the due date avoids a late fee. The customer agreed to pay this evening and asked for a payment link on WhatsApp, which the agent promised within five minutes. Outcome: promise to pay, follow-up required.",
+  "expected_entities": {
+    "amount_inr": 4500,
+    "due_date": "2026-10-20",
+    "grace_period_days": 30,
+    "payment_channel": "WhatsApp link",
+    "follow_up": "same day evening"
+  }
+}

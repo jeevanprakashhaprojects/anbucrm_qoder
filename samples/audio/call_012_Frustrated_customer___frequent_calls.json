@@ -1,0 +1,147 @@
+{
+  "id": "call_012",
+  "scenario": "Frustrated customer - frequent calls",
+  "agent": "Anbarasan",
+  "customer": "Mr Menon",
+  "outcome": "de_escalated",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 26.97,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd This is LIC calling about",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "This is LIC calling about"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 5.8
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "Again you called yesterday also",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Again you called yesterday also"
+        }
+      ],
+      "start_sec": 6.27,
+      "end_sec": 8.3
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Sorry sir \u0b89\u0b99\u0bcd\u0b95 \u0b95\u0bb5\u0bb2\u0bc8 \u0baa\u0bc1\u0bb0\u0bbf\u0baf\u0bc1\u0ba4\u0bc1",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Sorry sir"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b89\u0b99\u0bcd\u0b95 \u0b95\u0bb5\u0bb2\u0bc8 \u0baa\u0bc1\u0bb0\u0bbf\u0baf\u0bc1\u0ba4\u0bc1"
+        }
+      ],
+      "start_sec": 8.77,
+      "end_sec": 11.06
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "I already paid why are you calling",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "I already paid why are you calling"
+        }
+      ],
+      "start_sec": 11.68,
+      "end_sec": 13.78
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Let me check \u0b86\u0bae\u0bbe \u0baa\u0bc7\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd \u0bb5\u0ba8\u0bcd\u0ba4\u0bc1\u0b9f\u0bc1\u0b9a\u0bcd\u0b9a\u0bc1 I will update the system",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Let me check"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0baa\u0bc7\u0bae\u0bc6\u0ba3\u0bcd\u0b9f\u0bcd \u0bb5\u0ba8\u0bcd\u0ba4\u0bc1\u0b9f\u0bc1\u0b9a\u0bcd\u0b9a\u0bc1"
+        },
+        {
+          "lang": "english",
+          "text": "I will update the system"
+        }
+      ],
+      "start_sec": 14.48,
+      "end_sec": 18.53
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "Please stop calling me",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Please stop calling me"
+        }
+      ],
+      "start_sec": 18.93,
+      "end_sec": 20.3
+    },
+    {
+      "index": 6,
+      "speaker": "agent",
+      "text": "Absolutely sir \u0bb0\u0bbf\u0b9a\u0bbe\u0bb2\u0bcd\u0bb5\u0bcd \u0b8e\u0ba9\u0bcd\u0bb1\u0bc1 \u0bae\u0bbe\u0bb0\u0bcd\u0b95\u0bcd \u0baa\u0ba3\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd Sorry for the inconvenience",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Absolutely sir"
+        },
+        {
+          "lang": "tamil",
+          "text": "\u0bb0\u0bbf\u0b9a\u0bbe\u0bb2\u0bcd\u0bb5\u0bcd \u0b8e\u0ba9\u0bcd\u0bb1\u0bc1 \u0bae\u0bbe\u0bb0\u0bcd\u0b95\u0bcd \u0baa\u0ba3\u0bcd\u0bb1\u0bc7\u0ba9\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "Sorry for the inconvenience"
+        }
+      ],
+      "start_sec": 20.86,
+      "end_sec": 25.56
+    },
+    {
+      "index": 7,
+      "speaker": "customer",
+      "text": "\u0b93\u0b95\u0bc7",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b93\u0b95\u0bc7"
+        }
+      ],
+      "start_sec": 26.15,
+      "end_sec": 26.57
+    }
+  ],
+  "expected_summary": "Mr Menon frustrated about repeated calls after already paying. Agent apologized, confirmed payment received, will update system to mark as resolved and stop calls. Outcome: de-escalated.",
+  "expected_entities": {
+    "customer_mood": "frustrated",
+    "issue": "repeated calls after payment",
+    "resolution": "marked as resolved, calls to stop"
+  }
+}

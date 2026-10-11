@@ -34,6 +34,11 @@ import '../presentation/important_dates_screen/important_dates_screen.dart';
 import '../presentation/assign_leads_screen/assign_leads_screen.dart';
 import '../presentation/assigned_tasks_screen/assigned_tasks_screen.dart';
 import '../presentation/whatsapp_automation/whatsapp_automation_screen.dart';
+import '../presentation/whatsapp_automation/choose_connection_screen.dart';
+import '../presentation/whatsapp_automation/connect_meta_screen.dart';
+import '../presentation/whatsapp_automation/number_setup_screen.dart';
+import '../presentation/whatsapp_automation/whatsapp_dashboard_master.dart';
+import '../presentation/whatsapp_automation/automation_builder_screen.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -71,6 +76,13 @@ class AppRoutes {
   static const String assignLeadsScreen = '/assign-leads-screen';
   static const String assignedTasksScreen = '/assigned-tasks-screen';
   static const String whatsappAutomationScreen = '/whatsapp-automation-screen';
+  static const String whatsappChooseConnection = '/whatsapp-choose-connection';
+  static const String whatsappConnectMeta = '/whatsapp-connect-meta';
+  static const String whatsappNumberSetup = '/whatsapp-number-setup';
+  static const String whatsappDashboard = '/whatsapp-dashboard';
+  static const String whatsappDashboardTab1 = '/whatsapp-dashboard-templates';
+  static const String whatsappDashboardTab2 = '/whatsapp-dashboard-logs';
+  static const String whatsappBuilder = '/whatsapp-builder';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -631,6 +643,132 @@ final GoRouter appRouter = GoRouter(
           return SlideTransition(position: slide, child: child);
         },
         transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappChooseConnection,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const ChooseConnectionScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappConnectMeta,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const ConnectMetaScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappNumberSetup,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const NumberSetupScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappDashboard,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const WhatsAppDashboardMaster(initialTab: 0),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappDashboardTab1,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const WhatsAppDashboardMaster(initialTab: 1),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappDashboardTab2,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const WhatsAppDashboardMaster(initialTab: 2),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappBuilder,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const AutomationBuilderScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(0, 1.0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 350),
       ),
     ),
     // Main app shell — 4 tabs: Dashboard | Leads | Logs | Settings

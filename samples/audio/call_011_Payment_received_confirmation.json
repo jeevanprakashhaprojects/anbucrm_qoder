@@ -1,0 +1,105 @@
+{
+  "id": "call_011",
+  "scenario": "Payment received confirmation",
+  "agent": "Anbarasan",
+  "customer": "Mr Nair",
+  "outcome": "resolved",
+  "source": "synthetic (macOS `say`, Tamil Vani + English Tara/Rishi)",
+  "sample_rate_hz": 16000,
+  "channels": 1,
+  "duration_sec": 21.17,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "agent",
+      "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd Confirming we received your premium",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd \u0b9a\u0bbe\u0bb0\u0bcd"
+        },
+        {
+          "lang": "english",
+          "text": "Confirming we received your premium"
+        }
+      ],
+      "start_sec": 3.1,
+      "end_sec": 6.03
+    },
+    {
+      "index": 1,
+      "speaker": "customer",
+      "text": "\u0b86\u0bae\u0bbe \u0ba8\u0bc7\u0ba4\u0bcd\u0ba4\u0bc1 \u0b95\u0b9f\u0bcd\u0b9f\u0bbf\u0ba9\u0bc7\u0ba9\u0bcd",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b86\u0bae\u0bbe \u0ba8\u0bc7\u0ba4\u0bcd\u0ba4\u0bc1 \u0b95\u0b9f\u0bcd\u0b9f\u0bbf\u0ba9\u0bc7\u0ba9\u0bcd"
+        }
+      ],
+      "start_sec": 6.7,
+      "end_sec": 8.07
+    },
+    {
+      "index": 2,
+      "speaker": "agent",
+      "text": "Twenty five thousand rupees for policy nine eight seven six five four three two one",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Twenty five thousand rupees for policy nine eight seven six five four three two one"
+        }
+      ],
+      "start_sec": 8.75,
+      "end_sec": 14.25
+    },
+    {
+      "index": 3,
+      "speaker": "customer",
+      "text": "Yes that is correct",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Yes that is correct"
+        }
+      ],
+      "start_sec": 14.64,
+      "end_sec": 15.94
+    },
+    {
+      "index": 4,
+      "speaker": "agent",
+      "text": "Receipt has been sent to your email and WhatsApp",
+      "segments": [
+        {
+          "lang": "english",
+          "text": "Receipt has been sent to your email and WhatsApp"
+        }
+      ],
+      "start_sec": 16.57,
+      "end_sec": 19.34
+    },
+    {
+      "index": 5,
+      "speaker": "customer",
+      "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0ba9\u0bcd\u0bb1\u0bbf",
+      "segments": [
+        {
+          "lang": "tamil",
+          "text": "\u0b93\u0b95\u0bc7 \u0ba8\u0ba9\u0bcd\u0bb1\u0bbf"
+        }
+      ],
+      "start_sec": 19.86,
+      "end_sec": 20.63
+    }
+  ],
+  "expected_summary": "Agent confirmed receipt of Rs 25,000 premium for policy 987654321 from Mr Nair. Payment made yesterday. Receipt sent to email and WhatsApp. Outcome: resolved.",
+  "expected_entities": {
+    "amount_inr": 25000,
+    "policy_number": "987654321",
+    "payment_date": "yesterday",
+    "receipt_sent_to": [
+      "email",
+      "WhatsApp"
+    ]
+  }
+}

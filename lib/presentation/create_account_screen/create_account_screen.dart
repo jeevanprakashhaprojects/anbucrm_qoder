@@ -1,9 +1,13 @@
 import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
+import '../../services/auth_service.dart';
+import '../../services/database_service.dart';
+import '../../services/payment_service.dart';
 import 'package:go_router/go_router.dart';
 
 // ─── Country Data ─────────────────────────────────────────────────────────────
@@ -113,6 +117,104 @@ const List<_Country> _kCountries = [
   _Country('Paraguay', '+595', '🇵🇾'),
   _Country('Uruguay', '+598', '🇺🇾'),
 ];
+
+final RegExp _kEmailRegex = RegExp(
+  r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,}$',
+);
+
+// Expected digit count after the dial code, per country code ([min, max]).
+const Map<String, List<int>> _kCodeLengths = {
+  '+91': [10, 10],
+  '+1': [10, 10],
+  '+44': [10, 10],
+  '+61': [9, 9],
+  '+49': [10, 11],
+  '+33': [9, 9],
+  '+81': [10, 10],
+  '+86': [11, 11],
+  '+55': [10, 11],
+  '+52': [10, 10],
+  '+27': [9, 9],
+  '+234': [10, 10],
+  '+254': [9, 9],
+  '+20': [10, 10],
+  '+966': [9, 9],
+  '+971': [9, 9],
+  '+65': [8, 8],
+  '+60': [9, 10],
+  '+62': [9, 12],
+  '+92': [10, 10],
+  '+880': [10, 10],
+  '+94': [9, 9],
+  '+977': [10, 10],
+  '+66': [9, 9],
+  '+84': [9, 10],
+  '+63': [10, 10],
+  '+82': [9, 10],
+  '+7': [10, 10],
+  '+39': [9, 10],
+  '+34': [9, 9],
+  '+31': [9, 9],
+  '+46': [7, 9],
+  '+47': [8, 8],
+  '+45': [8, 8],
+  '+41': [9, 9],
+  '+48': [9, 9],
+  '+90': [10, 10],
+  '+54': [10, 10],
+  '+56': [9, 9],
+  '+57': [10, 10],
+  '+51': [9, 9],
+  '+58': [10, 10],
+  '+64': [8, 9],
+  '+353': [9, 9],
+  '+351': [9, 9],
+  '+30': [10, 10],
+  '+972': [9, 9],
+  '+974': [8, 8],
+  '+965': [8, 8],
+  '+973': [8, 8],
+  '+968': [8, 8],
+  '+962': [9, 9],
+  '+961': [7, 8],
+  '+964': [10, 10],
+  '+98': [10, 10],
+  '+93': [9, 9],
+  '+95': [8, 10],
+  '+855': [8, 9],
+  '+856': [8, 10],
+  '+976': [8, 8],
+  '+380': [9, 9],
+  '+40': [9, 9],
+  '+36': [9, 9],
+  '+420': [9, 9],
+  '+43': [10, 11],
+  '+32': [9, 9],
+  '+358': [9, 10],
+  '+212': [9, 9],
+  '+213': [9, 9],
+  '+216': [8, 8],
+  '+251': [9, 9],
+  '+233': [9, 9],
+  '+255': [9, 9],
+  '+256': [9, 9],
+  '+263': [9, 9],
+  '+260': [9, 9],
+  '+258': [9, 9],
+  '+237': [9, 9],
+  '+225': [10, 10],
+  '+221': [9, 9],
+  '+53': [8, 8],
+  '+502': [8, 8],
+  '+504': [8, 8],
+  '+503': [8, 8],
+  '+506': [8, 8],
+  '+507': [8, 8],
+  '+593': [9, 9],
+  '+591': [8, 8],
+  '+595': [9, 9],
+  '+598': [8, 8],
+};
 
 // ─── Country Picker Bottom Sheet ──────────────────────────────────────────────
 
@@ -293,6 +395,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _termsAccepted = false;
+  bool _isCreating = false;
+
+  /// Set once the Firebase Auth account exists, so a cancelled or failed
+  /// payment can be retried without trying to create the account twice.
+  bool _accountCreated = false;
+  String? _profileSaveError;
 
   @override
   void initState() {
@@ -342,6 +450,86 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
     _stepController.reset();
     setState(() => _step = step);
     _stepController.forward();
+  }
+
+  Future<void> _onProceedToPayment() async {
+    if (_isCreating) return;
+    setState(() => _isCreating = true);
+    try {
+      if (!_accountCreated) {
+        final credential = await AuthService.instance.createAccount(
+          name: _nameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        _accountCreated = true;
+        final uid = credential.user?.uid;
+        if (uid != null) await _saveProfileToDatabase(uid);
+      }
+      if (!mounted) return;
+      setState(() => _isCreating = false);
+      if (_profileSaveError != null) {
+        _showSnackBar(
+          'Account created, but your details could not be saved to the '
+          'database yet. Check the Realtime Database rules.',
+          AppTheme.warning,
+        );
+      }
+      _goToStep(3);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isCreating = false);
+      _showSnackBar(AuthService.friendlyError(e), AppTheme.error);
+      // Once the account exists, never send the user back to re-enter details:
+      // a second createAccount would fail as email-already-in-use.
+      if (_accountCreated) return;
+      final code = e is FirebaseAuthException ? e.code : '';
+      if (code == 'email-already-in-use' || code == 'invalid-email') {
+        _goToStep(0);
+      } else if (code == 'weak-password') {
+        _goToStep(1);
+      }
+    }
+  }
+
+  Future<void> _saveProfileToDatabase(String uid) async {
+    try {
+      await DatabaseService.instance.savePersonalInformation(
+        uid: uid,
+        name: _nameController.text,
+        email: _emailController.text,
+        phoneDigits: _phoneController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        phoneFormatted: _formattedPhone,
+        dialCode: _selectedCountry.code,
+        country: _selectedCountry.name,
+        termsAccepted: _termsAccepted,
+      );
+      _profileSaveError = null;
+    } catch (e) {
+      // The Firebase Auth account already exists here, so a database failure
+      // must not strand the user. Record it and let them continue to payment.
+      _profileSaveError = e.toString();
+      debugPrint('Realtime Database save failed: $e');
+    }
+  }
+
+  void _showSnackBar(String message, Color background) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: background,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override
@@ -433,7 +621,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             _PaymentOverlay(
               name: _nameController.text,
               email: _emailController.text,
+              phone: '${_selectedCountry.code} ${_phoneController.text}',
               onSuccess: () => _goToStep(4),
+              onCancel: () => _goToStep(2),
             ),
         ],
       ),
@@ -467,7 +657,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           phone: _formattedPhone,
           countryCode: _selectedCountry.code,
           onEdit: (step) => _goToStep(step),
-          onProceedToPayment: () => _goToStep(3),
+          isCreating: _isCreating,
+          onProceedToPayment: _onProceedToPayment,
         );
       case 4:
         return _SuccessStep(
@@ -637,6 +828,7 @@ class _PersonalInfoStep extends StatefulWidget {
 
 class _PersonalInfoStepState extends State<_PersonalInfoStep> {
   final _formKey = GlobalKey<FormState>();
+  final _phoneFieldKey = GlobalKey<FormFieldState<String>>();
   bool _hasSubmitted = false;
 
   void _openCountryPicker() {
@@ -649,7 +841,14 @@ class _PersonalInfoStepState extends State<_PersonalInfoStep> {
         minimum: EdgeInsets.only(bottom: 8),
         child: _CountryPickerSheet(
           selected: widget.selectedCountry,
-          onSelect: widget.onCountryChanged,
+          onSelect: (c) {
+            widget.onCountryChanged(c);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && widget.phoneController.text.isNotEmpty) {
+                _phoneFieldKey.currentState?.validate();
+              }
+            });
+          },
         ),
       ),
     );
@@ -717,18 +916,16 @@ class _PersonalInfoStepState extends State<_PersonalInfoStep> {
             controller: widget.emailController,
             keyboardType: TextInputType.emailAddress,
             style: GoogleFonts.plusJakartaSans(fontSize: 14),
-            onChanged: (_) {
-              if (_hasSubmitted) _formKey.currentState?.validate();
-            },
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               hintText: 'you@example.com',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
             ),
             validator: (v) {
-              if (!_hasSubmitted) return null;
-              if (v == null || v.isEmpty) return 'Enter your email';
-              if (!v.contains('@') || !v.contains('.')) {
-                return 'Enter a valid email';
+              final value = (v ?? '').trim();
+              if (value.isEmpty) return 'Enter your email';
+              if (!_kEmailRegex.hasMatch(value)) {
+                return 'Enter a valid email address';
               }
               return null;
             },
@@ -787,16 +984,15 @@ class _PersonalInfoStepState extends State<_PersonalInfoStep> {
                 // Phone number input
                 Expanded(
                   child: TextFormField(
+                    key: _phoneFieldKey,
                     controller: widget.phoneController,
                     keyboardType: TextInputType.phone,
                     style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       LengthLimitingTextInputFormatter(15),
                     ],
-                    onChanged: (_) {
-                      if (_hasSubmitted) _formKey.currentState?.validate();
-                    },
                     decoration: InputDecoration(
                       hintText: '98765 43210',
                       hintStyle: GoogleFonts.plusJakartaSans(
@@ -813,11 +1009,21 @@ class _PersonalInfoStepState extends State<_PersonalInfoStep> {
                       ),
                     ),
                     validator: (v) {
-                      if (!_hasSubmitted) return null;
-                      if (v == null || v.isEmpty) {
-                        return 'Enter your phone number';
+                      final digits = (v ?? '').replaceAll(RegExp(r'\D'), '');
+                      if (digits.isEmpty) return 'Enter your phone number';
+                      final range =
+                          _kCodeLengths[widget.selectedCountry.code];
+                      if (range != null) {
+                        final min = range[0];
+                        final max = range[1];
+                        if (digits.length < min || digits.length > max) {
+                          return min == max
+                              ? 'Must be $min digits'
+                              : 'Must be $min-$max digits';
+                        }
+                      } else if (digits.length < 7 || digits.length > 15) {
+                        return 'Enter a valid phone number';
                       }
-                      if (v.length < 7) return 'Enter a valid phone number';
                       return null;
                     },
                   ),
@@ -1202,6 +1408,7 @@ class _ReviewStep extends StatelessWidget {
   final String phone;
   final String countryCode;
   final Function(int) onEdit;
+  final bool isCreating;
   final VoidCallback onProceedToPayment;
 
   const _ReviewStep({
@@ -1210,6 +1417,7 @@ class _ReviewStep extends StatelessWidget {
     required this.phone,
     required this.countryCode,
     required this.onEdit,
+    required this.isCreating,
     required this.onProceedToPayment,
   });
 
@@ -1334,8 +1542,11 @@ class _ReviewStep extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         _PrimaryButton(
-          label: 'Proceed to Payment  →',
+          label: isCreating
+              ? 'Creating your account…'
+              : 'Proceed to Payment  →',
           onTap: onProceedToPayment,
+          enabled: !isCreating,
         ),
         const SizedBox(height: 16),
       ],
@@ -1442,12 +1653,16 @@ class _ReviewItem {
 class _PaymentOverlay extends StatefulWidget {
   final String name;
   final String email;
+  final String phone;
   final VoidCallback onSuccess;
+  final VoidCallback onCancel;
 
   const _PaymentOverlay({
     required this.name,
     required this.email,
+    required this.phone,
     required this.onSuccess,
+    required this.onCancel,
   });
 
   @override
@@ -1458,12 +1673,19 @@ class _PaymentOverlayState extends State<_PaymentOverlay>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeIn;
-  int _stage = 0;
-  final List<String> _stages = [
-    'Processing payment...',
-    'Verifying transaction...',
-    'Creating your account...',
-  ];
+
+  String _stageLabel = 'Preparing secure payment...';
+  int _phase = 0;
+  String? _error;
+
+  /// Maps the service's progress labels onto the three dots in the card.
+  static const Map<String, int> _phaseForStage = {
+    'Signing you in...': 0,
+    'Creating your order...': 0,
+    'Opening secure checkout...': 1,
+    'Verifying transaction...': 2,
+    'Confirming with your bank...': 2,
+  };
 
   @override
   void initState() {
@@ -1477,16 +1699,54 @@ class _PaymentOverlayState extends State<_PaymentOverlay>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
-    _runPaymentFlow();
+    _startPayment();
   }
 
-  Future<void> _runPaymentFlow() async {
-    for (int i = 0; i < _stages.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 1200));
-      if (mounted) setState(() => _stage = i);
+  /// Success is decided by the backend, never by the checkout callback alone.
+  Future<void> _startPayment() async {
+    setState(() {
+      _error = null;
+      _phase = 0;
+      _stageLabel = 'Preparing secure payment...';
+    });
+    try {
+      final result = await PaymentService.instance.startPayment(
+        name: widget.name,
+        email: widget.email,
+        phone: widget.phone,
+        onStage: (stage) {
+          if (!mounted) return;
+          setState(() {
+            _stageLabel = stage;
+            _phase = _phaseForStage[stage] ?? _phase;
+          });
+        },
+      );
+      if (!mounted) return;
+      if (result.paid) {
+        widget.onSuccess();
+        return;
+      }
+      setState(() {
+        _error = result.cancelled
+            ? 'Payment cancelled. Your account is saved — try again whenever '
+                  'you are ready.'
+            : (result.message.isEmpty
+                  ? 'Payment was not confirmed by the server.'
+                  : result.message);
+      });
+    } on PaymentException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.message);
+    } catch (e) {
+      debugPrint('Payment flow failed: $e');
+      if (!mounted) return;
+      setState(
+        () => _error =
+            'Something went wrong. If any amount was deducted it will be '
+            'refunded automatically.',
+      );
     }
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) widget.onSuccess();
   }
 
   @override
@@ -1516,27 +1776,37 @@ class _PaymentOverlayState extends State<_PaymentOverlay>
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.primary, Color(0xFF7C3AED)],
+                    gradient: LinearGradient(
+                      colors: _error == null
+                          ? const [AppTheme.primary, Color(0xFF7C3AED)]
+                          : const [AppTheme.error, Color(0xFFF87171)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
+                  child: Center(
+                    child: _error == null
+                        ? const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.priority_high_rounded,
+                            size: 34,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Secure Payment',
+                  _error == null ? 'Secure Payment' : 'Payment Not Confirmed',
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -1547,49 +1817,52 @@ class _PaymentOverlayState extends State<_PaymentOverlay>
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: Text(
-                    _stages[_stage],
-                    key: ValueKey(_stage),
+                    _error ?? _stageLabel,
+                    key: ValueKey(_error ?? _stageLabel),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       color: AppTheme.textSecondary,
+                      height: 1.45,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_stages.length, (i) {
-                    final isDone = i < _stage;
-                    final isActive = i == _stage;
-                    return Row(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isDone
-                                ? AppTheme.success
-                                : isActive
-                                ? AppTheme.primary
-                                : AppTheme.surface200,
-                          ),
-                        ),
-                        if (i < _stages.length - 1)
+                if (_error == null) ...[
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (i) {
+                      final isDone = i < _phase;
+                      final isActive = i == _phase;
+                      return Row(
+                        children: [
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 400),
-                            width: 24,
-                            height: 2,
-                            color: isDone
-                                ? AppTheme.success
-                                : AppTheme.surface200,
+                            duration: const Duration(milliseconds: 300),
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDone
+                                  ? AppTheme.success
+                                  : isActive
+                                  ? AppTheme.primary
+                                  : AppTheme.surface200,
+                            ),
                           ),
-                      ],
-                    );
-                  }),
-                ),
+                          if (i < 2)
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              width: 24,
+                              height: 2,
+                              color: isDone
+                                  ? AppTheme.success
+                                  : AppTheme.surface200,
+                            ),
+                        ],
+                      );
+                    }),
+                  ),
+                ],
                 const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -1620,6 +1893,43 @@ class _PaymentOverlayState extends State<_PaymentOverlay>
                     ],
                   ),
                 ),
+                if (_error != null) ...[
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _startPayment,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        'Try Again',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextButton(
+                    onPressed: widget.onCancel,
+                    child: Text(
+                      'Back to Review',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

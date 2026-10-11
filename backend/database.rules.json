@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "admin": {
+      "Users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": "auth != null && auth.uid == $uid",
+          "personal_information": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": "auth != null && auth.uid == $uid"
+          },
+          "payment": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": false
+          }
+        }
+      }
+    }
+  }
+}

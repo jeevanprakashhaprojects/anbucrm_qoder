@@ -4,6 +4,44 @@ import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
+// Precomputed text styles — resolved once at class load, not per rebuild.
+class _S {
+  static final _base = GoogleFonts.plusJakartaSans();
+
+  static final welcomeSmall = _base.copyWith(
+    fontSize: 16, fontWeight: FontWeight.w400, color: AppTheme.textSecondary,
+  );
+  static final welcomeTitle = _base.copyWith(
+    fontSize: 36, fontWeight: FontWeight.w800, color: AppTheme.textPrimary,
+    letterSpacing: -1.0,
+  );
+  static final tagline = _base.copyWith(
+    fontSize: 14, fontWeight: FontWeight.w400, color: AppTheme.textSecondary,
+    height: 1.5,
+  );
+  static final cardTitle = _base.copyWith(
+    fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary,
+  );
+  static final cardSub = _base.copyWith(
+    fontSize: 12, color: AppTheme.textSecondary, height: 1.4,
+  );
+  static final termsText = _base.copyWith(
+    fontSize: 12, color: AppTheme.textSecondary,
+  );
+  static final termsDot = _base.copyWith(
+    fontSize: 12, color: AppTheme.textMuted,
+  );
+  static final copyright = _base.copyWith(
+    fontSize: 11, color: AppTheme.textMuted,
+  );
+  static final btnLabel = _base.copyWith(
+    fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white,
+  );
+  static final outlineBtnLabel = _base.copyWith(
+    fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary,
+  );
+}
+
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -13,34 +51,32 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen>
     with TickerProviderStateMixin {
-  late AnimationController _entryController;
-  late AnimationController _floatController;
+  late final AnimationController _entryController;
+  late final AnimationController _floatController;
 
-  late Animation<double> _logoOpacity;
-  late Animation<Offset> _logoSlide;
-  late Animation<double> _titleOpacity;
-  late Animation<Offset> _titleSlide;
-  late Animation<double> _taglineOpacity;
-  late Animation<double> _card1Opacity;
-  late Animation<Offset> _card1Slide;
-  late Animation<double> _card2Opacity;
-  late Animation<Offset> _card2Slide;
-  late Animation<double> _card3Opacity;
-  late Animation<Offset> _card3Slide;
-  late Animation<double> _buttonsOpacity;
-  late Animation<Offset> _buttonsSlide;
-  late Animation<double> _floatAnim;
+  late final Animation<double> _logoOpacity;
+  late final Animation<Offset> _logoSlide;
+  late final Animation<double> _titleOpacity;
+  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _taglineOpacity;
+  late final Animation<double> _card1Opacity;
+  late final Animation<Offset> _card1Slide;
+  late final Animation<double> _card2Opacity;
+  late final Animation<Offset> _card2Slide;
+  late final Animation<double> _card3Opacity;
+  late final Animation<Offset> _card3Slide;
+  late final Animation<double> _buttonsOpacity;
+  late final Animation<Offset> _buttonsSlide;
+  late final Animation<double> _floatAnim;
 
   @override
   void initState() {
     super.initState();
     _entryController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      vsync: this, duration: const Duration(milliseconds: 1800),
     );
     _floatController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      vsync: this, duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
     _logoOpacity = _interval(0.0, 0.25);
@@ -65,18 +101,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Animation<double> _interval(double begin, double end) =>
       Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: _entryController,
-          curve: Interval(begin, end, curve: Curves.easeOut),
-        ),
+        CurvedAnimation(parent: _entryController, curve: Interval(begin, end, curve: Curves.easeOut)),
       );
 
   Animation<Offset> _slideInterval(double begin, double end) =>
       Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero).animate(
-        CurvedAnimation(
-          parent: _entryController,
-          curve: Interval(begin, end, curve: Curves.easeOutCubic),
-        ),
+        CurvedAnimation(parent: _entryController, curve: Interval(begin, end, curve: Curves.easeOutCubic)),
       );
 
   @override
@@ -88,44 +118,29 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       body: Stack(
         children: [
-          // Background gradient blobs
           Positioned(
-            top: -100,
-            right: -60,
+            top: -100, right: -60,
             child: Container(
-              width: 280,
-              height: 280,
+              width: 280, height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.primary.withAlpha(35),
-                    AppTheme.primary.withAlpha(0),
-                  ],
-                ),
+                gradient: RadialGradient(colors: [AppTheme.primary.withAlpha(35), AppTheme.primary.withAlpha(0)]),
               ),
             ),
           ),
           Positioned(
-            bottom: size.height * 0.25,
-            left: -80,
+            bottom: size.height * 0.25, left: -80,
             child: Container(
-              width: 220,
-              height: 220,
+              width: 220, height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF7C3AED).withAlpha(25),
-                    const Color(0xFF7C3AED).withAlpha(0),
-                  ],
-                ),
+                gradient: RadialGradient(colors: [const Color(0xFF7C3AED).withAlpha(25), const Color(0xFF7C3AED).withAlpha(0)]),
               ),
             ),
           ),
@@ -136,7 +151,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 48),
-                  // Logo
                   FadeTransition(
                     opacity: _logoOpacity,
                     child: SlideTransition(
@@ -149,93 +163,46 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             child: child,
                           ),
                           child: Container(
-                            width: 80,
-                            height: 80,
+                            width: 80, height: 80,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [AppTheme.primary, Color(0xFF7C3AED)],
-                              ),
+                              gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppTheme.primary, Color(0xFF7C3AED)]),
                               borderRadius: BorderRadius.circular(22),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primary.withAlpha(70),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
+                              boxShadow: [BoxShadow(color: AppTheme.primary.withAlpha(70), blurRadius: 20, offset: const Offset(0, 8))],
                             ),
-                            child: const Icon(
-                              Icons.trending_up_rounded,
-                              color: Colors.white,
-                              size: 40,
-                            ),
+                            child: const Icon(Icons.trending_up_rounded, color: Colors.white, size: 40),
                           ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 28),
-                  // Title
                   FadeTransition(
                     opacity: _titleOpacity,
                     child: SlideTransition(
                       position: _titleSlide,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Welcome to',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: AppTheme.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'AnbuCRM',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 36,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
-                              letterSpacing: -1.0,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                      child: Column(children: [
+                        Text('Welcome to', style: _S.welcomeSmall, textAlign: TextAlign.center),
+                        const SizedBox(height: 4),
+                        Text('AnbuCRM', style: _S.welcomeTitle, textAlign: TextAlign.center),
+                      ]),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Tagline
                   FadeTransition(
                     opacity: _taglineOpacity,
-                    child: Text(
-                      'Track Calls. Manage Leads. Grow Business.',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: AppTheme.textSecondary,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text('Track Calls. Manage Leads. Grow Business.', style: _S.tagline, textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 40),
-                  // Feature highlight cards
                   FadeTransition(
                     opacity: _card1Opacity,
                     child: SlideTransition(
                       position: _card1Slide,
-                      child: _FeatureCard(
+                      child: const _FeatureCard(
                         icon: Icons.phone_in_talk_rounded,
                         iconColor: AppTheme.primary,
                         iconBg: AppTheme.primaryContainer,
                         title: 'Smart Call Tracking',
-                        subtitle:
-                            'Auto-log every call with context and follow-up reminders',
+                        subtitle: 'Auto-log every call with context and follow-up reminders',
                       ),
                     ),
                   ),
@@ -244,13 +211,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     opacity: _card2Opacity,
                     child: SlideTransition(
                       position: _card2Slide,
-                      child: _FeatureCard(
+                      child: const _FeatureCard(
                         icon: Icons.people_alt_rounded,
-                        iconColor: const Color(0xFF059669),
-                        iconBg: const Color(0xFFD1FAE5),
+                        iconColor: Color(0xFF059669),
+                        iconBg: Color(0xFFD1FAE5),
                         title: 'Lead Pipeline',
-                        subtitle:
-                            'Visualise your sales funnel from first touch to close',
+                        subtitle: 'Visualise your sales funnel from first touch to close',
                       ),
                     ),
                   ),
@@ -259,18 +225,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     opacity: _card3Opacity,
                     child: SlideTransition(
                       position: _card3Slide,
-                      child: _FeatureCard(
+                      child: const _FeatureCard(
                         icon: Icons.bar_chart_rounded,
-                        iconColor: const Color(0xFFD97706),
-                        iconBg: const Color(0xFFFEF3C7),
+                        iconColor: Color(0xFFD97706),
+                        iconBg: Color(0xFFFEF3C7),
                         title: 'Performance Analytics',
-                        subtitle:
-                            'Real-time insights on team activity and revenue growth',
+                        subtitle: 'Real-time insights on team activity and revenue growth',
                       ),
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Action buttons
                   FadeTransition(
                     opacity: _buttonsOpacity,
                     child: SlideTransition(
@@ -279,58 +243,25 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _PrimaryButton(
-                            label: 'Login',
-                            icon: Icons.login_rounded,
-                            onTap: () =>
-                                context.go(AppRoutes.signUpLoginScreen),
+                            label: 'Login', icon: Icons.login_rounded,
+                            onTap: () => context.go(AppRoutes.signUpLoginScreen),
                           ),
                           const SizedBox(height: 12),
                           _OutlineButton(
-                            label: 'Buy Product',
-                            icon: Icons.shopping_bag_outlined,
+                            label: 'Buy Product', icon: Icons.shopping_bag_outlined,
                             onTap: () => context.go(AppRoutes.buyProductScreen),
                           ),
                           const SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'Terms of Service',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Text(
-                                  '·',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: AppTheme.textMuted,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                'Privacy Policy',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
+                              Text('Terms of Service', style: _S.termsText),
+                              Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('·', style: _S.termsDot)),
+                              Text('Privacy Policy', style: _S.termsText),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            '© 2026 AnbuCRM',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              color: AppTheme.textMuted,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                          Text('© 2026 AnbuCRM', style: _S.copyright, textAlign: TextAlign.center),
                           const SizedBox(height: 24),
                         ],
                       ),
@@ -354,11 +285,8 @@ class _FeatureCard extends StatelessWidget {
   final String subtitle;
 
   const _FeatureCard({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBg,
-    required this.title,
-    required this.subtitle,
+    required this.icon, required this.iconColor, required this.iconBg,
+    required this.title, required this.subtitle,
   });
 
   @override
@@ -366,55 +294,28 @@ class _FeatureCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
+        color: AppTheme.surfaceLight, borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.surface200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 8, offset: const Offset(0, 2))],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 22),
+      child: Row(children: [
+        Container(
+          width: 44, height: 44,
+          decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, color: iconColor, size: 22),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: _S.cardTitle),
+              const SizedBox(height: 2),
+              Text(subtitle, style: _S.cardSub),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
@@ -423,12 +324,7 @@ class _PrimaryButton extends StatefulWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-
-  const _PrimaryButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  const _PrimaryButton({required this.label, required this.icon, required this.onTap});
 
   @override
   State<_PrimaryButton> createState() => _PrimaryButtonState();
@@ -436,70 +332,39 @@ class _PrimaryButton extends StatefulWidget {
 
 class _PrimaryButtonState extends State<_PrimaryButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _pressController;
-  late Animation<double> _scaleAnim;
+  late final AnimationController _pressController;
+  late final Animation<double> _scaleAnim;
 
   @override
   void initState() {
     super.initState();
-    _pressController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
+    _pressController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _scaleAnim = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _pressController, curve: Curves.easeOut),
     );
-    _scaleAnim = Tween<double>(
-      begin: 1.0,
-      end: 0.96,
-    ).animate(CurvedAnimation(parent: _pressController, curve: Curves.easeOut));
   }
 
   @override
-  void dispose() {
-    _pressController.dispose();
-    super.dispose();
-  }
+  void dispose() { _pressController.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (_) => _pressController.forward(),
-      onTapUp: (_) {
-        _pressController.reverse();
-        widget.onTap();
-      },
+      onTapUp: (_) { _pressController.reverse(); widget.onTap(); },
       onTapCancel: () => _pressController.reverse(),
       child: ScaleTransition(
         scale: _scaleAnim,
         child: Container(
           height: 52,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppTheme.primary, Color(0xFF7C3AED)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFF7C3AED)], begin: Alignment.centerLeft, end: Alignment.centerRight),
             borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primary.withAlpha(70),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: AppTheme.primary.withAlpha(70), blurRadius: 16, offset: const Offset(0, 6))],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+            children: [Icon(widget.icon, color: Colors.white, size: 20), const SizedBox(width: 8), Text(widget.label, style: _S.btnLabel)],
           ),
         ),
       ),
@@ -511,12 +376,7 @@ class _OutlineButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-
-  const _OutlineButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  const _OutlineButton({required this.label, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -525,24 +385,12 @@ class _OutlineButton extends StatelessWidget {
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: AppTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(14),
+          color: AppTheme.surfaceLight, borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppTheme.surface200, width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: AppTheme.textPrimary, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-          ],
+          children: [Icon(icon, color: AppTheme.textPrimary, size: 20), const SizedBox(width: 8), Text(label, style: _S.outlineBtnLabel)],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,9 +6,20 @@ import 'package:sizer/sizer.dart';
 
 import './widgets/custom_error_widget.dart';
 import 'core/app_export.dart';
+import 'firebase_options.dart';
+import 'services/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Fire-and-forget: notifications must not block app startup
+  PushNotificationService.instance.initialize().catchError((e) {
+    debugPrint('Push notification init failed: $e');
+  });
 
   // Prevent google_fonts from crashing when offline
   GoogleFonts.config.allowRuntimeFetching = false;
