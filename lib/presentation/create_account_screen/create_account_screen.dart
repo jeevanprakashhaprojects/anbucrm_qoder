@@ -1055,38 +1055,55 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   }
 
   Future<void> _sendInvoiceEmail() async {
-    try {
-      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      if (token == null) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-      final plan = _currentPlanDetails();
-      final phoneWithCode = _formattedPhone.isNotEmpty
-          ? '${_selectedCountry.code} ${_formattedPhone}'
-          : '';
-      final response = await http.post(
-        Uri.parse('https://api.anbucrm.com/email/invoice'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'name': _nameController.text,
-          'email': _emailController.text,
-          'phone': phoneWithCode,
-          'country': _selectedCountry.name,
-          'planTerm': plan.planTerm,
-          'discountPercent': _discountPercent,
-          'couponCode': _appliedCoupon ?? '',
-        }),
-      );
+    final plan = _currentPlanDetails();
+    final phoneWithCode = _formattedPhone.isNotEmpty
+        ? '${_selectedCountry.code} ${_formattedPhone}'
+        : '';
+    final body = jsonEncode({
+      'name': _nameController.text,
+      'email': _emailController.text,
+      'phone': phoneWithCode,
+      'country': _selectedCountry.name,
+      'planTerm': plan.planTerm,
+      'discountPercent': _discountPercent,
+      'couponCode': _appliedCoupon ?? '',
+    });
 
-      if (response.statusCode == 200) {
-        debugPrint('Invoice email sent successfully');
-      } else {
-        debugPrint('Invoice email failed: ${response.body}');
+    // Runs in the background so retries never block navigation.
+    unawaited(_postInvoiceWithRetry(user, body));
+  }
+
+  static Future<void> _postInvoiceWithRetry(User user, String body) async {
+    const maxAttempts = 3;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final token = await user.getIdToken();
+        final response = await http
+            .post(
+              Uri.parse('https://api.anbucrm.com/email/invoice'),
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+              body: body,
+            )
+            .timeout(const Duration(seconds: 30));
+
+        if (response.statusCode == 200) {
+          debugPrint('Invoice email sent successfully');
+          return;
+        }
+        debugPrint('Invoice email failed (attempt $attempt): ${response.body}');
+        if (response.statusCode >= 400 && response.statusCode < 500) return;
+      } catch (e) {
+        debugPrint('Invoice email error (attempt $attempt): $e');
       }
-    } catch (e) {
-      debugPrint('Invoice email error: $e');
+      if (attempt < maxAttempts) {
+        await Future.delayed(Duration(seconds: 3 * attempt));
+      }
     }
   }
 

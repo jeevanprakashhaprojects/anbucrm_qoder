@@ -1,4 +1,6 @@
-.env
-serviceAccount.json
 node_modules/
-npm-debug.log*
+.env
+service-account.json
+serviceAccount.json
+*.log
+npm-debug.log

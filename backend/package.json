@@ -1,20 +1,26 @@
 {
-  "name": "anbucrm-payment-backend",
+  "name": "anbucrm-api",
   "version": "1.0.0",
-  "description": "Razorpay order creation, webhook signature verification and Firebase Realtime Database payment status for AnbuCRM",
+  "description": "AnbuCRM backend — Firebase auth + payment gateway",
   "main": "server.js",
-  "private": true,
-  "engines": {
-    "node": ">=18.0.0"
-  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "firebase-admin": "^12.7.0",
-    "razorpay": "^2.9.5"
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "firebase-admin": "^12.5.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "nodemailer": "^10.1.0",
+    "pdfkit": "^0.20.2",
+    "razorpay": "^2.9.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
