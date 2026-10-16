@@ -24,12 +24,44 @@ const BASE_PRICE = 500;
 const GST_RATE = 0.18;
 const PLAN_TERMS = ['Monthly', 'Yearly', '2 Years'];
 
+const LOGO_PATH = path.join(__dirname, '..', 'assets', 'anbucrm_logo.png');
+const FONT_REGULAR = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+const FONT_BOLD = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+const HAS_RUPEE_FONT = fs.existsSync(FONT_REGULAR) && fs.existsSync(FONT_BOLD);
+
+const C = {
+  navy: '#09152b',
+  navy2: '#0e2140',
+  amber: '#fbbf24',
+  amber3: '#fcd34d',
+  s900: '#0f172a',
+  s800: '#1e293b',
+  s700: '#334155',
+  s600: '#475569',
+  s500: '#64748b',
+  s400: '#94a3b8',
+  s300: '#cbd5e1',
+  s200: '#e2e8f0',
+  s100: '#f1f5f9',
+  s50: '#f8fafc',
+  e50: '#ecfdf5',
+  e200: '#a7f3d0',
+  e300: '#6ee7b7',
+  e600: '#059669',
+  e700: '#047857',
+  e800: '#065f46',
+};
+
+function amount(n) {
+  return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function inrPdf(n) {
-  return 'Rs. ' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (HAS_RUPEE_FONT ? '\u20B9' : 'Rs. ') + amount(n);
 }
 
 function inrHtml(n) {
-  return '\u20B9' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '\u20B9' + amount(n);
 }
 
 function fmtDate(d) {
@@ -47,220 +79,318 @@ function nextPeriodEnd(start, planTerm) {
 
 function generateInvoicePdf(d) {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 0, size: 'A4' });
+    const doc = new PDFDocument({ margin: 0, size: 'A4', info: { Title: `AnbuCRM Invoice ${d.invoiceNumber}`, Author: 'AnbuCRM' } });
     const chunks = [];
     doc.on('data', chunk => chunks.push(chunk));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
-
-    // HEADER - Royal Navy with Gold accent bar
-    doc.rect(0, 0, pageWidth, 135).fill('#09152b');
-    doc.rect(0, 132, pageWidth, 3).fill('#f59e0b');
-
-    // Logo
-    const logoPath = path.join(__dirname, 'logo.jpg');
-    if (fs.existsSync(logoPath)) {
-      doc.save();
-      doc.roundedRect(45, 32, 50, 50, 10).clip();
-      doc.image(logoPath, 45, 32, { width: 50, height: 50 });
-      doc.restore();
-      doc.roundedRect(45, 32, 50, 50, 10).stroke('#f59e0b');
-    } else {
-      doc.roundedRect(45, 32, 50, 50, 10).fill('#0f2347').stroke('#f59e0b');
-      doc.fillColor('#fbbf24').fontSize(28).font('Helvetica-Bold').text('A', 45, 42, { width: 50, align: 'center' });
+    if (HAS_RUPEE_FONT) {
+      doc.registerFont('Money', FONT_REGULAR);
+      doc.registerFont('MoneyBold', FONT_BOLD);
     }
+    const MONEY = HAS_RUPEE_FONT ? 'Money' : 'Helvetica';
+    const MONEY_BOLD = HAS_RUPEE_FONT ? 'MoneyBold' : 'Helvetica-Bold';
 
-    // Company info
-    doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold').text('AnbuCRM', 110, 36);
-    doc.fontSize(10).font('Helvetica').fillColor('#fbbf24').text('Cloud CRM & Insurance Automation Suite', 110, 64);
-    doc.fontSize(8.5).fillColor('#94a3b8').text('GSTIN: 33AAACA9812K1Z8 \u00B7 SAC: 998313 \u00B7 billing@anbucrm.com', 110, 80);
+    const pw = doc.page.width;
+    const ph = doc.page.height;
+    const M = 40;
+    const W = pw - M * 2;
+    const R = pw - M;
 
-    // Invoice meta right side
-    doc.fillColor('#fbbf24').fontSize(16).font('Helvetica-Bold').text('TAX INVOICE', pageWidth - 220, 36, { align: 'right' });
-    doc.fontSize(10).font('Helvetica-Bold').fillColor('#ffffff').text(`#${d.invoiceNumber}`, pageWidth - 220, 58, { align: 'right' });
-    doc.fontSize(9).font('Helvetica').fillColor('#cbd5e1').text(`Date: ${d.periodStart}`, pageWidth - 220, 74, { align: 'right' });
-    doc.text(`Due Date: ${d.periodStart}`, pageWidth - 220, 88, { align: 'right' });
+    // Single-line text clipped to its box so long values never spill past the margins.
+    const put = (str, x, y, o = {}) => {
+      const size = o.size || 9;
+      doc.font(o.font || 'Helvetica').fontSize(size).fillColor(o.color || C.s700).fillOpacity(o.opacity == null ? 1 : o.opacity);
+      doc.text(String(str), x, y, {
+        width: o.width,
+        align: o.align || 'left',
+        height: o.multi ? undefined : size * 1.35,
+        ellipsis: !o.multi,
+        lineGap: o.lineGap || 0,
+        characterSpacing: o.spacing || 0,
+      });
+      doc.fillOpacity(1);
+    };
+    const label = (str, x, y, width, color = C.s500, align = 'left') => put(str.toUpperCase(), x, y, { width, align, size: 7.5, font: 'Helvetica-Bold', color, spacing: 0.6 });
+    const hline = (x, y, w, color = C.s200, h = 0.75) => doc.rect(x, y, w, h).fill(color);
 
-    // BILLED TO & SUBSCRIPTION CARDS
-    const cardY = 160;
-    const cardHeight = 95;
-    const cardWidth = 240;
+    // ---------- HEADER ----------
+    const headerH = 150;
+    doc.rect(0, 0, pw, headerH).fill(C.navy);
+    doc.save();
+    doc.rect(0, 0, pw, headerH).clip();
+    doc.circle(pw - 30, 0, 150).fillOpacity(0.05).fill('#ffffff');
+    doc.restore();
+    doc.fillOpacity(1);
+    doc.rect(0, headerH, pw, 3).fill(C.amber);
 
-    doc.roundedRect(45, cardY, cardWidth, cardHeight, 8).fill('#f8fafc').stroke('#e2e8f0');
-    doc.fillColor('#64748b').fontSize(8.5).font('Helvetica-Bold').text('BILLED TO CUSTOMER', 60, cardY + 12);
-    doc.fillColor('#0f172a').fontSize(13).font('Helvetica-Bold').text(d.name, 60, cardY + 28);
-    doc.fontSize(9.5).font('Helvetica').fillColor('#334155').text(d.email, 60, cardY + 46);
-    if (d.phone) doc.text(`Phone: ${d.phone}`, 60, cardY + 60);
-    doc.text(d.country || 'Tamil Nadu, India', 60, cardY + 74);
+    const logoSize = 70;
+    const logoY = 40;
+    if (fs.existsSync(LOGO_PATH)) {
+      doc.image(LOGO_PATH, M, logoY, { width: logoSize, height: logoSize });
+    } else {
+      doc.roundedRect(M, logoY, logoSize, logoSize, 12).fill(C.navy2);
+      put('A', M, logoY + 18, { width: logoSize, align: 'center', size: 30, font: 'Helvetica-Bold', color: C.amber });
+    }
+    doc.roundedRect(M, logoY, logoSize, logoSize, 12).lineWidth(1).strokeOpacity(0.4).stroke(C.amber);
+    doc.strokeOpacity(1);
 
-    const rightCardX = pageWidth - 45 - cardWidth;
-    doc.roundedRect(rightCardX, cardY, cardWidth, cardHeight, 8).fill('#f8fafc').stroke('#e2e8f0');
-    doc.fillColor('#64748b').fontSize(8.5).font('Helvetica-Bold').text('SUBSCRIPTION SPECIFICS', rightCardX + 15, cardY + 12);
-    doc.fillColor('#0f172a').fontSize(11).font('Helvetica-Bold').text(`Plan: ${d.planTerm} Plan`, rightCardX + 15, cardY + 28);
-    doc.fontSize(9.5).font('Helvetica').fillColor('#334155').text(`Coverage: ${d.periodStart} to ${d.periodEnd}`, rightCardX + 15, cardY + 46);
-    doc.roundedRect(rightCardX + 15, cardY + 64, 75, 18, 4).fill('#dcfce7').stroke('#86efac');
-    doc.fillColor('#15803d').fontSize(8.5).font('Helvetica-Bold').text('PAID IN FULL', rightCardX + 15, cardY + 68, { width: 75, align: 'center' });
+    const bx = M + logoSize + 16;
+    const metaW = 170;
+    const metaX = R - metaW;
+    const brandW = metaX - bx - 12;
 
-    // ITEMS TABLE
-    let tableY = 280;
-    doc.roundedRect(45, tableY, pageWidth - 90, 28, 4).fill('#09152b');
-    doc.fillColor('#fbbf24').fontSize(9.5).font('Helvetica-Bold');
-    doc.text('DESCRIPTION & SERVICE', 60, tableY + 9);
-    doc.text('SAC CODE', 290, tableY + 9);
-    doc.text('QTY', 365, tableY + 9);
-    doc.text('RATE', 420, tableY + 9);
-    doc.text('AMOUNT', pageWidth - 140, tableY + 9, { align: 'right' });
+    put('AnbuCRM', bx, 44, { size: 24, font: 'Helvetica-Bold', color: '#ffffff', width: 150 });
+    doc.font('Helvetica-Bold').fontSize(24);
+    const badgeX = bx + doc.widthOfString('AnbuCRM') + 10;
+    doc.font('Helvetica-Bold').fontSize(7);
+    const badgeW = doc.widthOfString('TAX INVOICE') + 7 + 14;
+    doc.roundedRect(badgeX, 50, badgeW, 15, 3).fillOpacity(0.1).fill('#ffffff');
+    doc.roundedRect(badgeX, 50, badgeW, 15, 3).lineWidth(0.75).strokeOpacity(0.25).stroke('#ffffff');
+    doc.fillOpacity(1).strokeOpacity(1);
+    put('TAX INVOICE', badgeX, 54.5, { width: badgeW, align: 'center', size: 7, font: 'Helvetica-Bold', color: '#ffffff', opacity: 0.92, spacing: 0.6 });
 
-    tableY += 38;
-    doc.fillColor('#0f172a').fontSize(9.5).font('Helvetica-Bold');
-    doc.text(`AnbuCRM Subscription - ${d.planTerm} Plan`, 60, tableY);
-    doc.fillColor('#64748b').fontSize(8).font('Helvetica').text('Cloud CRM Access, Leads Pipeline, Automated Follow-ups & Analytics', 60, tableY + 14);
-    doc.fillColor('#475569').fontSize(9).font('Helvetica');
-    doc.text('998313', 290, tableY);
-    doc.text('1', 365, tableY);
-    doc.text(inrPdf(d.basePrice), 420, tableY);
-    doc.fillColor('#0f172a').font('Helvetica-Bold').text(inrPdf(d.basePrice), pageWidth - 140, tableY, { align: 'right' });
+    put('Cloud CRM & Insurance Automation Suite', bx, 77, { size: 9.5, color: C.s300, width: brandW });
+    put('GSTIN: 33AAACA9812K1Z8  \u00B7  SAC: 998313', bx, 94, { size: 8, color: '#ffffff', opacity: 0.72, width: brandW });
+    put('billing@anbucrm.com  \u00B7  www.anbucrm.com', bx, 106, { size: 8, color: '#ffffff', opacity: 0.72, width: brandW });
 
-    tableY += 34;
+    label('Invoice Reference', metaX, 46, metaW, C.s300, 'right');
+    put(d.invoiceNumber, metaX, 58, { width: metaW, align: 'right', size: 17, font: 'Helvetica-Bold', color: '#ffffff' });
+    put(`Date:  ${d.periodStart}`, metaX, 84, { width: metaW, align: 'right', size: 8.5, color: '#ffffff', opacity: 0.85 });
+    put(`Due Date:  ${d.periodStart}`, metaX, 98, { width: metaW, align: 'right', size: 8.5, color: '#ffffff', opacity: 0.85 });
+
+    // ---------- BILLED TO CUSTOMER ----------
+    const pad = 16;
+    let y = headerH + 20;
+    const billH = 94;
+    doc.roundedRect(M, y, W, billH, 8).lineWidth(0.75).fillAndStroke(C.s50, C.s200);
+    label('Billed To Customer', M + pad, y + 14, W - pad * 2);
+    put(d.name, M + pad, y + 30, { size: 14, font: 'Helvetica-Bold', color: C.s900, width: W - pad * 2 });
+    const infoRow = (k, v, ry) => {
+      put(k, M + pad, ry + 1, { size: 7.5, color: C.s400, width: 52 });
+      put(v, M + pad + 54, ry, { size: 9, font: 'Helvetica-Bold', color: C.s800, width: W - pad * 2 - 54 });
+    };
+    infoRow('Email:', d.email, y + 50);
+    infoRow('Phone:', d.phone || '-', y + 64);
+    infoRow('Location:', d.country || 'India', y + 78);
+
+    // ---------- SUBSCRIPTION SPECIFICS ----------
+    y += billH + 10;
+    const subH = 96;
+    doc.roundedRect(M, y, W, subH, 8).lineWidth(0.75).fillAndStroke(C.s50, C.s200);
+    label('Subscription Specifics', M + pad, y + 14, W - pad * 2);
+    const innerW = W - pad * 2;
+    const specRow = (k, v, ry, last) => {
+      put(k, M + pad, ry, { size: 9, color: C.s500, width: innerW / 2 });
+      if (v) put(v, M + pad + innerW / 2, ry, { size: 9, font: 'Helvetica-Bold', color: C.s900, width: innerW / 2, align: 'right' });
+      if (!last) hline(M + pad, ry + 15, innerW, C.s200, 0.5);
+    };
+    specRow('Service Plan', `${d.planTerm} Plan`, y + 31);
+    specRow('Coverage Period', `${d.periodStart}  to  ${d.periodEnd}`, y + 51);
+    specRow('Payment Status', '', y + 72, true);
+    const pbW = 84;
+    const pbX = R - pad - pbW;
+    doc.roundedRect(pbX, y + 68, pbW, 17, 3).lineWidth(0.75).fillAndStroke(C.e50, C.e300);
+    put('PAID IN FULL', pbX, y + 73, { width: pbW, align: 'center', size: 7.5, font: 'Helvetica-Bold', color: C.e700, spacing: 0.5 });
+
+    // ---------- LINE ITEMS ----------
+    y += subH + 18;
+    const col = {
+      desc: { x: M + 12, w: 240 },
+      sac: { x: M + 262, w: 58 },
+      qty: { x: M + 320, w: 40 },
+      rate: { x: M + 360, w: 72 },
+      amt: { x: M + 432, w: W - 432 - 12 },
+    };
+    doc.roundedRect(M, y, W, 26, 5).fill(C.navy2);
+    const th = (t, c, align) => put(t, c.x, y + 9.5, { width: c.w, align, size: 7.5, font: 'Helvetica-Bold', color: C.amber3, spacing: 0.6 });
+    th('DESCRIPTION & SERVICE', col.desc, 'left');
+    th('SAC CODE', col.sac, 'center');
+    th('QTY', col.qty, 'center');
+    th('RATE', col.rate, 'right');
+    th('AMOUNT', col.amt, 'right');
+
+    y += 26 + 12;
+    put(`AnbuCRM Subscription - ${d.planTerm} Plan`, col.desc.x, y, { size: 9.5, font: 'Helvetica-Bold', color: C.s900, width: col.desc.w });
+    put('Cloud CRM Access, Leads Pipeline, Automated Follow-ups & Analytics', col.desc.x, y + 15, { size: 7.8, color: C.s500, width: col.desc.w, multi: true, lineGap: 1.5 });
+    put('998313', col.sac.x, y + 1, { size: 8.5, color: C.s500, width: col.sac.w, align: 'center' });
+    put('1', col.qty.x, y + 1, { size: 9, color: C.s700, width: col.qty.w, align: 'center' });
+    put(inrPdf(d.basePrice), col.rate.x, y, { size: 9, font: MONEY, color: C.s700, width: col.rate.w, align: 'right' });
+    put(inrPdf(d.basePrice), col.amt.x, y, { size: 9, font: MONEY_BOLD, color: C.s900, width: col.amt.w, align: 'right' });
+    y += 40;
 
     if (d.discountPercent > 0) {
-      doc.fillColor('#059669').fontSize(9).font('Helvetica-Bold');
-      doc.text(`Promotional Discount (${d.discountPercent}% off${d.couponCode ? ' - ' + d.couponCode : ''})`, 60, tableY);
-      doc.text('-', 290, tableY);
-      doc.text('-', 365, tableY);
-      doc.text('-', 420, tableY);
-      doc.text('-' + inrPdf(d.basePrice - d.subtotal), pageWidth - 140, tableY, { align: 'right' });
-      tableY += 26;
+      hline(M, y - 8, W, C.s100);
+      const disc = `Promotional Discount (${d.discountPercent}% off${d.couponCode ? ' - ' + d.couponCode : ''})`;
+      put(disc, col.desc.x, y, { size: 9, font: 'Helvetica-Bold', color: C.e600, width: col.desc.w + col.sac.w });
+      put('-', col.qty.x, y, { size: 9, color: C.e600, width: col.qty.w, align: 'center' });
+      put('-' + inrPdf(d.basePrice - d.subtotal), col.amt.x, y, { size: 9, font: MONEY_BOLD, color: C.e600, width: col.amt.w, align: 'right' });
+      y += 20;
+    }
+    hline(M, y, W, C.s900, 1);
+    y += 16;
+
+    // ---------- NOTES (left) & TOTALS (right) ----------
+    const totW = 228;
+    const totX = R - totW;
+    const leftW = totX - M - 20;
+    let ly = y;
+
+    if (d.discountPercent > 0 && d.couponCode) {
+      doc.roundedRect(M, ly, leftW, 42, 6).lineWidth(0.75).fillAndStroke(C.e50, C.e200);
+      put(`Promotional Coupon Applied: ${d.couponCode}`, M + 12, ly + 9, { size: 8.5, font: 'Helvetica-Bold', color: C.e800, width: leftW - 24 });
+      put(`${d.discountPercent}% promotional waiver granted for this billing cycle.`, M + 12, ly + 24, { size: 7.8, color: C.e700, width: leftW - 24 });
+      ly += 54;
     }
 
-    doc.rect(45, tableY, pageWidth - 90, 1).fill('#e2e8f0');
-    tableY += 15;
+    label('Payment Settlement & Notes', M, ly, leftW);
+    ly += 13;
+    doc.roundedRect(M, ly, leftW, 54, 6).lineWidth(0.75).fillAndStroke(C.s50, C.s100);
+    put('Payment Mode: Online / Verified Promo Code', M + 12, ly + 9, { size: 8, color: C.s600, width: leftW - 24 });
+    put(`Transaction Reference: TXN-${d.invoiceNumber.replace('INV-', '')}`, M + 12, ly + 23, { size: 8, color: C.s600, width: leftW - 24 });
+    put('This invoice is generated in compliance with GST Rule 46.', M + 12, ly + 37, { size: 8, color: C.s600, width: leftW - 24 });
 
-    // SUMMARY & TOTALS
-    doc.fillColor('#64748b').fontSize(8.5).font('Helvetica-Bold').text('PAYMENT SETTLEMENT & NOTES', 45, tableY);
-    doc.font('Helvetica').fontSize(8).fillColor('#475569');
-    doc.text('Payment Mode: Online / Verified Promo Code', 45, tableY + 14);
-    doc.text(`Transaction Reference: TXN-${d.invoiceNumber.replace('INV-', '')}`, 45, tableY + 26);
-    doc.text('This invoice is generated in compliance with GST Rule 46.', 45, tableY + 38);
+    const rows = [['Gross Subtotal:', inrPdf(d.basePrice), C.s600, C.s800, MONEY]];
+    if (d.discountPercent > 0) {
+      rows.push([`Discount (${d.discountPercent}% off):`, '-' + inrPdf(d.basePrice - d.subtotal), C.e700, C.e700, MONEY_BOLD]);
+    }
+    const tp = 14;
+    const rowH = 16;
+    const boxH = tp + rows.length * rowH + 8 + rowH * 3 + 8 + 46 + tp;
+    doc.roundedRect(totX, y, totW, boxH, 8).lineWidth(0.75).fillAndStroke(C.s50, C.s200);
+    const tIn = totW - tp * 2;
+    let ty = y + tp;
+    const trow = (k, v, kc, vc, vf, kf) => {
+      put(k, totX + tp, ty, { size: 8.5, color: kc, font: kf || 'Helvetica', width: tIn * 0.58 });
+      put(v, totX + tp + tIn * 0.4, ty - 0.5, { size: 8.5, color: vc, font: vf, width: tIn * 0.6, align: 'right' });
+      ty += rowH;
+    };
+    rows.forEach(r => trow(r[0], r[1], r[2], r[3], r[4]));
+    hline(totX + tp, ty - 3, tIn, C.s200, 0.75);
+    ty += 5;
+    trow('Taxable Value:', inrPdf(d.subtotal), C.s700, C.s900, MONEY_BOLD, 'Helvetica-Bold');
+    trow('CGST @ 9%:', inrPdf(d.tax / 2), C.s500, C.s600, MONEY);
+    trow('SGST @ 9%:', inrPdf(d.tax / 2), C.s500, C.s600, MONEY);
+    ty += 8;
+    doc.roundedRect(totX + tp, ty, tIn, 46, 6).fill(C.navy);
+    label('Total Amount Paid', totX + tp + 12, ty + 11, tIn / 2, C.s300);
+    put('Fully Settled', totX + tp + 12, ty + 25, { size: 8.5, color: '#ffffff', opacity: 0.9, width: tIn / 2 });
+    put(inrPdf(d.totalAmount), totX + tp + tIn * 0.35, ty + 14, { size: 15, font: MONEY_BOLD, color: '#ffffff', width: tIn * 0.65 - 12, align: 'right' });
 
-    const totalsX = 350;
-    const totalsWidth = pageWidth - 45 - totalsX;
+    // ---------- FOOTER ----------
+    const footY = ph - 136;
+    doc.rect(0, footY, pw, ph - footY).fill(C.s50);
+    hline(0, footY, pw, C.s200, 0.75);
 
-    doc.fontSize(9).font('Helvetica').fillColor('#475569');
-    doc.text('Subtotal:', totalsX, tableY);
-    doc.text(inrPdf(d.subtotal), pageWidth - 140, tableY, { align: 'right' });
-    doc.text('CGST (9%):', totalsX, tableY + 16);
-    doc.text(inrPdf(d.tax / 2), pageWidth - 140, tableY + 16, { align: 'right' });
-    doc.text('SGST (9%):', totalsX, tableY + 32);
-    doc.text(inrPdf(d.tax / 2), pageWidth - 140, tableY + 32, { align: 'right' });
+    const fLeftW = W - 200;
+    label('Terms & Compliance', M, footY + 16, fLeftW);
+    const terms = [
+      '1. Services rendered are non-transferable.',
+      '2. Invoice issued in accordance with GST Rule 46.',
+      '3. Cloud services are governed by the AnbuCRM Master Service Agreement.',
+    ];
+    terms.forEach((t, i) => put(t, M, footY + 30 + i * 12, { size: 7.8, color: C.s500, width: fLeftW }));
+    put('Thank you for subscribing to AnbuCRM! Access your dashboard at https://anbucrm.com', M, footY + 70, { size: 7.8, color: C.s600, width: fLeftW });
+    put('Support: support@anbucrm.com  |  Master Service Agreement applies', M, footY + 83, { size: 7.5, color: C.s400, width: fLeftW });
 
-    const totalBoxY = tableY + 54;
-    doc.roundedRect(totalsX - 10, totalBoxY, totalsWidth + 10, 42, 6).fill('#09152b');
-    doc.fillColor('#ffffff').fontSize(9).font('Helvetica-Bold').text('TOTAL PAID', totalsX, totalBoxY + 15);
-    doc.fillColor('#fbbf24').fontSize(14).font('Helvetica-Bold').text(inrPdf(d.totalAmount), pageWidth - 140, totalBoxY + 13, { align: 'right' });
+    const sigW = 160;
+    const sigX = R - sigW;
+    hline(sigX + 10, footY + 62, sigW - 20, C.s300, 0.75);
+    put('Authorized Signatory', sigX, footY + 69, { size: 8.5, font: 'Helvetica-Bold', color: C.s800, width: sigW, align: 'center' });
+    put('AnbuCRM Technologies Pvt Ltd', sigX, footY + 82, { size: 7.8, color: C.s500, width: sigW, align: 'center' });
 
-    // FOOTER & SIGNATORY
-    const footerY = pageHeight - 110;
-    doc.rect(45, footerY, pageWidth - 90, 1).fill('#e2e8f0');
-
-    doc.fillColor('#64748b').fontSize(8).font('Helvetica');
-    doc.text('Thank you for subscribing to AnbuCRM! Access your dashboard at https://anbucrm.com', 45, footerY + 15, { width: 320 });
-    doc.text('Support: support@anbucrm.com | Master Service Agreement applies', 45, footerY + 38);
-
-    const sigX = pageWidth - 190;
-    doc.fillColor('#0f172a').fontSize(8.5).font('Helvetica-Bold').text('Authorized Signatory', sigX, footerY + 38, { width: 145, align: 'center' });
-    doc.fillColor('#f59e0b').fontSize(8).font('Helvetica-Bold').text('AnbuCRM Technologies Pvt Ltd', sigX, footerY + 50, { width: 145, align: 'center' });
-
-    doc.fillColor('#94a3b8').fontSize(7.5).font('Helvetica').text('\u00A9 2026 AnbuCRM. All rights reserved. GST Rule 46 Compliant.', 45, pageHeight - 24, { align: 'center', width: pageWidth - 90 });
+    hline(M, ph - 36, W, C.s200, 0.5);
+    put('\u00A9 2026 AnbuCRM. All rights reserved.  \u00B7  GST Rule 46 Compliant', M, ph - 24, { size: 7.5, color: C.s400, width: W, align: 'center' });
 
     doc.end();
   });
 }
 
 function invoiceHtml(d) {
+  const td = 'padding:11px 16px;border-bottom:1px solid #f1f5f9;';
   const discountRow = d.discountPercent > 0
-    ? `<tr><td style="padding:12px 16px;color:#059669;font-weight:600;border-bottom:1px solid #f1f5f9;">Discount (${d.discountPercent}% off${d.couponCode ? ' \u00B7 ' + d.couponCode : ''})</td><td style="padding:12px 16px;text-align:right;color:#059669;font-weight:700;border-bottom:1px solid #f1f5f9;">-${inrHtml(d.basePrice - d.subtotal)}</td></tr>`
+    ? `<tr><td style="${td}color:#059669;font-weight:700;">Promotional Discount (${d.discountPercent}% off${d.couponCode ? ' &middot; ' + d.couponCode : ''})</td><td style="${td}text-align:right;white-space:nowrap;color:#059669;font-weight:700;">-${inrHtml(d.basePrice - d.subtotal)}</td></tr>`
     : '';
+  const couponBox = d.discountPercent > 0 && d.couponCode
+    ? `<div style="margin:0 0 20px;padding:12px 16px;background-color:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;"><div style="font-size:13px;font-weight:700;color:#065f46;">Promotional Coupon Applied: ${d.couponCode}</div><div style="font-size:12px;color:#047857;margin-top:2px;">${d.discountPercent}% promotional waiver granted for this billing cycle.</div></div>`
+    : '';
+  const spec = (k, v, last) => `<tr><td style="padding:8px 0;font-size:13px;color:#64748b;${last ? '' : 'border-bottom:1px solid #e2e8f0;'}">${k}</td><td style="padding:8px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;${last ? '' : 'border-bottom:1px solid #e2e8f0;'}">${v}</td></tr>`;
+  const info = (k, v) => `<tr><td style="padding:2px 0;width:70px;font-size:11px;color:#94a3b8;">${k}</td><td style="padding:2px 0;font-size:13px;color:#1e293b;font-weight:600;">${v}</td></tr>`;
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Your AnbuCRM Invoice</title></head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 <div style="max-width:620px;margin:0 auto;padding:32px 16px;">
-<div style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px -5px rgba(0,0,0,0.08);border:1px solid #e2e8f0;">
+<div style="background-color:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
 
-<div style="background-color:#09152b;padding:36px 32px;border-bottom:3px solid #f59e0b;">
+<div style="background-color:#09152b;padding:30px 28px;border-bottom:3px solid #fbbf24;">
 <table style="width:100%;border-collapse:collapse;"><tr>
 <td style="vertical-align:middle;">
 <table style="border-collapse:collapse;"><tr>
-<td style="width:46px;height:46px;background-color:#0f2347;border:2px solid #f59e0b;border-radius:10px;text-align:center;vertical-align:middle;overflow:hidden;">
-<img src="cid:logo_inline" alt="AnbuCRM" style="width:42px;height:42px;object-fit:cover;display:block;border-radius:8px;" />
-</td>
-<td style="padding-left:14px;">
-<div style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">AnbuCRM</div>
-<div style="color:#fbbf24;font-size:12px;font-weight:500;margin-top:2px;">Cloud CRM &amp; Insurance Suite</div>
+<td style="width:60px;vertical-align:middle;"><img src="cid:logo_inline" alt="AnbuCRM" width="60" height="60" style="width:60px;height:60px;display:block;border-radius:12px;" /></td>
+<td style="padding-left:14px;vertical-align:middle;">
+<div><span style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;vertical-align:middle;">AnbuCRM</span>
+<span style="display:inline-block;margin-left:6px;padding:2px 7px;border:1px solid rgba(255,255,255,0.25);background-color:rgba(255,255,255,0.1);border-radius:4px;color:#ffffff;font-size:9px;font-weight:700;letter-spacing:0.6px;vertical-align:middle;">TAX INVOICE</span></div>
+<div style="color:#cbd5e1;font-size:12px;margin-top:3px;">Cloud CRM &amp; Insurance Automation Suite</div>
+<div style="color:rgba(255,255,255,0.7);font-size:10px;margin-top:4px;">GSTIN: 33AAACA9812K1Z8 &middot; SAC: 998313</div>
 </td></tr></table>
 </td>
-<td style="vertical-align:middle;text-align:right;">
-<div style="display:inline-block;padding:4px 10px;background-color:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:6px;color:#fbbf24;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">TAX INVOICE</div>
-<div style="color:#ffffff;font-size:15px;font-weight:700;margin-top:6px;font-family:monospace;">#${d.invoiceNumber}</div>
-<div style="color:#94a3b8;font-size:11px;margin-top:2px;">Date: ${d.periodStart}</div>
+<td style="vertical-align:middle;text-align:right;white-space:nowrap;">
+<div style="color:#cbd5e1;font-size:10px;font-weight:700;letter-spacing:0.8px;">INVOICE REFERENCE</div>
+<div style="color:#ffffff;font-size:17px;font-weight:800;margin-top:3px;">${d.invoiceNumber}</div>
+<div style="color:rgba(255,255,255,0.85);font-size:11px;margin-top:4px;">Date: ${d.periodStart}</div>
+<div style="color:rgba(255,255,255,0.85);font-size:11px;">Due Date: ${d.periodStart}</div>
 </td>
 </tr></table>
 </div>
 
-<div style="padding:32px;">
+<div style="padding:28px;">
 <h2 style="margin:0 0 8px;font-size:18px;color:#0f172a;font-weight:700;">Hi ${d.name},</h2>
-<p style="margin:0 0 24px;font-size:14px;color:#475569;line-height:1.6;">Thank you for choosing <strong>AnbuCRM</strong>. Your subscription has been activated successfully. Your official tax invoice PDF is attached to this email.</p>
+<p style="margin:0 0 22px;font-size:14px;color:#475569;line-height:1.6;">Thank you for choosing <strong>AnbuCRM</strong>. Your subscription has been activated successfully. Your official tax invoice PDF is attached to this email.</p>
 
-<table style="width:100%;border-collapse:collapse;margin-bottom:28px;"><tr>
-<td style="width:50%;vertical-align:top;padding-right:8px;">
-<div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
-<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Billed To</div>
-<div style="font-size:14px;font-weight:700;color:#0f172a;">${d.name}</div>
-<div style="font-size:12px;color:#475569;margin-top:3px;">${d.email}</div>
-${d.phone ? `<div style="font-size:12px;color:#475569;margin-top:2px;">${d.phone}</div>` : ''}
-<div style="font-size:12px;color:#64748b;margin-top:2px;">${d.country || 'Tamil Nadu, India'}</div>
-</div></td>
-<td style="width:50%;vertical-align:top;padding-left:8px;">
-<div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
-<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Plan Details</div>
-<div style="font-size:14px;font-weight:700;color:#0f172a;">${d.planTerm} Plan</div>
-<div style="font-size:12px;color:#475569;margin-top:3px;">${d.periodStart} &rarr; ${d.periodEnd}</div>
-<div style="margin-top:6px;"><span style="display:inline-block;padding:2px 8px;background-color:#dcfce7;border:1px solid #86efac;border-radius:4px;color:#15803d;font-size:10px;font-weight:700;">PAID &amp; ACTIVE</span></div>
-</div></td>
-</tr></table>
+<div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px;">
+<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Billed To Customer</div>
+<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px;">${d.name}</div>
+<table style="border-collapse:collapse;">${info('Email:', d.email)}${info('Phone:', d.phone || '-')}${info('Location:', d.country || 'India')}</table>
+</div>
 
-<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;">
-<thead><tr style="background-color:#09152b;color:#fbbf24;">
-<th style="padding:12px 16px;text-align:left;font-weight:700;border-top-left-radius:8px;">Description</th>
-<th style="padding:12px 16px;text-align:right;font-weight:700;border-top-right-radius:8px;">Amount</th>
+<div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:24px;">
+<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;">Subscription Specifics</div>
+<table style="width:100%;border-collapse:collapse;">
+${spec('Service Plan', `${d.planTerm} Plan`)}
+${spec('Coverage Period', `${d.periodStart} to ${d.periodEnd}`)}
+${spec('Payment Status', '<span style="display:inline-block;padding:3px 9px;background-color:#ecfdf5;border:1px solid #6ee7b7;border-radius:4px;color:#047857;font-size:10px;font-weight:700;letter-spacing:0.5px;">PAID IN FULL</span>', true)}
+</table>
+</div>
+
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:22px;">
+<thead><tr style="background-color:#0e2140;">
+<th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:#fcd34d;letter-spacing:0.5px;">DESCRIPTION &amp; SERVICE</th>
+<th style="padding:11px 16px;text-align:right;font-size:11px;font-weight:700;color:#fcd34d;letter-spacing:0.5px;">AMOUNT</th>
 </tr></thead>
 <tbody>
-<tr><td style="padding:14px 16px;color:#0f172a;border-bottom:1px solid #f1f5f9;"><strong>AnbuCRM subscription &mdash; ${d.planTerm} plan</strong><div style="font-size:11px;color:#64748b;margin-top:2px;">SAC Code: 998313 (IT Software &amp; Cloud CRM Services)</div></td>
-<td style="padding:14px 16px;text-align:right;color:#0f172a;font-weight:600;border-bottom:1px solid #f1f5f9;font-family:monospace;">${inrHtml(d.basePrice)}</td></tr>
+<tr><td style="${td}color:#0f172a;"><strong>AnbuCRM Subscription &mdash; ${d.planTerm} Plan</strong><div style="font-size:11px;color:#64748b;margin-top:2px;">SAC 998313 &middot; Cloud CRM Access, Leads Pipeline, Automated Follow-ups &amp; Analytics</div></td>
+<td style="${td}text-align:right;white-space:nowrap;color:#0f172a;font-weight:700;vertical-align:top;">${inrHtml(d.basePrice)}</td></tr>
 ${discountRow}
-<tr><td style="padding:10px 16px;color:#64748b;border-bottom:1px solid #f1f5f9;">Subtotal</td><td style="padding:10px 16px;text-align:right;color:#334155;border-bottom:1px solid #f1f5f9;font-family:monospace;">${inrHtml(d.subtotal)}</td></tr>
-<tr><td style="padding:10px 16px;color:#64748b;border-bottom:1px solid #f1f5f9;">GST @ 18% (CGST 9% + SGST 9%)</td><td style="padding:10px 16px;text-align:right;color:#334155;border-bottom:1px solid #f1f5f9;font-family:monospace;">${inrHtml(d.tax)}</td></tr>
-<tr style="background-color:#09152b;color:#ffffff;">
-<td style="padding:16px;font-size:14px;font-weight:700;border-bottom-left-radius:8px;">TOTAL AMOUNT PAID</td>
-<td style="padding:16px;text-align:right;font-size:18px;font-weight:800;color:#fbbf24;border-bottom-right-radius:8px;font-family:monospace;">${inrHtml(d.totalAmount)}</td>
+<tr><td style="${td}color:#334155;font-weight:700;">Taxable Value</td><td style="${td}text-align:right;white-space:nowrap;color:#0f172a;font-weight:700;">${inrHtml(d.subtotal)}</td></tr>
+<tr><td style="${td}color:#64748b;">CGST @ 9%</td><td style="${td}text-align:right;white-space:nowrap;color:#475569;">${inrHtml(d.tax / 2)}</td></tr>
+<tr><td style="${td}color:#64748b;">SGST @ 9%</td><td style="${td}text-align:right;white-space:nowrap;color:#475569;">${inrHtml(d.tax / 2)}</td></tr>
+<tr style="background-color:#09152b;">
+<td style="padding:14px 16px;"><div style="font-size:10px;font-weight:700;color:#cbd5e1;letter-spacing:0.6px;">TOTAL AMOUNT PAID</div><div style="font-size:12px;color:rgba(255,255,255,0.9);">Fully Settled</div></td>
+<td style="padding:14px 16px;text-align:right;white-space:nowrap;font-size:20px;font-weight:800;color:#ffffff;">${inrHtml(d.totalAmount)}</td>
 </tr>
 </tbody></table>
 
-<div style="margin-top:28px;padding:20px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border-radius:12px;border:1px solid #a7f3d0;">
-<div style="font-size:14px;color:#065f46;font-weight:700;margin-bottom:6px;">Welcome to AnbuCRM Suite!</div>
-<div style="font-size:13px;color:#047857;line-height:1.5;">Your account is ready. Log in to your CRM dashboard to manage client portfolios, automate follow-up workflows, and accelerate growth.</div>
-<div style="margin-top:14px;"><a href="https://anbucrm.com" style="display:inline-block;padding:10px 20px;background-color:#09152b;color:#fbbf24;text-decoration:none;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:0.3px;">Launch AnbuCRM Dashboard &rarr;</a></div>
-</div>
+${couponBox}
 
-<div style="margin-top:28px;padding-top:20px;border-top:1px solid #e2e8f0;font-size:12px;color:#94a3b8;line-height:1.6;text-align:center;">
-This is an official computer-generated invoice issued by AnbuCRM Technologies Pvt. Ltd.<br>
-Need assistance? Contact <a href="mailto:support@anbucrm.com" style="color:#f59e0b;text-decoration:none;font-weight:600;">support@anbucrm.com</a>
+<div style="text-align:center;margin:6px 0 4px;"><a href="https://anbucrm.com" style="display:inline-block;padding:11px 22px;background-color:#09152b;color:#fbbf24;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Open AnbuCRM Dashboard</a></div>
+
+<div style="margin-top:24px;padding-top:18px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;line-height:1.6;text-align:center;">
+This is a computer-generated tax invoice issued by AnbuCRM Technologies Pvt Ltd under the GST framework of India.<br>
+Need assistance? Contact <a href="mailto:support@anbucrm.com" style="color:#0e2140;text-decoration:none;font-weight:700;">support@anbucrm.com</a>
 </div>
 </div></div>
-<div style="text-align:center;padding:16px;font-size:11px;color:#94a3b8;">&copy; 2026 AnbuCRM. All rights reserved. GST Rule 46 Compliant.</div>
+<div style="text-align:center;padding:16px;font-size:11px;color:#94a3b8;">&copy; 2026 AnbuCRM. All rights reserved. &middot; GST Rule 46 Compliant</div>
 </div></body></html>`;
 }
 
@@ -268,12 +398,13 @@ function invoiceText(d) {
   const lines = [
     `Hi ${d.name},`, '',
     'Thank you for subscribing to AnbuCRM. Your plan is now active.', '',
+    `Invoice: ${d.invoiceNumber}`,
     `Plan: ${d.planTerm}`, `Base Price: ${inrHtml(d.basePrice)}`,
   ];
   if (d.discountPercent > 0) {
     lines.push(`Discount: -${inrHtml(d.basePrice - d.subtotal)} (${d.discountPercent}% off${d.couponCode ? ', code ' + d.couponCode : ''})`);
   }
-  lines.push(`Subtotal: ${inrHtml(d.subtotal)}`, `GST @ 18%: ${inrHtml(d.tax)}`, `Total Amount Paid: ${inrHtml(d.totalAmount)}`, `Billing Period: ${d.periodStart} to ${d.periodEnd}`, '', 'Your official PDF invoice is attached with this email.', 'Thank you for choosing AnbuCRM!');
+  lines.push(`Taxable Value: ${inrHtml(d.subtotal)}`, `GST @ 18% (CGST 9% + SGST 9%): ${inrHtml(d.tax)}`, `Total Amount Paid: ${inrHtml(d.totalAmount)}`, `Billing Period: ${d.periodStart} to ${d.periodEnd}`, '', 'Your official PDF invoice is attached with this email.', 'Thank you for choosing AnbuCRM!');
   return lines.join('\n');
 }
 
@@ -303,7 +434,7 @@ router.post('/invoice', requireAuth, async (req, res, next) => {
       name: String(b.name || '').trim() || 'Customer',
       email: to,
       phone: String(b.phone || '').trim(),
-      country: String(b.country || 'Tamil Nadu, India').trim(),
+      country: String(b.country || 'India').trim(),
       planTerm,
       basePrice: BASE_PRICE,
       discountPercent,
@@ -318,12 +449,11 @@ router.post('/invoice', requireAuth, async (req, res, next) => {
 
     const pdfBuffer = await generateInvoicePdf(d);
 
-    const logoPath = path.join(__dirname, 'logo.jpg');
     const attachments = [
       { filename: `AnbuCRM-Invoice-${invoiceNum}.pdf`, content: pdfBuffer, contentType: 'application/pdf' },
     ];
-    if (fs.existsSync(logoPath)) {
-      attachments.push({ filename: 'logo.jpg', path: logoPath, cid: 'logo_inline' });
+    if (fs.existsSync(LOGO_PATH)) {
+      attachments.push({ filename: 'anbucrm-logo.png', path: LOGO_PATH, cid: 'logo_inline', contentType: 'image/png' });
     }
 
     await cfg.transporter.sendMail({
