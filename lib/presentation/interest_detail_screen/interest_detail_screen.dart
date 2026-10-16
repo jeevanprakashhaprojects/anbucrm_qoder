@@ -335,6 +335,7 @@ class _InterestDetailScreenState extends State<InterestDetailScreen>
 
   Widget _buildOverviewTab(Map<String, dynamic> interest) {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

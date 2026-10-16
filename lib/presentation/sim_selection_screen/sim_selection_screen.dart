@@ -162,6 +162,7 @@ class _SimSelectionScreenState extends State<SimSelectionScreen>
       backgroundColor: AppTheme.backgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           padding: EdgeInsets.symmetric(
             horizontal: isTablet ? 48 : 24,
             vertical: 24,

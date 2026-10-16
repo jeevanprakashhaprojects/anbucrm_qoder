@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
@@ -6,6 +7,7 @@ class AuthService {
   static final AuthService instance = AuthService._();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Dio _dio = Dio();
 
   Future<UserCredential> createAccount({
     required String name,
@@ -59,5 +61,13 @@ class AuthService {
       }
     }
     return 'Something went wrong. Check your internet and try again.';
+  }
+
+  Future<bool> checkEmailExists(String email) async {
+    final response = await _dio.post(
+      'https://api.anbucrm.com/auth/check-email',
+      data: {'email': email.trim()},
+    );
+    return response.data['exists'] == true;
   }
 }

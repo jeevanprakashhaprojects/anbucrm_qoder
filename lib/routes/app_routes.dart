@@ -39,6 +39,7 @@ import '../presentation/whatsapp_automation/connect_meta_screen.dart';
 import '../presentation/whatsapp_automation/number_setup_screen.dart';
 import '../presentation/whatsapp_automation/whatsapp_dashboard_master.dart';
 import '../presentation/whatsapp_automation/automation_builder_screen.dart';
+import '../presentation/whatsapp_automation/whatsapp_onboarding_screen.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -83,6 +84,7 @@ class AppRoutes {
   static const String whatsappDashboardTab1 = '/whatsapp-dashboard-templates';
   static const String whatsappDashboardTab2 = '/whatsapp-dashboard-logs';
   static const String whatsappBuilder = '/whatsapp-builder';
+  static const String whatsappOnboarding = '/whatsapp-onboarding';
 }
 
 final GoRouter appRouter = GoRouter(
@@ -769,6 +771,24 @@ final GoRouter appRouter = GoRouter(
           return SlideTransition(position: slide, child: child);
         },
         transitionDuration: const Duration(milliseconds: 350),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.whatsappOnboarding,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const WhatsAppOnboardingScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(1.0, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
+          return SlideTransition(position: slide, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 320),
       ),
     ),
     // Main app shell — 4 tabs: Dashboard | Leads | Logs | Settings

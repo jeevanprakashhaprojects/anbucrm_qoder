@@ -3,6 +3,30 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/app_theme.dart';
 
+class _S {
+  static final header = GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.primary,
+  );
+  static final button = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.primary,
+  );
+  static final credLabel = GoogleFonts.plusJakartaSans(
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.textSecondary,
+  );
+  static final credValue = GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.textPrimary,
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
+}
+
 class DemoCredentialsWidget extends StatelessWidget {
   final Function(String email, String password) onUseCredentials;
 
@@ -44,11 +68,7 @@ class DemoCredentialsWidget extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 'Demo Credentials',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary,
-                ),
+                style: _S.header,
               ),
             ],
           ),
@@ -82,11 +102,7 @@ class DemoCredentialsWidget extends StatelessWidget {
               ),
               child: Text(
                 'Use Demo Account',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.primary,
-                ),
+                style: _S.button,
               ),
             ),
           ),
@@ -115,22 +131,13 @@ class _CredRow extends StatelessWidget {
           width: 64,
           child: Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.textSecondary,
-            ),
+            style: _S.credLabel,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.textPrimary,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+            style: _S.credValue,
           ),
         ),
         InkWell(

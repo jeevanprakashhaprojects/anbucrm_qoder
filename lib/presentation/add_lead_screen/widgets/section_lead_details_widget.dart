@@ -571,6 +571,7 @@ class _SectionLeadDetailsWidgetState extends State<SectionLeadDetailsWidget>
         ),
         const SizedBox(height: 14),
         SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           scrollDirection: Axis.horizontal,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -73,25 +73,25 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   void initState() {
     super.initState();
     _entryController = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1800),
+      vsync: this, duration: const Duration(milliseconds: 400),
     );
     _floatController = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 3000),
     )..repeat(reverse: true);
 
-    _logoOpacity = _interval(0.0, 0.25);
-    _logoSlide = _slideInterval(0.0, 0.3);
-    _titleOpacity = _interval(0.2, 0.45);
-    _titleSlide = _slideInterval(0.2, 0.45);
-    _taglineOpacity = _interval(0.35, 0.55);
-    _card1Opacity = _interval(0.45, 0.65);
-    _card1Slide = _slideInterval(0.45, 0.65);
-    _card2Opacity = _interval(0.55, 0.75);
-    _card2Slide = _slideInterval(0.55, 0.75);
-    _card3Opacity = _interval(0.65, 0.85);
-    _card3Slide = _slideInterval(0.65, 0.85);
-    _buttonsOpacity = _interval(0.75, 1.0);
-    _buttonsSlide = _slideInterval(0.75, 1.0);
+    _logoOpacity = _interval(0.0, 0.3);
+    _logoSlide = _slideInterval(0.0, 0.35);
+    _titleOpacity = _interval(0.15, 0.45);
+    _titleSlide = _slideInterval(0.15, 0.45);
+    _taglineOpacity = _interval(0.3, 0.55);
+    _card1Opacity = _interval(0.35, 0.6);
+    _card1Slide = _slideInterval(0.35, 0.6);
+    _card2Opacity = _interval(0.45, 0.7);
+    _card2Slide = _slideInterval(0.45, 0.7);
+    _card3Opacity = _interval(0.55, 0.8);
+    _card3Slide = _slideInterval(0.55, 0.8);
+    _buttonsOpacity = _interval(0.65, 1.0);
+    _buttonsSlide = _slideInterval(0.65, 1.0);
     _floatAnim = Tween<double>(begin: -6.0, end: 6.0).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
@@ -145,11 +145,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
           ),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                   const SizedBox(height: 48),
                   FadeTransition(
                     opacity: _logoOpacity,
@@ -244,12 +249,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         children: [
                           _PrimaryButton(
                             label: 'Login', icon: Icons.login_rounded,
-                            onTap: () => context.go(AppRoutes.signUpLoginScreen),
+                            onTap: () => context.push(AppRoutes.signUpLoginScreen),
                           ),
                           const SizedBox(height: 12),
                           _OutlineButton(
                             label: 'Buy Product', icon: Icons.shopping_bag_outlined,
-                            onTap: () => context.go(AppRoutes.buyProductScreen),
+                            onTap: () => context.push(AppRoutes.buyProductScreen),
                           ),
                           const SizedBox(height: 24),
                           Row(
@@ -271,9 +276,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               ),
             ),
           ),
-        ],
+        ),
       ),
-    );
+    ],
+  ),
+);
   }
 }
 

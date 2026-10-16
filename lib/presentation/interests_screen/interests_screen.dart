@@ -293,6 +293,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
           builder: (ctx, setSheet) => Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2028,6 +2029,7 @@ class _NewInterestFormState extends State<_NewInterestForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: EdgeInsets.only(
         left: 16,
         right: 16,

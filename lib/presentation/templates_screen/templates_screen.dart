@@ -1916,6 +1916,7 @@ class _TemplateCreateSheetState extends State<_TemplateCreateSheet> {
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2426,6 +2427,7 @@ class _TemplatePreviewSheetState extends State<_TemplatePreviewSheet> {
           const Divider(height: 1),
           Flexible(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -179,6 +179,7 @@ class _SectionNotesWidgetState extends State<SectionNotesWidget>
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           scrollDirection: Axis.horizontal,
           child: Row(
             children: _categories.map((c) {

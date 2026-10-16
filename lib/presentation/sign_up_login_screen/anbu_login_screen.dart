@@ -12,47 +12,73 @@ class _S {
   static final _base = GoogleFonts.plusJakartaSans();
 
   static final title = _base.copyWith(
-    fontSize: 26, fontWeight: FontWeight.w800, color: AppTheme.textPrimary,
+    fontSize: 26,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
     letterSpacing: -0.5,
   );
   static final subtitle = _base.copyWith(
-    fontSize: 13, color: AppTheme.textSecondary, height: 1.5,
+    fontSize: 13,
+    color: AppTheme.textSecondary,
+    height: 1.5,
   );
   static final fieldLabel = _base.copyWith(
-    fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textPrimary,
   );
   static final fieldText = _base.copyWith(fontSize: 14);
   static final badgeTitle = _base.copyWith(
-    fontSize: 13, fontWeight: FontWeight.w700,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
   );
   static final badgeSub = _base.copyWith(
-    fontSize: 11, color: AppTheme.textSecondary,
+    fontSize: 11,
+    color: AppTheme.textSecondary,
   );
-  static final tabLabel = _base.copyWith(fontSize: 11, fontWeight: FontWeight.w500);
-  static final tabLabelActive = _base.copyWith(fontSize: 11, fontWeight: FontWeight.w700);
+  static final tabLabel = _base.copyWith(
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+  );
+  static final tabLabelActive = _base.copyWith(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+  );
   static final forgotLink = _base.copyWith(
-    fontSize: 13, fontWeight: FontWeight.w600,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
   );
   static final signUpText = _base.copyWith(
-    fontSize: 13, color: AppTheme.textSecondary,
+    fontSize: 13,
+    color: AppTheme.textSecondary,
   );
   static final signUpLink = _base.copyWith(
-    fontSize: 13, fontWeight: FontWeight.w700,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
   );
   static final errorText = _base.copyWith(
-    fontSize: 12, color: AppTheme.error, fontWeight: FontWeight.w500,
+    fontSize: 12,
+    color: AppTheme.error,
+    fontWeight: FontWeight.w500,
   );
   static final btnLabel = _base.copyWith(
-    fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white,
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
   );
   static final infoText = _base.copyWith(
-    fontSize: 11, color: AppTheme.textSecondary, height: 1.4,
+    fontSize: 11,
+    color: AppTheme.textSecondary,
+    height: 1.4,
   );
   static final clientBadge = _base.copyWith(
-    fontSize: 10, fontWeight: FontWeight.w600,
+    fontSize: 10,
+    fontWeight: FontWeight.w600,
   );
   static final backIcon = const Icon(
-    Icons.arrow_back_rounded, size: 18, color: AppTheme.textPrimary,
+    Icons.arrow_back_rounded,
+    size: 18,
+    color: AppTheme.textPrimary,
   );
 }
 
@@ -88,18 +114,35 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
   void initState() {
     super.initState();
     _entryController = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 900),
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
     );
     _headerOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
     );
     _headerSlide = Tween<Offset>(begin: const Offset(0, -0.3), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _entryController, curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic)));
+        .animate(
+          CurvedAnimation(
+            parent: _entryController,
+            curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+          ),
+        );
     _formOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.3, 1.0, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+      ),
     );
     _formSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _entryController, curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic)));
+        .animate(
+          CurvedAnimation(
+            parent: _entryController,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
     _entryController.forward();
   }
 
@@ -126,12 +169,16 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
   }
 
   Future<void> _submit() async {
-    setState(() { _hasSubmitted = true; _wrongCredentials = false; });
+    setState(() {
+      _hasSubmitted = true;
+      _wrongCredentials = false;
+    });
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
       await AuthService.instance.signIn(
-        email: _emailController.text, password: _passwordController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
       );
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -139,16 +186,35 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _isLoading = false; _wrongCredentials = true;
+        _isLoading = false;
+        _wrongCredentials = true;
         _errorMessage = AuthService.friendlyError(e);
       });
     }
   }
 
   static const _tabs = [
-    (icon: Icons.admin_panel_settings_rounded, label: 'Admin', sub: 'Full access to all CRM features', color: AppTheme.primary, color2: Color(0xFF7C3AED)),
-    (icon: Icons.badge_rounded, label: 'Employee', sub: 'Access your assigned leads & calls', color: Color(0xFF059669), color2: Color(0xFF0EA5E9)),
-    (icon: Icons.person_outline_rounded, label: 'Client', sub: 'View your proposals & documents', color: Color(0xFFD97706), color2: Color(0xFFF59E0B)),
+    (
+      icon: Icons.admin_panel_settings_rounded,
+      label: 'Admin',
+      sub: 'Full access to all CRM features',
+      color: AppTheme.primary,
+      color2: Color(0xFF7C3AED),
+    ),
+    (
+      icon: Icons.badge_rounded,
+      label: 'Employee',
+      sub: 'Access your assigned leads & calls',
+      color: Color(0xFF059669),
+      color2: Color(0xFF0EA5E9),
+    ),
+    (
+      icon: Icons.person_outline_rounded,
+      label: 'Client',
+      sub: 'View your proposals & documents',
+      color: Color(0xFFD97706),
+      color2: Color(0xFFF59E0B),
+    ),
   ];
 
   @override
@@ -162,101 +228,169 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
       body: Stack(
         children: [
           Positioned(
-            top: -80, right: -60,
+            top: -80,
+            right: -60,
             child: Container(
-              width: 240, height: 240,
+              width: 240,
+              height: 240,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(colors: [AppTheme.primary.withAlpha(30), AppTheme.primary.withAlpha(0)]),
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.primary.withAlpha(30),
+                    AppTheme.primary.withAlpha(0),
+                  ],
+                ),
               ),
             ),
           ),
           SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: isTablet ? 0 : 24, vertical: 24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isTablet ? 460 : double.infinity),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      FadeTransition(
-                        opacity: _headerOpacity,
-                        child: Row(children: [
-                          GestureDetector(
-                            onTap: () => context.go(AppRoutes.welcomeScreen),
-                            child: Container(
-                              width: 36, height: 36,
-                              decoration: BoxDecoration(
-                                color: AppTheme.surfaceLight, borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppTheme.surface200),
-                              ),
-                              child: _S.backIcon,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // PERF: the keyboard inset is read once here and added as
+                // padding, instead of each field padding by a guessed 140.
+                // resizeToAvoidBottomInset has already shrunk the viewport, so
+                // the fields only need a small buffer. This removes the
+                // overshoot-then-settle wobble when the keyboard appears.
+                final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+                return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+                  physics: const ClampingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 0 : 24,
+                    vertical: 24,
+                  ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                      maxWidth: isTablet ? 460 : double.infinity,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: bottomInset > 0 ? 16 : 0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          FadeTransition(
+                            opacity: _headerOpacity,
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go(AppRoutes.welcomeScreen);
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.surfaceLight,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: AppTheme.surface200,
+                                      ),
+                                    ),
+                                    child: _S.backIcon,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ]),
-                      ),
-                      const SizedBox(height: 28),
-                      FadeTransition(
-                        opacity: _headerOpacity,
-                        child: SlideTransition(
-                          position: _headerSlide,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 52, height: 52,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFF7C3AED)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(Icons.trending_up_rounded, color: Colors.white, size: 26),
+                          const SizedBox(height: 28),
+                          FadeTransition(
+                            opacity: _headerOpacity,
+                            child: SlideTransition(
+                              position: _headerSlide,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          AppTheme.primary,
+                                          Color(0xFF7C3AED),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Icon(
+                                      Icons.trending_up_rounded,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text('Sign in to AnbuCRM', style: _S.title),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Select your role and enter your credentials',
+                                    style: _S.subtitle,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 20),
-                              Text('Sign in to AnbuCRM', style: _S.title),
-                              const SizedBox(height: 6),
-                              Text('Select your role and enter your credentials', style: _S.subtitle),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      FadeTransition(
-                        opacity: _formOpacity,
-                        child: SlideTransition(
-                          position: _formSlide,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _RoleTabBar(activeTab: _activeTab, onTabChanged: _switchTab),
-                              const SizedBox(height: 24),
-                              _LoginForm(
-                                key: ValueKey(_activeTab),
-                                tab: tab,
-                                formKey: _formKey,
-                                emailController: _emailController,
-                                passwordController: _passwordController,
-                                obscurePassword: _obscurePassword,
-                                isLoading: _isLoading,
-                                wrongCredentials: _wrongCredentials,
-                                hasSubmitted: _hasSubmitted,
-                                errorMessage: _errorMessage,
-                                onToggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
-                                onSubmit: _submit,
-                                onForgotPassword: () => context.go(AppRoutes.forgotPasswordScreen),
-                                onSignUp: () => context.go(AppRoutes.buyProductScreen),
-                                onFieldChanged: () {
-                                  if (_wrongCredentials) setState(() => _wrongCredentials = false);
-                                },
+                          const SizedBox(height: 28),
+                          FadeTransition(
+                            opacity: _formOpacity,
+                            child: SlideTransition(
+                              position: _formSlide,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _RoleTabBar(
+                                    activeTab: _activeTab,
+                                    onTabChanged: _switchTab,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  _LoginForm(
+                                    key: ValueKey(_activeTab),
+                                    tab: tab,
+                                    formKey: _formKey,
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    obscurePassword: _obscurePassword,
+                                    isLoading: _isLoading,
+                                    wrongCredentials: _wrongCredentials,
+                                    hasSubmitted: _hasSubmitted,
+                                    errorMessage: _errorMessage,
+                                    onToggleObscure: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
+                                    onSubmit: _submit,
+                                    onForgotPassword: () => context.push(
+                                      AppRoutes.forgotPasswordScreen,
+                                    ),
+                                    onSignUp: () => context.push(
+                                      AppRoutes.buyProductScreen,
+                                    ),
+                                    onFieldChanged: () {
+                                      if (_wrongCredentials)
+                                        setState(
+                                          () => _wrongCredentials = false,
+                                        );
+                                    },
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -275,13 +409,20 @@ class _RoleTabBar extends StatelessWidget {
     (icon: Icons.badge_rounded, label: 'Employee'),
     (icon: Icons.person_outline_rounded, label: 'Client'),
   ];
-  static const _colors = [AppTheme.primary, Color(0xFF059669), Color(0xFFD97706)];
+  static const _colors = [
+    AppTheme.primary,
+    Color(0xFF059669),
+    Color(0xFFD97706),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppTheme.surface100, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: AppTheme.surface100,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Row(
         children: List.generate(_tabs.length, (i) {
           final isActive = i == activeTab;
@@ -296,14 +437,31 @@ class _RoleTabBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isActive ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: isActive ? [BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(12),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(_tabs[i].icon, size: 18, color: isActive ? color : AppTheme.textMuted),
+                    Icon(
+                      _tabs[i].icon,
+                      size: 18,
+                      color: isActive ? color : AppTheme.textMuted,
+                    ),
                     const SizedBox(height: 3),
-                    Text(_tabs[i].label, style: isActive ? _S.tabLabelActive.copyWith(color: color) : _S.tabLabel.copyWith(color: AppTheme.textMuted)),
+                    Text(
+                      _tabs[i].label,
+                      style: isActive
+                          ? _S.tabLabelActive.copyWith(color: color)
+                          : _S.tabLabel.copyWith(color: AppTheme.textMuted),
+                    ),
                   ],
                 ),
               ),
@@ -316,7 +474,8 @@ class _RoleTabBar extends StatelessWidget {
 }
 
 class _LoginForm extends StatelessWidget {
-  final ({IconData icon, String label, String sub, Color color, Color color2}) tab;
+  final ({IconData icon, String label, String sub, Color color, Color color2})
+  tab;
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
   final TextEditingController passwordController;
@@ -332,13 +491,21 @@ class _LoginForm extends StatelessWidget {
   final VoidCallback onFieldChanged;
 
   const _LoginForm({
-    super.key, required this.tab, required this.formKey,
-    required this.emailController, required this.passwordController,
-    required this.obscurePassword, required this.isLoading,
-    required this.wrongCredentials, required this.hasSubmitted,
-    required this.errorMessage, required this.onToggleObscure,
-    required this.onSubmit, required this.onForgotPassword,
-    required this.onSignUp, required this.onFieldChanged,
+    super.key,
+    required this.tab,
+    required this.formKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.obscurePassword,
+    required this.isLoading,
+    required this.wrongCredentials,
+    required this.hasSubmitted,
+    required this.errorMessage,
+    required this.onToggleObscure,
+    required this.onSubmit,
+    required this.onForgotPassword,
+    required this.onSignUp,
+    required this.onFieldChanged,
   });
 
   @override
@@ -351,13 +518,15 @@ class _LoginForm extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: tab.color.withAlpha(15), borderRadius: BorderRadius.circular(10),
+              color: tab.color.withAlpha(15),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(color: tab.color.withAlpha(40)),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 32, height: 32,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [tab.color, tab.color2]),
                     borderRadius: BorderRadius.circular(8),
@@ -369,16 +538,28 @@ class _LoginForm extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${tab.label} Login', style: _S.badgeTitle.copyWith(color: tab.color)),
+                      Text(
+                        '${tab.label} Login',
+                        style: _S.badgeTitle.copyWith(color: tab.color),
+                      ),
                       Text(tab.sub, style: _S.badgeSub),
                     ],
                   ),
                 ),
                 if (tab.label == 'Client')
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: tab.color.withAlpha(20), borderRadius: BorderRadius.circular(20)),
-                    child: Text('Client portal', style: _S.clientBadge.copyWith(color: tab.color)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: tab.color.withAlpha(20),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Client portal',
+                      style: _S.clientBadge.copyWith(color: tab.color),
+                    ),
                   ),
               ],
             ),
@@ -389,8 +570,11 @@ class _LoginForm extends StatelessWidget {
           TextFormField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
             style: _S.fieldText,
             onChanged: (_) => onFieldChanged(),
+            onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             decoration: const InputDecoration(
               hintText: 'admin@company.com',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
@@ -408,13 +592,22 @@ class _LoginForm extends StatelessWidget {
           TextFormField(
             controller: passwordController,
             obscureText: obscurePassword,
+            textInputAction: TextInputAction.done,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
             style: _S.fieldText,
             onChanged: (_) => onFieldChanged(),
+            onFieldSubmitted: (_) => onSubmit(),
             decoration: InputDecoration(
               hintText: '••••••••',
               prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
               suffixIcon: IconButton(
-                icon: Icon(obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20, color: AppTheme.textSecondary),
+                icon: Icon(
+                  obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  size: 20,
+                  color: AppTheme.textSecondary,
+                ),
                 onPressed: onToggleObscure,
               ),
             ),
@@ -429,12 +622,21 @@ class _LoginForm extends StatelessWidget {
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: AppTheme.errorContainer, borderRadius: BorderRadius.circular(10)),
-              child: Row(children: [
-                Icon(Icons.error_outline_rounded, size: 16, color: AppTheme.error),
-                const SizedBox(width: 8),
-                Expanded(child: Text(errorMessage, style: _S.errorText)),
-              ]),
+              decoration: BoxDecoration(
+                color: AppTheme.errorContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 16,
+                    color: AppTheme.error,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(errorMessage, style: _S.errorText)),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 12),
@@ -442,29 +644,57 @@ class _LoginForm extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: GestureDetector(
               onTap: onForgotPassword,
-              child: Text('Forgot password?', style: _S.forgotLink.copyWith(color: tab.color)),
+              child: Text(
+                'Forgot password?',
+                style: _S.forgotLink.copyWith(color: tab.color),
+              ),
             ),
           ),
           const SizedBox(height: 24),
-          _LoginButton(isLoading: isLoading, onTap: onSubmit, label: 'Sign In as ${tab.label}', gradient: [tab.color, tab.color2]),
+          _LoginButton(
+            isLoading: isLoading,
+            onTap: onSubmit,
+            label: 'Sign In as ${tab.label}',
+            gradient: [tab.color, tab.color2],
+          ),
           const SizedBox(height: 28),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Don't have an account? ", style: _S.signUpText),
-              GestureDetector(onTap: onSignUp, child: Text('Sign Up', style: _S.signUpLink.copyWith(color: tab.color))),
+              GestureDetector(
+                onTap: onSignUp,
+                child: Text(
+                  'Sign Up',
+                  style: _S.signUpLink.copyWith(color: tab.color),
+                ),
+              ),
             ],
           ),
           if (tab.label == 'Client') ...[
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: AppTheme.surface100, borderRadius: BorderRadius.circular(10)),
-              child: Row(children: [
-                Icon(Icons.info_outline_rounded, size: 16, color: AppTheme.textMuted),
-                const SizedBox(width: 8),
-                Expanded(child: Text('Client credentials are provided by your CRM agent when your profile is created.', style: _S.infoText)),
-              ]),
+              decoration: BoxDecoration(
+                color: AppTheme.surface100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: AppTheme.textMuted,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Client credentials are provided by your CRM agent when your profile is created.',
+                      style: _S.infoText,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 16),
@@ -479,7 +709,12 @@ class _LoginButton extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
   final List<Color> gradient;
-  const _LoginButton({required this.isLoading, required this.onTap, required this.label, required this.gradient});
+  const _LoginButton({
+    required this.isLoading,
+    required this.onTap,
+    required this.label,
+    required this.gradient,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -488,13 +723,30 @@ class _LoginButton extends StatelessWidget {
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: gradient, begin: Alignment.centerLeft, end: Alignment.centerRight),
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: gradient[0].withAlpha(60), blurRadius: 14, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withAlpha(60),
+              blurRadius: 14,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Center(
           child: isLoading
-              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
               : Text(label, style: _S.btnLabel),
         ),
       ),

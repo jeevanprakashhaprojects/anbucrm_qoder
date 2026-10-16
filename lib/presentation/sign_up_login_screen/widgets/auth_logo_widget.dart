@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/app_theme.dart';
 
+class _S {
+  static final brand = GoogleFonts.plusJakartaSans(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    color: AppTheme.textPrimary,
+    letterSpacing: -0.5,
+  );
+  static final subtitle = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppTheme.textSecondary,
+  );
+}
+
 class AuthLogoWidget extends StatelessWidget {
   final Animation<double> animation;
   const AuthLogoWidget({super.key, required this.animation});
@@ -44,21 +58,12 @@ class AuthLogoWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'LeadFlow',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.textPrimary,
-                letterSpacing: -0.5,
-              ),
+              style: _S.brand,
             ),
             const SizedBox(height: 4),
             Text(
               'Your intelligent sales pipeline',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: AppTheme.textSecondary,
-              ),
+              style: _S.subtitle,
             ),
           ],
         ),

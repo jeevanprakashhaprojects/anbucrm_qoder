@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -230,7 +231,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Jeevan Kumar',
+                      FirebaseAuth.instance.currentUser?.displayName ??
+                          'Welcome',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -318,6 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildDateRangeSelector() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       scrollDirection: Axis.horizontal,
       child: Row(
         children: _ranges.map((range) {

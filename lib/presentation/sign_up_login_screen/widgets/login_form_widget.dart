@@ -2,6 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../theme/app_theme.dart';
 
+class _S {
+  static final error = GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    color: AppTheme.error,
+    fontWeight: FontWeight.w500,
+  );
+  static final roleSelected = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.primary,
+  );
+  static final roleUnselected = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppTheme.textSecondary,
+  );
+  static final rememberMe = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    color: AppTheme.textSecondary,
+  );
+  static final forgotPassword = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    color: AppTheme.primary,
+    fontWeight: FontWeight.w500,
+  );
+  static final successBtn = GoogleFonts.plusJakartaSans(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
+  static final idleBtn = GoogleFonts.plusJakartaSans(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: Colors.white,
+  );
+  static final label = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.textPrimary,
+  );
+}
+
 class LoginFormWidget extends StatefulWidget {
   final bool isLogin;
   final VoidCallback onSuccess;
@@ -151,11 +193,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   Expanded(
                     child: Text(
                       'Invalid credentials — use the demo accounts below to sign in',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: AppTheme.error,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: _S.error,
                     ),
                   ),
                 ],
@@ -192,15 +230,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                     ),
                     child: Text(
                       role,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: isSelected
-                            ? AppTheme.primary
-                            : AppTheme.textSecondary,
-                      ),
+                      style: isSelected ? _S.roleSelected : _S.roleUnselected,
                     ),
                   ),
                 );
@@ -226,21 +256,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 const SizedBox(width: 8),
                 Text(
                   'Remember me',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: _S.rememberMe,
                 ),
                 const Spacer(),
                 TextButton(
                   onPressed: () {},
                   child: Text(
                     'Forgot password?',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: _S.forgotPassword,
                   ),
                 ),
               ],
@@ -280,11 +303,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           const SizedBox(width: 8),
                           Text(
                             'Welcome to LeadFlow!',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                            style: _S.successBtn,
                           ),
                         ],
                       )
@@ -301,11 +320,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                     : Text(
                         key: const ValueKey('idle'),
                         widget.isLogin ? 'Sign In' : 'Create Account',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                        style: _S.idleBtn,
                       ),
               ),
             ),
@@ -318,11 +333,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: AppTheme.textPrimary,
-      ),
+      style: _S.label,
     );
   }
 }

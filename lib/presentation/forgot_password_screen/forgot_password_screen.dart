@@ -1,8 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
+
+// Precomputed text styles — resolved once, reused on every build.
+// GoogleFonts.plusJakartaSans() does asset lookup + parsing per call;
+// calling it inside build() on every keystroke causes visible frame drops.
+class _S {
+  static final _base = GoogleFonts.plusJakartaSans();
+  static final fieldText = _base.copyWith(fontSize: 14);
+  static final fieldLabel = _base.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textPrimary,
+  );
+  static final sectionTitle = _base.copyWith(
+    fontSize: 24,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
+    letterSpacing: -0.5,
+  );
+  static final body = _base.copyWith(
+    fontSize: 13,
+    color: AppTheme.textSecondary,
+    height: 1.5,
+  );
+  static final bodyWide = _base.copyWith(
+    fontSize: 14,
+    color: AppTheme.textSecondary,
+    height: 1.6,
+  );
+  static final stepNum = _base.copyWith(
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+  );
+  static final stepLabel = _base.copyWith(fontSize: 11);
+  static final otpDigit = _base.copyWith(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: AppTheme.textPrimary,
+  );
+  static final errorText = _base.copyWith(
+    fontSize: 12,
+    color: AppTheme.error,
+    fontWeight: FontWeight.w500,
+  );
+  static final resendText = _base.copyWith(
+    fontSize: 13,
+    color: AppTheme.textSecondary,
+  );
+  static final resendBold = _base.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    color: AppTheme.primary,
+  );
+  static final hint = _base.copyWith(fontSize: 11, color: AppTheme.textMuted);
+  static final ruleText = _base.copyWith(fontSize: 12);
+  static final buttonText = _base.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+  );
+  static final successTitle = _base.copyWith(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
+    letterSpacing: -0.5,
+    height: 1.2,
+  );
+  static final successBody = _base.copyWith(
+    fontSize: 14,
+    color: AppTheme.textSecondary,
+    height: 1.6,
+  );
+  static final successNote = _base.copyWith(
+    fontSize: 12,
+    color: AppTheme.success,
+    fontWeight: FontWeight.w500,
+    height: 1.4,
+  );
+  static final emailBold = _base.copyWith(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textPrimary,
+  );
+}
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -45,9 +128,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   }
 
   void _goToStep(int step) {
-    _stepController.reset();
+    // PERF: forward() before setState so the new step is already animating in
+    // when it mounts. The old order painted one transparent frame first.
+    _stepController.forward(from: 0);
     setState(() => _step = step);
-    _stepController.forward();
   }
 
   void _onEmailVerified(String email) {
@@ -66,89 +150,130 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width >= 600;
+    // PERF: sizeOf instead of MediaQuery.of, so opening the keyboard does not
+    // rebuild this whole screen on every frame of the inset animation.
+    final isTablet = MediaQuery.sizeOf(context).width >= 600;
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      body: Stack(
-        children: [
-          Positioned(
-            top: -80,
-            right: -60,
-            child: Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.primary.withAlpha(25),
-                    AppTheme.primary.withAlpha(0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isTablet ? 0 : 24,
-                  vertical: 24,
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: isTablet ? 440 : double.infinity,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Back button — matches login screen style (36×36)
-                      if (_step < 3)
-                        GestureDetector(
-                          onTap: () {
-                            if (_step > 0) {
-                              _goToStep(_step - 1);
-                            } else {
-                              context.go(AppRoutes.signUpLoginScreen);
-                            }
-                          },
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceLight,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppTheme.surface200),
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_rounded,
-                              size: 18,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                        ),
-                      if (_step < 3) const SizedBox(height: 28),
-                      // Step indicator — only show for steps 0-2
-                      if (_step < 3) ...[
-                        _StepIndicator(currentStep: _step),
-                        const SizedBox(height: 32),
-                      ],
-                      // Step content
-                      FadeTransition(
-                        opacity: _stepOpacity,
-                        child: SlideTransition(
-                          position: _stepSlide,
-                          child: _buildStepContent(),
-                        ),
-                      ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_step >= 3) {
+          context.go(AppRoutes.signUpLoginScreen);
+        } else if (_step > 0) {
+          _goToStep(_step - 1);
+        } else if (context.canPop()) {
+          context.pop();
+        } else {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.backgroundLight,
+        body: Stack(
+          children: [
+            Positioned(
+              top: -80,
+              right: -60,
+              child: Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      AppTheme.primary.withAlpha(25),
+                      AppTheme.primary.withAlpha(0),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // PERF: keyboard inset is added once here rather than being
+                  // double-counted by scrollPadding on each field. The
+                  // viewport has already shrunk by the keyboard height, so the
+                  // fields only need a small buffer.
+                  final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+                  return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+                    physics: const ClampingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 0 : 24,
+                      vertical: 24,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                        maxWidth: isTablet ? 440 : double.infinity,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: bottomInset > 0 ? 16 : 0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_step < 3)
+                              GestureDetector(
+                                onTap: () {
+                                  if (_step > 0) {
+                                    _goToStep(_step - 1);
+                                  } else if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go(AppRoutes.signUpLoginScreen);
+                                  }
+                                },
+                                child: Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surfaceLight,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: AppTheme.surface200,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.arrow_back_rounded,
+                                    size: 18,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            if (_step < 3) const SizedBox(height: 28),
+                            if (_step < 3) ...[
+                              _StepIndicator(currentStep: _step),
+                              const SizedBox(height: 32),
+                            ],
+                            // PERF: AnimatedSize animates the height in step with the
+                            // fade/slide, so the scroll content does not snap while
+                            // the 400ms transition is still running.
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutCubic,
+                              alignment: Alignment.topCenter,
+                              child: FadeTransition(
+                                opacity: _stepOpacity,
+                                child: SlideTransition(
+                                  position: _stepSlide,
+                                  child: _buildStepContent(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -167,7 +292,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         );
       case 3:
         return _ResetSuccessStep(
-          onGoToLogin: () => context.go(AppRoutes.signUpLoginScreen),
+          onGoToLogin: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.signUpLoginScreen);
+            }
+          },
         );
       default:
         return const SizedBox.shrink();
@@ -175,7 +306,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
   }
 }
 
-// ─── Step Indicator (consistent equal gaps) ───────────────────────────────────
+// ─── Step Indicator ───────────────────────────────────────────────────────────
 
 class _StepIndicator extends StatelessWidget {
   final int currentStep;
@@ -259,9 +390,7 @@ class _StepCircle extends StatelessWidget {
                     )
                   : Text(
                       '${index + 1}',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      style: _S.stepNum.copyWith(
                         color: isActive ? Colors.white : AppTheme.textMuted,
                       ),
                     ),
@@ -270,8 +399,7 @@ class _StepCircle extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
+            style: _S.stepLabel.copyWith(
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
               color: isActive ? AppTheme.primary : AppTheme.textMuted,
             ),
@@ -337,23 +465,11 @@ class _EmailStepState extends State<_EmailStep> {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            'Forgot Password?',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
-              letterSpacing: -0.5,
-            ),
-          ),
+          Text('Forgot Password?', style: _S.sectionTitle),
           const SizedBox(height: 8),
           Text(
             "Enter your registered email and we'll send a verification code to reset your password.",
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
-              height: 1.5,
-            ),
+            style: _S.body,
           ),
           const SizedBox(height: 28),
           _FieldLabel(label: 'Email Address'),
@@ -361,7 +477,10 @@ class _EmailStepState extends State<_EmailStep> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: GoogleFonts.plusJakartaSans(fontSize: 14),
+            textInputAction: TextInputAction.done,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
+            style: _S.fieldText,
+            onFieldSubmitted: (_) => _submit(),
             onChanged: (_) {
               if (_hasSubmitted) {
                 _formKey.currentState?.validate();
@@ -452,7 +571,6 @@ class _OtpStepState extends State<_OtpStep>
     if (value.isNotEmpty && index < 5) {
       _focusNodes[index + 1].requestFocus();
     }
-    // Clear error immediately when typing
     if (_hasError) setState(() => _hasError = false);
     if (_otp.length == 6) {
       _verifyOtp();
@@ -494,33 +612,14 @@ class _OtpStepState extends State<_OtpStep>
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          'Enter Verification Code',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
-            letterSpacing: -0.5,
-          ),
-        ),
+        Text('Enter Verification Code', style: _S.sectionTitle),
         const SizedBox(height: 8),
         RichText(
           text: TextSpan(
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
-              height: 1.5,
-            ),
+            style: _S.body,
             children: [
               const TextSpan(text: 'We sent a 6-digit code to '),
-              TextSpan(
-                text: widget.email,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
+              TextSpan(text: widget.email, style: _S.emailBold),
             ],
           ),
         ),
@@ -546,11 +645,7 @@ class _OtpStepState extends State<_OtpStep>
                   textAlign: TextAlign.center,
                   keyboardType: TextInputType.number,
                   maxLength: 1,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                  ),
+                  style: _S.otpDigit,
                   decoration: InputDecoration(
                     counterText: '',
                     contentPadding: EdgeInsets.zero,
@@ -588,11 +683,7 @@ class _OtpStepState extends State<_OtpStep>
           const SizedBox(height: 10),
           Text(
             'Invalid OTP. Please try again.',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              color: AppTheme.error,
-              fontWeight: FontWeight.w500,
-            ),
+            style: _S.errorText,
             textAlign: TextAlign.center,
           ),
         ],
@@ -608,20 +699,13 @@ class _OtpStepState extends State<_OtpStep>
           child: _resendSeconds > 0
               ? RichText(
                   text: TextSpan(
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: _S.resendText,
                     children: [
                       const TextSpan(text: 'Resend code in '),
                       TextSpan(
                         text:
                             '${_resendSeconds ~/ 60}:${(_resendSeconds % 60).toString().padLeft(2, '0')}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.primary,
-                        ),
+                        style: _S.resendBold,
                       ),
                     ],
                   ),
@@ -631,24 +715,14 @@ class _OtpStepState extends State<_OtpStep>
                     setState(() => _resendSeconds = 60);
                     _startResendTimer();
                   },
-                  child: Text(
-                    'Resend OTP',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.primary,
-                    ),
-                  ),
+                  child: Text('Resend OTP', style: _S.resendBold),
                 ),
         ),
         const SizedBox(height: 8),
         Center(
           child: Text(
             'Hint: Enter any 6 digits (except 000000)',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              color: AppTheme.textMuted,
-            ),
+            style: _S.hint,
           ),
         ),
       ],
@@ -682,13 +756,11 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
   bool _isLoading = false;
   bool _hasSubmitted = false;
 
-  bool get _hasLength => _passwordController.text.length >= 8;
-  bool get _hasUpperLower =>
-      _passwordController.text.contains(RegExp(r'[A-Z]')) &&
-      _passwordController.text.contains(RegExp(r'[a-z]'));
-  bool get _hasNumber => _passwordController.text.contains(RegExp(r'[0-9]'));
-  bool get _hasSpecial =>
-      _passwordController.text.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+  bool _hasLength(String t) => t.length >= 8;
+  bool _hasUpperLower(String t) =>
+      t.contains(RegExp(r'[A-Z]')) && t.contains(RegExp(r'[a-z]'));
+  bool _hasNumber(String t) => t.contains(RegExp(r'[0-9]'));
+  bool _hasSpecial(String t) => t.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
 
   @override
   void dispose() {
@@ -727,23 +799,11 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
             ),
           ),
           const SizedBox(height: 20),
-          Text(
-            'Create New Password',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
-              letterSpacing: -0.5,
-            ),
-          ),
+          Text('Create New Password', style: _S.sectionTitle),
           const SizedBox(height: 8),
           Text(
             'Your new password must be different from previously used passwords.',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
-              height: 1.5,
-            ),
+            style: _S.body,
           ),
           const SizedBox(height: 28),
           _FieldLabel(label: 'New Password'),
@@ -751,9 +811,11 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
           TextFormField(
             controller: _passwordController,
             obscureText: _obscureNew,
-            style: GoogleFonts.plusJakartaSans(fontSize: 14),
+            textInputAction: TextInputAction.next,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
+            style: _S.fieldText,
+            onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             onChanged: (_) {
-              setState(() {});
               if (_hasSubmitted) _formKey.currentState?.validate();
             },
             decoration: InputDecoration(
@@ -773,26 +835,38 @@ class _NewPasswordStepState extends State<_NewPasswordStep> {
             validator: (v) {
               if (!_hasSubmitted) return null;
               if (v == null || v.isEmpty) return 'Enter a new password';
-              if (!_hasLength) return 'At least 8 characters required';
+              if (!_hasLength(v)) return 'At least 8 characters required';
               return null;
             },
           ),
-          if (_passwordController.text.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _PasswordRulesWidget(
-              hasLength: _hasLength,
-              hasUpperLower: _hasUpperLower,
-              hasNumber: _hasNumber,
-              hasSpecial: _hasSpecial,
-            ),
-          ],
+          ListenableBuilder(
+            listenable: _passwordController,
+            builder: (context, _) {
+              final text = _passwordController.text;
+              if (text.isEmpty) return const SizedBox.shrink();
+              return Column(
+                children: [
+                  const SizedBox(height: 12),
+                  _PasswordRulesWidget(
+                    hasLength: _hasLength(text),
+                    hasUpperLower: _hasUpperLower(text),
+                    hasNumber: _hasNumber(text),
+                    hasSpecial: _hasSpecial(text),
+                  ),
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 16),
           _FieldLabel(label: 'Confirm Password'),
           const SizedBox(height: 6),
           TextFormField(
             controller: _confirmController,
             obscureText: _obscureConfirm,
-            style: GoogleFonts.plusJakartaSans(fontSize: 14),
+            textInputAction: TextInputAction.done,
+            scrollPadding: const EdgeInsets.only(bottom: 24),
+            style: _S.fieldText,
+            onFieldSubmitted: (_) => _submit(),
             onChanged: (_) {
               if (_hasSubmitted) _formKey.currentState?.validate();
             },
@@ -916,23 +990,13 @@ class _ResetSuccessStepState extends State<_ResetSuccessStep>
             children: [
               Text(
                 'Password Reset\nSuccessfully!',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: -0.5,
-                  height: 1.2,
-                ),
+                style: _S.successTitle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 'Your password has been updated successfully. You can now sign in with your new password.',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                  height: 1.6,
-                ),
+                style: _S.successBody,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -957,12 +1021,7 @@ class _ResetSuccessStepState extends State<_ResetSuccessStep>
                     Expanded(
                       child: Text(
                         'Your account is now secured with the new password.',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: AppTheme.success,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                        ),
+                        style: _S.successNote,
                       ),
                     ),
                   ],
@@ -1044,8 +1103,7 @@ class _RuleRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
+          style: _S.ruleText.copyWith(
             color: met ? AppTheme.success : AppTheme.textSecondary,
             fontWeight: met ? FontWeight.w500 : FontWeight.w400,
           ),
@@ -1063,14 +1121,7 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textPrimary,
-      ),
-    );
+    return Text(label, style: _S.fieldLabel);
   }
 }
 
@@ -1126,9 +1177,7 @@ class _ActionButton extends StatelessWidget {
                 )
               : Text(
                   label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                  style: _S.buttonText.copyWith(
                     color: enabled ? Colors.white : AppTheme.textMuted,
                   ),
                 ),

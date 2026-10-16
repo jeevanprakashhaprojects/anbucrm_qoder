@@ -919,6 +919,7 @@ class _TaskDetailScreenState extends State<_TaskDetailScreen> {
               bottom: MediaQuery.of(ctx).viewInsets.bottom + 32,
             ),
           child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

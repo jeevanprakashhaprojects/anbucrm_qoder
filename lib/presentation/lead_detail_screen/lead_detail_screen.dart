@@ -435,6 +435,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
 
   Widget _buildOverviewTab() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,6 +560,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen>
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               scrollDirection: Axis.horizontal,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

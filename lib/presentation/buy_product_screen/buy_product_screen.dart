@@ -4,6 +4,74 @@ import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
+class _S {
+  static final progress = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+  );
+  static final skip = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textSecondary,
+  );
+  static final tag = GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+  );
+  static final title = GoogleFonts.plusJakartaSans(
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
+    letterSpacing: -0.8,
+    height: 1.2,
+  );
+  static final subtitle = GoogleFonts.plusJakartaSans(
+    fontSize: 14,
+    color: AppTheme.textSecondary,
+    height: 1.6,
+  );
+  static final highlight = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.textPrimary,
+  );
+  static final price = GoogleFonts.plusJakartaSans(
+    fontSize: 40,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
+    letterSpacing: -1,
+  );
+  static final priceUnit = GoogleFonts.plusJakartaSans(
+    fontSize: 16,
+    color: AppTheme.textSecondary,
+  );
+  static final planBadge = GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+  static final planSubtitle = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    color: AppTheme.textSecondary,
+  );
+  static final feature = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    color: AppTheme.textPrimary,
+    fontWeight: FontWeight.w500,
+  );
+  static final nextBtn = GoogleFonts.plusJakartaSans(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+  static final buyBtn = GoogleFonts.plusJakartaSans(
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+  );
+}
+
 class BuyProductScreen extends StatefulWidget {
   const BuyProductScreen({super.key});
 
@@ -149,20 +217,30 @@ class _BuyProductScreenState extends State<BuyProductScreen>
                 ),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => context.go(AppRoutes.welcomeScreen),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceLight,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppTheme.surface200),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_rounded,
-                          size: 18,
-                          color: AppTheme.textPrimary,
+                    // Back button — fixed width for centering
+                    SizedBox(
+                      width: 60,
+                      child: GestureDetector(
+                        onTap: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go(AppRoutes.welcomeScreen);
+                          }
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: AppTheme.surfaceLight,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppTheme.surface200),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_rounded,
+                            size: 18,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
                       ),
                     ),
@@ -170,37 +248,32 @@ class _BuyProductScreenState extends State<BuyProductScreen>
                     // Progress text
                     Text(
                       '${_currentPage + 1} / $_totalPages',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: _S.progress,
                     ),
                     const Spacer(),
-                    if (_currentPage < _totalPages - 1)
-                      GestureDetector(
-                        onTap: _skipToLast,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surface100,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Skip',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 60),
+                    // Skip button — fixed width for centering
+                    SizedBox(
+                      width: 60,
+                      child: _currentPage < _totalPages - 1
+                          ? GestureDetector(
+                              onTap: _skipToLast,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surface100,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'Skip',
+                                  style: _S.skip,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
                 ),
               ),
@@ -230,7 +303,7 @@ class _BuyProductScreenState extends State<BuyProductScreen>
                     return _PageContent(
                       page: _pages[index],
                       isTablet: isTablet,
-                      onBuyNow: () => context.go(AppRoutes.createAccountScreen),
+                      onBuyNow: () => context.push(AppRoutes.createAccountScreen),
                     );
                   },
                 ),
@@ -266,7 +339,7 @@ class _BuyProductScreenState extends State<BuyProductScreen>
                 child: _currentPage < _totalPages - 1
                     ? _NextButton(onTap: _nextPage)
                     : _BuyNowButton(
-                        onTap: () => context.go(AppRoutes.createAccountScreen),
+                        onTap: () => context.push(AppRoutes.createAccountScreen),
                       ),
               ),
             ],
@@ -291,6 +364,7 @@ class _PageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: EdgeInsets.symmetric(
         horizontal: isTablet ? 48 : 24,
         vertical: 8,
@@ -332,34 +406,20 @@ class _PageContent extends StatelessWidget {
               ),
               child: Text(
                 page.tag,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: page.iconGradient[0],
-                ),
+                style: _S.tag.copyWith(color: page.iconGradient[0]),
               ),
             ),
             const SizedBox(height: 12),
             // Title
             Text(
               page.title,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: AppTheme.textPrimary,
-                letterSpacing: -0.8,
-                height: 1.2,
-              ),
+              style: _S.title,
             ),
             const SizedBox(height: 12),
             // Subtitle
             Text(
               page.subtitle,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                color: AppTheme.textSecondary,
-                height: 1.6,
-              ),
+              style: _S.subtitle,
             ),
             if (page.highlights.isNotEmpty) ...[
               const SizedBox(height: 24),
@@ -384,11 +444,7 @@ class _PageContent extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         h,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.textPrimary,
-                        ),
+                        style: _S.highlight,
                       ),
                     ],
                   ),
@@ -432,21 +488,13 @@ class _PricingCard extends StatelessWidget {
             children: [
               Text(
                 '₹500',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: -1,
-                ),
+                style: _S.price,
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 6, left: 4),
                 child: Text(
                   '/month',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: _S.priceUnit,
                 ),
               ),
               const Spacer(),
@@ -461,11 +509,7 @@ class _PricingCard extends StatelessWidget {
                 ),
                 child: Text(
                   'Basic Plan',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                  style: _S.planBadge,
                 ),
               ),
             ],
@@ -473,10 +517,7 @@ class _PricingCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Everything you need to grow',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
-            ),
+            style: _S.planSubtitle,
           ),
           const SizedBox(height: 16),
           const Divider(),
@@ -500,11 +541,7 @@ class _PricingCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     f,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      color: AppTheme.textPrimary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: _S.feature,
                   ),
                 ],
               ),
@@ -546,17 +583,7 @@ class _NextButton extends StatelessWidget {
           children: [
             Text(
               'Next',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(
-              Icons.arrow_forward_rounded,
-              color: Colors.white,
-              size: 18,
+              style: _S.nextBtn,
             ),
           ],
         ),
@@ -601,11 +628,7 @@ class _BuyNowButton extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Buy Now — ₹500/month',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+              style: _S.buyBtn,
             ),
           ],
         ),

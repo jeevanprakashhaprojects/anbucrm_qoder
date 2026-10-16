@@ -1,7 +1,25 @@
+// ==============================================================================
+// ANBU CRM — WHATSAPP AUTOMATION REDESIGN (FLUTTER / DART)
+// File: lib/presentation/whatsapp_automation/suite_drawer.dart
+//
+// Redesigned to seamlessly match AnbuCRM _AppDrawer in app_scaffold.dart:
+// - Same executive gradient header [AppTheme.primary, Color(0xFF7C3AED)]
+// - Quick stats and CRM navigation links
+// - Highlights WhatsApp Automation active suite
+// ==============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
+
+// The WhatsApp master owns the suite drawer; tab screens nest their own
+// Scaffolds, so Scaffold.of() from inside a tab finds the wrong scaffold.
+// They use this key to open the drawer instead.
+final GlobalKey<ScaffoldState> whatsappSuiteScaffoldKey =
+    GlobalKey<ScaffoldState>();
 
 class SuiteDrawer extends StatelessWidget {
   const SuiteDrawer({super.key});
@@ -9,161 +27,215 @@ class SuiteDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surfaceLight,
       child: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: const Color(0xFF10B981), borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.smart_toy, color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text('WA Automation', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                            SizedBox(width: 4),
-                            Icon(Icons.verified, color: Color(0xFF4F46E5), size: 14),
-                          ],
-                        ),
-                        Text('+91 98765 43210', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left, color: Color(0xFF64748B)),
-                    onPressed: () => Scaffold.maybeOf(context)?.closeDrawer(),
-                  )
-                ],
-              ),
-            ),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search flows, templates, logs...',
-                  hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-                  prefixIcon: const Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
-                  filled: true,
-                  fillColor: const Color(0xFFF8FAFC),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                ),
-              ),
-            ),
+            _buildHeader(context),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.zero,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    child: Text('WHATSAPP SUITE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8), letterSpacing: 0.8)),
+                  _buildQuickStats(),
+                  const SizedBox(height: 8),
+                  _buildSectionLabel('WhatsApp Suite'),
+                  _buildDrawerItem(
+                    context,
+                    Icons.flash_on_rounded,
+                    'Active Automations',
+                    () => Scaffold.maybeOf(context)?.closeDrawer(),
+                    isSelected: true,
                   ),
-                  _buildDrawerItem(Icons.space_dashboard_outlined, 'Overview', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.chat_bubble_outline, 'Inbox', false, () => Scaffold.maybeOf(context)?.closeDrawer(), badge: '5 New'),
-                  _buildDrawerItem(Icons.people_outline, 'Contacts', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.category_outlined, 'Segments', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.copy_outlined, 'Templates', false, () {
-                    Scaffold.maybeOf(context)?.closeDrawer();
-                    context.go(AppRoutes.whatsappDashboardTab1);
-                  }),
-                  _buildDrawerItem(Icons.account_tree, 'Automations', true, () {
-                    Scaffold.maybeOf(context)?.closeDrawer();
-                    context.go(AppRoutes.whatsappDashboard);
-                  }),
-                  _buildDrawerItem(Icons.campaign_outlined, 'Campaigns', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.psychology_outlined, 'AI Agents', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.extension_outlined, 'Integrations', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.analytics_outlined, 'Analytics', false, () {
-                    Scaffold.maybeOf(context)?.closeDrawer();
-                    context.go(AppRoutes.whatsappDashboardTab2);
-                  }),
-                  _buildDrawerItem(Icons.credit_card_outlined, 'Usage & Billing', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
-                  _buildDrawerItem(Icons.settings_outlined, 'WhatsApp Settings', false, () => Scaffold.maybeOf(context)?.closeDrawer()),
+                  _buildDrawerItem(
+                    context,
+                    Icons.add_circle_outline_rounded,
+                    'Workflow Builder',
+                    () {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                      context.push(AppRoutes.whatsappBuilder);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.library_books_rounded,
+                    'WhatsApp Templates',
+                    () {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                      context.go(AppRoutes.whatsappDashboardTab1);
+                    },
+                  ),
+                  const Divider(height: 24, indent: 16, endIndent: 16),
+                  _buildSectionLabel('Return to CRM'),
+                  _buildDrawerItem(
+                    context,
+                    Icons.dashboard_rounded,
+                    'CRM Dashboard',
+                    () {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                      context.go(AppRoutes.dashboardScreen);
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.people_outline_rounded,
+                    'Leads Pipeline',
+                    () {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                      context.go(AppRoutes.leadsListScreen);
+                    },
+                  ),
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(14),
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Color(0xFF4F46E5),
-                    child: Icon(Icons.person, color: Colors.white, size: 18),
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('AnbuCRM Core', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                        Text('Move to Core CRM', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4F46E5),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      minimumSize: Size.zero,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => context.go(AppRoutes.dashboardScreen),
-                    child: const Text('Move', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
-                  )
-                ],
-              ),
-            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title, bool active, VoidCallback onTap, {String? badge}) {
+  Widget _buildHeader(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 2),
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFFEEF2FF) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primary, Color(0xFF7C3AED)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: active ? const Color(0xFF4F46E5) : const Color(0xFF475569), size: 18),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: active ? const Color(0xFF4F46E5) : const Color(0xFF1E293B),
-            fontSize: 13,
-            fontWeight: active ? FontWeight.w800 : FontWeight.w500,
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(
+              child: Text(
+                'JK',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Jeevan Kumar',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  'Anbarasan Insurance Academy',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickStats() {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceVariantLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.surface200),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem('Active Flows', '12', AppTheme.primary),
+          Container(width: 1, height: 24, color: AppTheme.surface200),
+          _buildStatItem('Messages Today', '348', AppTheme.secondary),
+          Container(width: 1, height: 24, color: AppTheme.surface200),
+          _buildStatItem('Delivery', '99.4%', AppTheme.success),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: color,
           ),
         ),
-        trailing: badge != null
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(6)),
-                child: Text(badge, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF166534))),
-              )
-            : null,
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        onTap: onTap,
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 10,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Text(
+        label.toUpperCase(),
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: AppTheme.textMuted,
+          letterSpacing: 0.8,
+        ),
       ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    Color? color,
+    bool isSelected = false,
+  }) {
+    return ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -2),
+      leading: Icon(
+        icon,
+        size: 20,
+        color: isSelected ? AppTheme.primary : (color ?? AppTheme.textSecondary),
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          color: isSelected ? AppTheme.primary : AppTheme.textPrimary,
+        ),
+      ),
+      selected: isSelected,
+      onTap: onTap,
     );
   }
 }

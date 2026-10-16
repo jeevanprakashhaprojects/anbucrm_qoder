@@ -41,7 +41,7 @@ class PaymentService {
 
   /// Deployed Hostinger URL, no trailing slash.
   /// Point this at your server once the backend is live.
-  static const String backendUrl = 'https://your-backend-domain.example';
+  static const String backendUrl = 'https://api.anbucrm.com';
 
   static const String _placeholder = 'your-backend-domain.example';
 

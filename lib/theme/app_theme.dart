@@ -106,7 +106,7 @@ class AppTheme {
     }
   }
 
-  static ThemeData get lightTheme => ThemeData(
+  static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.light(
       primary: primary,
@@ -316,7 +316,7 @@ class AppTheme {
     ),
   );
 
-  static ThemeData get darkTheme => ThemeData(
+  static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.dark(
       primary: Color(0xFF818CF8),

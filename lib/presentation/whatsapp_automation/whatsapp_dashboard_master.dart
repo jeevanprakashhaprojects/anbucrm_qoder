@@ -1,8 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// ==============================================================================
+// ANBU CRM — WHATSAPP AUTOMATION REDESIGN (FLUTTER / DART)
+// File: lib/presentation/whatsapp_automation/whatsapp_dashboard_master.dart
+// 
+// Master Tabbed Shell for WhatsApp Automation:
+// - Seamlessly integrated into AnbuCRM theme and AppDrawer
+// - Tab 1: Automations Overview & Playbooks
+// - Tab 2: WhatsApp Approved Message Templates
+// - Tab 3: Delivery Logs & Analytics
+// - Tab 4: Interactive Live Chatbot Simulator
+// ==============================================================================
 
-import '../../routes/app_routes.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../theme/app_theme.dart';
 import 'suite_drawer.dart';
+import 'whatsapp_automation_screen.dart';
 
 class WhatsAppDashboardMaster extends StatefulWidget {
   final int initialTab;
@@ -24,651 +36,772 @@ class _WhatsAppDashboardMasterState extends State<WhatsAppDashboardMaster> {
   @override
   Widget build(BuildContext context) {
     final screens = [
-      const AutomationsDashboardScreen(),
-      const MessageTemplatesScreen(),
-      const LogsAndAnalyticsScreen(),
+      const WhatsAppAutomationScreen(),
+      const WhatsAppTemplatesView(),
+      const WhatsAppLogsAnalyticsView(),
+      const WhatsAppChatbotSimulatorView(),
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       drawer: const SuiteDrawer(),
-      body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: const Color(0xFF4F46E5),
-        unselectedItemColor: const Color(0xFF64748B),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 8,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_tree_outlined),
-            activeIcon: Icon(Icons.account_tree),
-            label: 'Automations',
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
+          border: Border(top: BorderSide(color: AppTheme.surface200)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          backgroundColor: AppTheme.surfaceLight,
+          indicatorColor: AppTheme.primaryContainer,
+          elevation: 0,
+          onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.flash_on_outlined, size: 22, color: AppTheme.textSecondary),
+              selectedIcon: const Icon(Icons.flash_on_rounded, size: 22, color: AppTheme.primary),
+              label: 'Automations',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.library_books_outlined, size: 22, color: AppTheme.textSecondary),
+              selectedIcon: const Icon(Icons.library_books_rounded, size: 22, color: AppTheme.primary),
+              label: 'Templates',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.bar_chart_outlined, size: 22, color: AppTheme.textSecondary),
+              selectedIcon: const Icon(Icons.bar_chart_rounded, size: 22, color: AppTheme.primary),
+              label: 'Analytics',
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.chat_bubble_outline_rounded, size: 22, color: AppTheme.textSecondary),
+              selectedIcon: const Icon(Icons.chat_bubble_rounded, size: 22, color: AppTheme.primary),
+              label: 'Test Bot',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==============================================================================
+// TAB 2: WhatsApp Approved Message Templates
+// ==============================================================================
+class WhatsAppTemplatesView extends StatelessWidget {
+  const WhatsAppTemplatesView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final templates = [
+      {
+        'name': 'lead_welcome_v2',
+        'status': 'Approved',
+        'category': 'Marketing',
+        'updated': '2 days ago',
+        'preview': 'Hello {{1}}! Welcome to Anbarasan Insurance Academy. Here is your personalized brochure and calendar link...',
+        'color': AppTheme.success,
+        'icon': Icons.verified_rounded,
+      },
+      {
+        'name': 'lead_followup_reminder',
+        'status': 'Approved',
+        'category': 'Utility',
+        'updated': '5 days ago',
+        'preview': 'Hi {{1}}, we noticed you haven\'t reviewed your quote yet. Our advisors are ready to help...',
+        'color': AppTheme.success,
+        'icon': Icons.verified_rounded,
+      },
+      {
+        'name': 'policy_renewal_urgent',
+        'status': 'Approved',
+        'category': 'Utility',
+        'updated': '1 week ago',
+        'preview': 'Dear {{1}}, your policy {{2}} is due for renewal in {{3}} days. Pay now to avoid lapse...',
+        'color': AppTheme.success,
+        'icon': Icons.verified_rounded,
+      },
+      {
+        'name': 'session_link_invite',
+        'status': 'Approved',
+        'category': 'Utility',
+        'updated': '1 week ago',
+        'preview': 'Your session "{{1}}" starts in {{2}} hours. Join here: {{3}}',
+        'color': AppTheme.success,
+        'icon': Icons.verified_rounded,
+      },
+      {
+        'name': 'birthday_greetings_v1',
+        'status': 'Approved',
+        'category': 'Marketing',
+        'updated': '2 weeks ago',
+        'preview': 'Happy Birthday {{1}}! 🎂 As a valued member, enjoy an exclusive loyalty discount...',
+        'color': AppTheme.success,
+        'icon': Icons.verified_rounded,
+      },
+      {
+        'name': 'claim_status_update',
+        'status': 'Pending',
+        'category': 'Utility',
+        'updated': 'Submitted today',
+        'preview': 'Your claim #{{1}} has been {{2}}. Our team will contact you within 24 hours...',
+        'color': AppTheme.warning,
+        'icon': Icons.pending_rounded,
+      },
+    ];
+
+    return SafeArea(
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(color: AppTheme.surface200, height: 1),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'WhatsApp Templates',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                Text(
+                  '${templates.length} templates · Meta Business verified',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: IconButton(
+                  icon: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: const Icon(Icons.add_rounded, size: 18, color: AppTheme.primary),
+                  ),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Opening Meta Template Editor...')),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_outlined),
-            activeIcon: Icon(Icons.grid_view),
-            label: 'Templates',
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, idx) {
+                  final t = templates[idx];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.surface200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.surface100,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(Icons.description_rounded, size: 16, color: AppTheme.textSecondary),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      t['name'] as String,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Icon(t['icon'] as IconData, size: 13, color: t['color'] as Color),
+                                const SizedBox(width: 3),
+                                Text(
+                                  t['status'] as String,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: t['color'] as Color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          t['preview'] as String,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                            height: 1.4,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surface100,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                t['category'] as String,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              t['updated'] as String,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                childCount: templates.length,
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Logs & Analytics',
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
     );
   }
 }
 
-class AutomationsDashboardScreen extends StatelessWidget {
-  const AutomationsDashboardScreen({super.key});
+// ==============================================================================
+// TAB 3: Delivery Logs & Analytics
+// ==============================================================================
+class WhatsAppLogsAnalyticsView extends StatelessWidget {
+  const WhatsAppLogsAnalyticsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: const Color(0xFF4F46E5), borderRadius: BorderRadius.circular(8)),
-              child: const Icon(Icons.trending_up, color: Colors.white, size: 18),
+    final logs = [
+      {'type': 'sent', 'icon': Icons.send_rounded, 'color': AppTheme.primary, 'title': 'lead_welcome_v2 → Priya Sharma', 'time': '2 min ago', 'status': 'Delivered', 'statusColor': AppTheme.success},
+      {'type': 'read', 'icon': Icons.done_all_rounded, 'color': AppTheme.secondary, 'title': 'lead_followup_reminder → Arjun Kapoor', 'time': '8 min ago', 'status': 'Read', 'statusColor': AppTheme.secondary},
+      {'type': 'failed', 'icon': Icons.error_outline_rounded, 'color': AppTheme.error, 'title': 'policy_renewal_urgent → Ravi Kumar', 'time': '15 min ago', 'status': 'Failed (235)', 'statusColor': AppTheme.error},
+      {'type': 'sent', 'icon': Icons.send_rounded, 'color': AppTheme.primary, 'title': 'session_link_invite → Meena Devi', 'time': '22 min ago', 'status': 'Delivered', 'statusColor': AppTheme.success},
+      {'type': 'reply', 'icon': Icons.reply_rounded, 'color': AppTheme.success, 'title': 'Inbound reply from Karthik R', 'time': '30 min ago', 'status': 'Processed', 'statusColor': AppTheme.success},
+      {'type': 'sent', 'icon': Icons.send_rounded, 'color': AppTheme.primary, 'title': 'birthday_greetings_v1 → Lakshmi N', 'time': '1 hour ago', 'status': 'Delivered', 'statusColor': AppTheme.success},
+      {'type': 'read', 'icon': Icons.done_all_rounded, 'color': AppTheme.secondary, 'title': 'bot_main_menu → Anonymous User', 'time': '1.5 hours ago', 'status': 'Read', 'statusColor': AppTheme.secondary},
+      {'type': 'sent', 'icon': Icons.send_rounded, 'color': AppTheme.primary, 'title': 'lead_welcome_v2 → Sanjay M', 'time': '2 hours ago', 'status': 'Delivered', 'statusColor': AppTheme.success},
+    ];
+
+    return SafeArea(
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            backgroundColor: AppTheme.surfaceLight,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(color: AppTheme.surface200, height: 1),
             ),
-            const SizedBox(width: 8),
-            const Column(
+            title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AnbuCRM', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-                Row(
-                  children: [
-                    CircleAvatar(radius: 3, backgroundColor: Color(0xFF10B981)),
-                    SizedBox(width: 4),
-                    Text('API CONNECTED', style: TextStyle(fontSize: 9, color: Color(0xFF10B981), fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
-          const IconButton(
-            icon: CircleAvatar(
-              radius: 14,
-              backgroundColor: Color(0xFF4F46E5),
-              child: Icon(Icons.person, size: 16, color: Colors.white),
-            ),
-            onPressed: null,
-          )
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF4F46E5),
-        onPressed: () => context.push(AppRoutes.whatsappBuilder),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Automation', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('PIPELINE AUTOMATION SUITE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF4F46E5), letterSpacing: 0.6)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFFDCFCE7), borderRadius: BorderRadius.circular(6)),
-                    child: const Text('Meta Cloud v19.0', style: TextStyle(fontSize: 10, color: Color(0xFF166534), fontWeight: FontWeight.bold)),
+                Text(
+                  'Logs & Analytics',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
                   ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              const Text('WhatsApp Automations', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
-              const Text('Manage CRM triggers, automatic lead follow-ups, and drip journeys.', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: _buildKpiCard('12', 'Active Triggers', '+18%', Icons.bolt, const Color(0xFF4F46E5))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildKpiCard('24.8K', 'Delivered', '99.4%', Icons.chat_bubble, const Color(0xFF10B981))),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildKpiCard('4.2K', 'Replies Received', '16.9%', Icons.reply, const Color(0xFF6366F1))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildKpiCard('82%', 'Meta API Quota', 'Tier 3', Icons.cloud_done, const Color(0xFF0EA5E9))),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterChip('All Workflows', true),
-                    _buildFilterChip('Lead Nurture', false),
-                    _buildFilterChip('Deal Alerts', false),
-                    _buildFilterChip('Support Drip', false),
-                  ],
                 ),
-              ),
-              const SizedBox(height: 14),
-              _buildAutomationRuleCard(
-                context,
-                title: 'New Lead Instant Welcome & PDF',
-                category: 'Lead Nurture',
-                id: '#WA-108',
-                trigger: 'CRM Lead Created',
-                filter: 'Source = Inbound Campaign',
-                action: 'Send WhatsApp Template w/ PDF brochure',
-                runs: '1,420 runs',
-                metric: '38% reply rate',
-                isActive: true,
-              ),
-              _buildAutomationRuleCard(
-                context,
-                title: 'Deal Stage Changed: Quote Sent',
-                category: 'Deal Alerts',
-                id: '#WA-204',
-                trigger: "Deal → 'Proposal Sent'",
-                filter: '24 Hours grace window',
-                action: 'Send Quote summary & Stripe paylink',
-                runs: '312 runs',
-                metric: '\$48.2k generated',
-                isActive: true,
-              ),
-              _buildAutomationRuleCard(
-                context,
-                title: 'Inactivity Re-engagement (30 Days)',
-                category: 'Lead Nurture',
-                id: '#WA-042',
-                trigger: 'No contact for 30 days',
-                filter: 'VIP and Enterprise tags',
-                action: 'Send WhatsApp Win-back offer & VIP perks',
-                runs: 'Paused',
-                metric: 'Sequence Paused',
-                isActive: false,
-              ),
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildKpiCard(String value, String label, String badge, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: color, size: 18),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                child: Text(badge, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color)),
-              )
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
-          Text(label, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        selectedColor: const Color(0xFF4F46E5),
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFF475569),
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
-        backgroundColor: Colors.white,
-        side: BorderSide(color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFFE2E8F0)),
-        onSelected: (_) {},
-      ),
-    );
-  }
-
-  Widget _buildAutomationRuleCard(
-    BuildContext context, {
-    required String title,
-    required String category,
-    required String id,
-    required String trigger,
-    required String filter,
-    required String action,
-    required String runs,
-    required String metric,
-    required bool isActive,
-  }) {
-    return InkWell(
-      onTap: () => context.push(AppRoutes.whatsappBuilder),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: const Color(0xFFEEF2FF), borderRadius: BorderRadius.circular(6)),
-                      child: Text(category, style: const TextStyle(fontSize: 10, color: Color(0xFF4F46E5), fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(id, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
-                  ],
+                Text(
+                  'Real-time webhook delivery tracking',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-                Switch(value: isActive, activeColor: const Color(0xFF4F46E5), onChanged: (val) {}),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(8)),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _buildRuleRow(Icons.bolt, 'Trigger', trigger),
-                  const SizedBox(height: 4),
-                  _buildRuleRow(Icons.filter_alt_outlined, 'Filter', filter),
-                  const SizedBox(height: 4),
-                  _buildRuleRow(Icons.send_outlined, 'Action', action),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLogStatCard('Sent', '1,420', AppTheme.primary, AppTheme.primaryContainer),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _buildLogStatCard('Delivered', '1,398', AppTheme.success, AppTheme.successContainer),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _buildLogStatCard('Failed', '22', AppTheme.error, AppTheme.errorContainer),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLogStatCard('Read Rate', '72.4%', AppTheme.secondary, AppTheme.secondaryContainer),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _buildLogStatCard('Reply Rate', '48.1%', const Color(0xFF8B5CF6), const Color(0xFFEDE9FE)),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _buildLogStatCard('Avg Latency', '0.2s', AppTheme.warning, AppTheme.warningContainer),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Activity',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Last 24 hours',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...logs.map((log) => Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.surface200),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: (log['color'] as Color).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(log['icon'] as IconData, size: 16, color: log['color'] as Color),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                log['title'] as String,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                log['time'] as String,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10.5,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: (log['statusColor'] as Color).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            log['status'] as String,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: log['statusColor'] as Color,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline, size: 14, color: Color(0xFF10B981)),
-                    const SizedBox(width: 4),
-                    Text(runs, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                Text(metric, style: const TextStyle(fontSize: 11, color: Color(0xFF4F46E5), fontWeight: FontWeight.w700)),
-              ],
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRuleRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: const Color(0xFF4F46E5)),
-        const SizedBox(width: 6),
-        Text('$label: ', style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
-        Expanded(child: Text(value, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Color(0xFF1E293B)))),
-      ],
+  Widget _buildLogStatCard(String label, String value, Color color, Color bg) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.surface200),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              color: AppTheme.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class MessageTemplatesScreen extends StatelessWidget {
-  const MessageTemplatesScreen({super.key});
+// ==============================================================================
+// TAB 4: Interactive Live Chatbot Simulator
+// ==============================================================================
+class WhatsAppChatbotSimulatorView extends StatefulWidget {
+  const WhatsAppChatbotSimulatorView({super.key});
+
+  @override
+  State<WhatsAppChatbotSimulatorView> createState() => _WhatsAppChatbotSimulatorViewState();
+}
+
+class _WhatsAppChatbotSimulatorViewState extends State<WhatsAppChatbotSimulatorView> {
+  final List<Map<String, dynamic>> _messages = [
+    {
+      'sender': 'bot',
+      'text': 'Hello! Welcome to Anbarasan Insurance Academy. 🎓\n\nReply with a number:\n1️⃣ Health Insurance\n2️⃣ Term Life\n3️⃣ Talk to Advisor\n4️⃣ Policy Status',
+      'time': 'Now',
+    },
+  ];
+
+  final TextEditingController _controller = TextEditingController();
+
+  void _sendMessage() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _messages.add({
+        'sender': 'user',
+        'text': text,
+        'time': 'Now',
+      });
+      _controller.clear();
+    });
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+      String reply;
+      switch (text) {
+        case '1':
+          reply = '🏥 Health Insurance Plans:\n\n• Family Floater — ₹899/mo\n• Senior Citizen — ₹1,299/mo\n• Critical Illness — ₹599/mo\n\nWant a detailed quote? Share your age & family size.';
+          break;
+        case '2':
+          reply = '🛡️ Term Life Plans:\n\n• 50L Cover (30yr) — ₹649/mo\n• 1Cr Cover (30yr) — ₹1,099/mo\n• 2Cr Cover (30yr) — ₹1,899/mo\n\nWant to calculate premium? Share your age.';
+          break;
+        case '3':
+          reply = '📞 Connecting you to a Senior Advisor...\n\nOur team will call you within 15 minutes during business hours (9AM - 7PM IST).';
+          break;
+        case '4':
+          reply = '📋 Policy Status:\n\nPlease share your policy number or registered phone number to check your policy status.';
+          break;
+        default:
+          reply = 'I didn\'t understand that. Please reply with 1, 2, 3, or 4 from the menu above.';
+      }
+      setState(() {
+        _messages.add({
+          'sender': 'bot',
+          'text': reply,
+          'time': 'Now',
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
-        title: const Text('Message Templates', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: () {})],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Meta-approved templates synced with CRM.', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4F46E5),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      minimumSize: Size.zero,
-                    ),
-                    onPressed: () {},
-                    icon: const Icon(Icons.add, size: 14, color: Colors.white),
-                    label: const Text('Create', style: TextStyle(fontSize: 11, color: Colors.white)),
-                  )
-                ],
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search templates, tags...',
-                  prefixIcon: const Icon(Icons.search, size: 18),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-                ),
-              ),
-              const SizedBox(height: 14),
-              _buildTemplateCard(
-                name: 'lead_welcome_v2',
-                category: 'Utility',
-                status: 'Approved',
-                previewText: 'Hi {{contact_name}}, welcome to AnbuCRM! Here is your requested overview. Reply 1 to chat with an agent.',
-                crmMappings: '{{contact_name}} → Lead.FirstName',
-                stats: '14.2K sent | 99.8% delivery',
-              ),
-              _buildTemplateCard(
-                name: 'quote_followup_reminder',
-                category: 'Marketing',
-                status: 'Approved',
-                previewText: 'Hello {{deal_contact}}, your proposal for {{deal_title}} is ready for review. Expires on {{expiry_date}}.',
-                crmMappings: '{{deal_contact}} → Deal.ClientName\n{{deal_title}} → Deal.Name',
-                stats: '2.1K sent | 98.4% delivery',
-              ),
-              _buildTemplateCard(
-                name: 'black_friday_promo',
-                category: 'Marketing',
-                status: 'In Review',
-                previewText: 'Exclusive VIP Access: {{company_name}} unlocks 40% off all enterprise seats until {{offer_deadline}}.',
-                crmMappings: '{{company_name}} → Account.OrgName',
-                stats: 'Submitted 2h ago to Meta review queue',
-                isInReview: true,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTemplateCard({
-    required String name,
-    required String category,
-    required String status,
-    required String previewText,
-    required String crmMappings,
-    required String stats,
-    bool isInReview = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
+    return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isInReview ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isInReview ? const Color(0xFF92400E) : const Color(0xFF166534)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              color: AppTheme.surfaceLight,
+              border: Border(bottom: BorderSide(color: AppTheme.surface200)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(previewText, style: const TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF334155))),
-                const SizedBox(height: 6),
-                const Align(
-                  alignment: Alignment.bottomRight,
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.smart_toy_rounded, size: 20, color: AppTheme.primary),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AnbuBot Simulator',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        'Interactive Flow: bot_main_menu · Live Preview',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.successContainer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('10:42 AM', style: TextStyle(fontSize: 9, color: Color(0xFF94A3B8))),
-                      SizedBox(width: 4),
-                      Icon(Icons.done_all, size: 12, color: Color(0xFF0EA5E9)),
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.success,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Active',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.success,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          const Text('DYNAMIC CRM MAPPINGS', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey)),
-          const SizedBox(height: 2),
-          Text(crmMappings, style: const TextStyle(fontSize: 11, color: Color(0xFF4F46E5), fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Text(stats, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-        ],
-      ),
-    );
-  }
-}
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              reverse: true,
+              itemCount: _messages.length,
+              itemBuilder: (context, idx) {
+                final reversedIdx = _messages.length - 1 - idx;
+                final msg = _messages[reversedIdx];
+                final isBot = msg['sender'] == 'bot';
 
-class LogsAndAnalyticsScreen extends StatelessWidget {
-  const LogsAndAnalyticsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
-        ),
-        title: const Text('Logs & Analytics', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  CircleAvatar(radius: 3, backgroundColor: Color(0xFF10B981)),
-                  SizedBox(width: 6),
-                  Text('REAL-TIME INGESTION - Live Polling (3s)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE2E8F0))),
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Total Sent (30d)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                          SizedBox(height: 2),
-                          Text('48,290', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                          Text('+12.4%', style: TextStyle(fontSize: 10, color: Color(0xFF10B981), fontWeight: FontWeight.bold)),
-                        ],
+                return Align(
+                  alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.75,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isBot ? AppTheme.surfaceLight : AppTheme.primary,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(12),
+                        topRight: const Radius.circular(12),
+                        bottomLeft: Radius.circular(isBot ? 4 : 12),
+                        bottomRight: Radius.circular(isBot ? 12 : 4),
                       ),
+                      border: isBot ? Border.all(color: AppTheme.surface200) : null,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          msg['text'] as String,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12.5,
+                            color: isBot ? AppTheme.textPrimary : Colors.white,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          msg['time'] as String,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 9.5,
+                            color: isBot ? AppTheme.textMuted : Colors.white.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFE2E8F0))),
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Delivery Rate', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                          SizedBox(height: 2),
-                          Text('99.2%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                          Text('Tier-1 Route', style: TextStyle(fontSize: 10, color: Color(0xFF4F46E5), fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Text('Webhook Activity Logs', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-              const SizedBox(height: 10),
-              _buildLogTile(
-                name: 'Sarah Jenkins',
-                phone: '+1 555-0192',
-                status: 'READ - 10:42 AM',
-                statusColor: const Color(0xFF0EA5E9),
-                template: 'quote_followup_reminder',
-                dealContext: 'Cloud Migration (\$42,000)',
-                avatar: '',
-              ),
-              _buildLogTile(
-                name: 'Marcus Vance',
-                phone: '+1 555-0841',
-                status: 'REPLIED - 10:38 AM',
-                statusColor: const Color(0xFF10B981),
-                template: 'lead_welcome_v2',
-                dealContext: 'Inbound Response: "Yes, I would like to schedule a demo"',
-                avatar: '',
-              ),
-              _buildLogTile(
-                name: 'David Miller',
-                phone: '+1 555-0329',
-                status: 'FAILED - 10:15 AM',
-                statusColor: const Color(0xFFEF4444),
-                template: 'Meta Code 131026: Undeliverable phone number',
-                dealContext: 'Option: Retry with SMS or Edit Contact',
-                avatar: '',
-                isFailed: true,
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogTile({
-    required String name,
-    required String phone,
-    required String status,
-    required Color statusColor,
-    required String template,
-    required String dealContext,
-    required String avatar,
-    bool isFailed = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isFailed ? const Color(0xFFFCA5A5) : const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: const Color(0xFFEEF2FF),
-                child: const Icon(Icons.person, color: Color(0xFF4F46E5), size: 16),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                    Text(phone, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                child: Text(status, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: statusColor)),
-              )
-            ],
-          ),
-          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(8)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              border: Border(top: BorderSide(color: AppTheme.surface200)),
+            ),
+            child: Row(
               children: [
-                Text(template, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isFailed ? const Color(0xFFDC2626) : const Color(0xFF334155))),
-                const SizedBox(height: 2),
-                Text(dealContext, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    onSubmitted: (_) => _sendMessage(),
+                    decoration: InputDecoration(
+                      hintText: 'Reply 1, 2, 3, or 4...',
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: AppTheme.textMuted,
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.surfaceVariantLight,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: AppTheme.surface200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: AppTheme.surface200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: AppTheme.primary),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    onPressed: _sendMessage,
+                    icon: const Icon(Icons.send_rounded, size: 18, color: Colors.white),
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

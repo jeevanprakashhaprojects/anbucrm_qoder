@@ -637,6 +637,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                 child: AnimatedSwitcher(
@@ -749,6 +750,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                       controller: _scrollController,
                       padding: const EdgeInsets.all(24),
                       child: AnimatedSwitcher(

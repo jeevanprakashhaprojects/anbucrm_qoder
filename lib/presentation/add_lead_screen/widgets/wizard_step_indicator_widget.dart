@@ -28,6 +28,7 @@ class WizardStepIndicatorWidget extends StatelessWidget {
             height: 40,
             child: Center(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

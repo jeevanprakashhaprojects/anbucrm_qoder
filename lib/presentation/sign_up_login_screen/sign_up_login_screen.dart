@@ -8,6 +8,19 @@ import './widgets/auth_logo_widget.dart';
 import './widgets/demo_credentials_widget.dart';
 import './widgets/login_form_widget.dart';
 
+class _S {
+  static final tabActive = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.textPrimary,
+  );
+  static final tabInactive = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppTheme.textSecondary,
+  );
+}
+
 class SignUpLoginScreen extends StatefulWidget {
   const SignUpLoginScreen({super.key});
 
@@ -97,6 +110,7 @@ class _SignUpLoginScreenState extends State<SignUpLoginScreen>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: EdgeInsets.symmetric(
                   horizontal: isTablet ? 0 : 24,
                   vertical: 24,
@@ -193,11 +207,7 @@ class _ToggleTab extends StatelessWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            color: isActive ? AppTheme.textPrimary : AppTheme.textSecondary,
-          ),
+          style: isActive ? _S.tabActive : _S.tabInactive,
         ),
       ),
     );

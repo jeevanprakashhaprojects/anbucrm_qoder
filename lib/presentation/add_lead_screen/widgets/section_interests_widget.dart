@@ -1984,6 +1984,7 @@ Widget _buildAgricultureFields() {
 
 Widget _buildInterestContent(String industry) {
   return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -3099,6 +3100,7 @@ class _SectionInterestsWidgetState extends State<SectionInterestsWidget> {
       children: [
         // Interest tabs
         SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [

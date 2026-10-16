@@ -85,7 +85,7 @@ class _CallsPermissionScreenState extends State<CallsPermissionScreen>
         });
         await Future.delayed(const Duration(milliseconds: 800));
         if (mounted) {
-          context.go(AppRoutes.simSelectionScreen);
+          context.push(AppRoutes.simSelectionScreen);
         }
       } else if (result == 'limited') {
         // Limited permission — skip SIM selection, go directly to dashboard
@@ -142,6 +142,7 @@ class _CallsPermissionScreenState extends State<CallsPermissionScreen>
           child: SlideTransition(
             position: _entrySlide,
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: EdgeInsets.symmetric(
                 horizontal: isTablet ? 48 : 24,
                 vertical: 24,

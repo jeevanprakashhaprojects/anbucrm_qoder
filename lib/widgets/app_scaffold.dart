@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -119,7 +120,7 @@ class _AppDrawer extends StatelessWidget {
                     'WhatsApp Automation',
                     () {
 
-                      context.push(AppRoutes.whatsappAutomationScreen);
+                      context.push(AppRoutes.whatsappDashboard);
                     },
                     color: const Color(0xFF25D366),
                   ),
@@ -185,6 +186,17 @@ class _AppDrawer extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final displayName =
+        FirebaseAuth.instance.currentUser?.displayName?.trim() ?? '';
+    final userName = displayName.isNotEmpty ? displayName : 'AnbuCRM User';
+    final userEmail = FirebaseAuth.instance.currentUser?.email ?? '';
+    final initials = userName
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .map((w) => w[0])
+        .take(2)
+        .join()
+        .toUpperCase();
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: const BoxDecoration(
@@ -208,7 +220,7 @@ class _AppDrawer extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'JK',
+                    initials,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -223,7 +235,7 @@ class _AppDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Jeevan Kumar',
+                      userName,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -231,7 +243,7 @@ class _AppDrawer extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'jeevan@anbucrm.in',
+                      userEmail,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         color: Colors.white.withAlpha(204),

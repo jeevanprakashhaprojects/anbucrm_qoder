@@ -4,6 +4,35 @@ import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 
+class _S {
+  static final brand = GoogleFonts.plusJakartaSans(
+    fontSize: 32,
+    fontWeight: FontWeight.w800,
+    color: AppTheme.textPrimary,
+    letterSpacing: -0.5,
+  );
+  static final tagline = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppTheme.textSecondary,
+    letterSpacing: 0.2,
+  );
+  static final syncStep = GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.textSecondary,
+  );
+  static final progress = GoogleFonts.plusJakartaSans(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppTheme.primary,
+  );
+  static final footer = GoogleFonts.plusJakartaSans(
+    fontSize: 11,
+    color: AppTheme.textMuted,
+  );
+}
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -225,24 +254,14 @@ class _SplashScreenState extends State<SplashScreen>
                             const SizedBox(height: 20),
                             Text(
                               'AnbuCRM',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: AppTheme.textPrimary,
-                                letterSpacing: -0.5,
-                              ),
+                              style: _S.brand,
                             ),
                             const SizedBox(height: 8),
                             FadeTransition(
                               opacity: _taglineOpacity,
                               child: Text(
                                 'Track Calls. Manage Leads. Grow Business.',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppTheme.textSecondary,
-                                  letterSpacing: 0.2,
-                                ),
+                                style: _S.tagline,
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -273,11 +292,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Text(
                           _syncSteps[_currentStep],
                           key: ValueKey(_currentStep),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.textSecondary,
-                          ),
+                          style: _S.syncStep,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -302,11 +317,7 @@ class _SplashScreenState extends State<SplashScreen>
                         animation: _progressValue,
                         builder: (_, __) => Text(
                           '${(_progressValue.value * 100).toInt()}%',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.primary,
-                          ),
+                          style: _S.progress,
                         ),
                       ),
                     ],
@@ -318,10 +329,7 @@ class _SplashScreenState extends State<SplashScreen>
                   padding: const EdgeInsets.only(bottom: 32),
                   child: Text(
                     '© 2026 AnbuCRM. All rights reserved.',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: AppTheme.textMuted,
-                    ),
+                    style: _S.footer,
                   ),
                 ),
               ],

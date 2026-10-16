@@ -2368,6 +2368,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
             ],
           ),
           content: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -4286,6 +4287,7 @@ class _AddEmployeeSheetState extends State<_AddEmployeeSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -5321,6 +5323,7 @@ class _EmpFilterSheetState extends State<_EmpFilterSheet> {
           const Divider(height: 1),
           Flexible(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -3075,6 +3075,7 @@ class _ReminderDetailSheet extends StatelessWidget {
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
       ),
       child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3658,6 +3659,7 @@ class _SnoozeSheetState extends State<_SnoozeSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
       ),
       child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -4076,6 +4078,7 @@ class _NewReminderSheetState extends State<_NewReminderSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -5695,6 +5698,7 @@ class _ReminderFilterSheetState extends State<_ReminderFilterSheet> {
           const Divider(height: 1),
           Flexible(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

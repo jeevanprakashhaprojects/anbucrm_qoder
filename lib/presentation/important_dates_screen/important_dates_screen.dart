@@ -1998,6 +1998,7 @@ class _ImportantDateCard extends StatelessWidget {
     final telegram = dateItem['telegram'] as String? ?? '';
 
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
@@ -2252,6 +2253,7 @@ class _IDDetailSheet extends StatelessWidget {
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
       ),
       child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3106,6 +3108,7 @@ class _AddImportantDateSheetState extends State<_AddImportantDateSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 32,
       ),
       child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

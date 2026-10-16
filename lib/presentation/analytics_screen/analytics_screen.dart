@@ -128,6 +128,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   Widget _buildOverviewTab() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +203,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   Widget _buildPipelineTab() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,6 +232,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   Widget _buildTeamTab() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,6 +257,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   Widget _buildSourcesTab() {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

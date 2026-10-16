@@ -91,6 +91,7 @@ class _NumberSetupScreenState extends State<NumberSetupScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -29,13 +29,11 @@ void main() async {
     return CustomErrorWidget(errorDetails: details);
   };
 
-  // 🚨 CRITICAL: Device orientation lock - DO NOT REMOVE
-  Future.wait([
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
-  ]).then((value) {
-    GoRouter.optionURLReflectsImperativeAPIs = true;
-    runApp(MyApp());
-  });
+  // Device orientation lock
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

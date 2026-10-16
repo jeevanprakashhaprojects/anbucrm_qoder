@@ -305,6 +305,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen>
 
   Widget _buildWaitingRoom(String customerName) {
     return SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [

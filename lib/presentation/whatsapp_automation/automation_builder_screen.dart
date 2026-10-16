@@ -1,166 +1,258 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// ==============================================================================
+// ANBU CRM — WHATSAPP AUTOMATION REDESIGN (FLUTTER / DART)
+// File: lib/presentation/whatsapp_automation/automation_builder_screen.dart
+//
+// Visual Flow Builder redesigned to match AnbuCRM executive design:
+// - AppTheme cards, subtle borders, clean step connectors
+// - GoogleFonts.plusJakartaSans
+// - Trigger, Action, Delay, and Decision step nodes
+// ==============================================================================
 
-class AutomationBuilderScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../theme/app_theme.dart';
+
+class AutomationBuilderScreen extends StatefulWidget {
   const AutomationBuilderScreen({super.key});
+
+  @override
+  State<AutomationBuilderScreen> createState() => _AutomationBuilderScreenState();
+}
+
+class _AutomationBuilderScreenState extends State<AutomationBuilderScreen> {
+  final List<Map<String, dynamic>> _nodes = [
+    {
+      'type': 'TRIGGER',
+      'title': 'CRM Event: New Lead Created',
+      'detail': 'Source: Web Form, Facebook Ads, or Google Ads · Score > 30',
+      'icon': Icons.bolt_rounded,
+      'color': AppTheme.primary,
+      'container': AppTheme.primaryContainer,
+      'badge': 'ENTRY POINT',
+    },
+    {
+      'type': 'ACTION',
+      'title': 'Send WhatsApp: lead_welcome_v2',
+      'detail': 'Template: Academy Welcome + Brochure PDF + Calendar Link',
+      'icon': Icons.chat_bubble_rounded,
+      'color': AppTheme.secondary,
+      'container': AppTheme.secondaryContainer,
+      'badge': 'IMMEDIATE',
+    },
+    {
+      'type': 'DELAY',
+      'title': 'Wait Delay: 24 Hours',
+      'detail': 'Check whether customer replied to initial message',
+      'icon': Icons.access_time_filled_rounded,
+      'color': AppTheme.warning,
+      'container': AppTheme.warningContainer,
+      'badge': 'TIMER',
+    },
+    {
+      'type': 'CONDITION',
+      'title': 'Condition: Has Lead Replied?',
+      'detail': 'Branch YES: Route to Senior Advisor | Branch NO: Send Follow-up Reminder',
+      'icon': Icons.alt_route_rounded,
+      'color': const Color(0xFF8B5CF6),
+      'container': const Color(0xFFEDE9FE),
+      'badge': 'DECISION',
+    },
+    {
+      'type': 'ACTION',
+      'title': 'Send Follow-up Drip: lead_followup_reminder',
+      'detail': 'Dynamic fields: {{lead.name}}, {{lead.dealValue}}',
+      'icon': Icons.mark_chat_unread_rounded,
+      'color': AppTheme.success,
+      'container': AppTheme.successContainer,
+      'badge': 'STEP 2',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+        backgroundColor: AppTheme.surfaceLight,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppTheme.surface200, height: 1),
         ),
-        title: const Column(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Automation Builder', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-            Text('Draft v2.4 \u2022 Auto-saved', style: TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+            Text(
+              'Workflow Builder',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            Text(
+              'Lead Welcome & Drip Sequence · Active',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppTheme.textSecondary,
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton.icon(
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Testing flow execution with mock payload...')),
+                const SnackBar(
+                  backgroundColor: AppTheme.primary,
+                  content: Text('Simulating flow with mock lead payload...'),
+                ),
               );
             },
-            icon: const Icon(Icons.play_arrow, size: 16, color: Color(0xFF4F46E5)),
-            label: const Text('Test Flow', style: TextStyle(color: Color(0xFF4F46E5), fontSize: 12, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.play_arrow_rounded, size: 16),
+            label: Text(
+              'Test Flow',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 12),
+            ),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 12),
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4F46E5),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                minimumSize: Size.zero,
-              ),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(backgroundColor: Color(0xFF10B981), content: Text('Flow published to live webhook triggers!')),
+                  const SnackBar(
+                    backgroundColor: AppTheme.success,
+                    content: Text('Workflow published & live to WhatsApp webhooks!'),
+                  ),
                 );
-                context.pop();
+                Navigator.pop(context);
               },
-              child: const Text('Publish', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: Text(
+                'Publish',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
             ),
-          )
+          ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _nodes.length,
+        itemBuilder: (context, idx) {
+          final node = _nodes[idx];
+          final isLast = idx == _nodes.length - 1;
+
+          return Column(
             children: [
-              _buildStepCard(
-                icon: Icons.person_add,
-                type: 'TRIGGER EVENT',
-                title: 'CRM Event: New Lead Created',
-                description: 'Filter: Source is Web Form OR Facebook Ads \u2022 Lead Score > 40',
-                meta: '142 matched today',
-              ),
-              _buildStepConnector(),
-              _buildStepCard(
-                icon: Icons.chat,
-                type: 'AUTOMATED MESSAGE',
-                title: 'Send WhatsApp: lead_welcome_v2',
-                description: 'Template Variables: {{lead.first_name}}\nAttachment: Company_Profile.pdf (2.4 MB)',
-                meta: 'Fallback: Listen unread timeout (3h)',
-                isAccent: true,
-              ),
-              _buildStepConnector(),
-              _buildStepCard(
-                icon: Icons.alt_route,
-                type: 'DECISION BRANCH',
-                title: 'Did lead reply within 3 hours?',
-                description: 'Evaluates inbound WhatsApp response channel status and message receipt webhook.',
-                meta: 'YES (64%)  |  NO (36%)',
-              ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  side: const BorderSide(color: Color(0xFF4F46E5)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Select node to insert: Action, Delay, or Condition')),
-                  );
-                },
-                icon: const Icon(Icons.add_circle_outline, color: Color(0xFF4F46E5)),
-                label: const Text('Insert Subsequent Step', style: TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(height: 30),
+              _buildStepCard(node, idx + 1),
+              if (!isLast) _buildConnector(),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStepConnector() {
-    return Column(
-      children: [
-        Container(width: 2, height: 16, color: const Color(0xFFCBD5E1)),
-        const Icon(Icons.arrow_downward, size: 14, color: Color(0xFF94A3B8)),
-        Container(width: 2, height: 16, color: const Color(0xFFCBD5E1)),
-      ],
-    );
-  }
-
-  Widget _buildStepCard({
-    required IconData icon,
-    required String type,
-    required String title,
-    required String description,
-    required String meta,
-    bool isAccent = false,
-  }) {
+  Widget _buildStepCard(Map<String, dynamic> node, int stepNumber) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isAccent ? const Color(0xFF4F46E5) : const Color(0xFFE2E8F0), width: isAccent ? 1.5 : 1),
+        color: AppTheme.surfaceLight,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.surface200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isAccent ? const Color(0xFF4F46E5) : const Color(0xFFEEF2FF),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, size: 18, color: isAccent ? Colors.white : const Color(0xFF4F46E5)),
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: node['container'] as Color,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(node['icon'] as IconData, size: 18, color: node['color'] as Color),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Step $stepNumber · ${node['type']}',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: node['color'] as Color,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(type, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF64748B))),
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                  ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface100,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  node['badge'],
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(description, style: const TextStyle(fontSize: 12, color: Color(0xFF475569), height: 1.3)),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(6)),
-            child: Text(meta, style: const TextStyle(fontSize: 11, color: Color(0xFF4F46E5), fontWeight: FontWeight.w700)),
+          Text(
+            node['title'],
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            node['detail'],
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              color: AppTheme.textSecondary,
+              height: 1.35,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildConnector() {
+    return Container(
+      width: 2,
+      height: 24,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.surface200,
+        borderRadius: BorderRadius.circular(1),
       ),
     );
   }

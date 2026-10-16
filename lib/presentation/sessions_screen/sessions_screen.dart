@@ -1833,6 +1833,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
           // Show all filter chips in a scrollable row
           Expanded(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _statusFilters.where((f) => f != _selectedFilter).map(
@@ -4497,6 +4498,7 @@ class _SessionCardState extends State<_SessionCard>
                           if (interestTags.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: interestTags
@@ -6803,6 +6805,7 @@ class _RescheduleFromCancelSheetState
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -7383,6 +7386,7 @@ class _ScheduledActionSheetState extends State<_ScheduledActionSheet> {
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -8042,6 +8046,7 @@ class _CompleteSessionSheetState extends State<_CompleteSessionSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -8926,6 +8931,7 @@ class _NewSessionSheetState extends State<_NewSessionSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -10979,6 +10985,7 @@ class _FilterSheetState extends State<_FilterSheet> {
           const Divider(height: 1),
           Flexible(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -12476,6 +12483,7 @@ class _TemplatePickerSheetState extends State<_TemplatePickerSheet> {
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

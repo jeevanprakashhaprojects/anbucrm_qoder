@@ -374,6 +374,7 @@ class _SectionAddressWidgetState extends State<SectionAddressWidget> {
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           scrollDirection: Axis.horizontal,
           child: Row(
             children: _addressTags.map((tag) {

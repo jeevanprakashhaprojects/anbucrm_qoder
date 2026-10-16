@@ -1334,6 +1334,7 @@ class _FollowUpsScreenState extends State<FollowUpsScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _statusFilterOptions
@@ -4511,6 +4512,7 @@ class _RescheduleSheetWidgetState extends State<_RescheduleSheetWidget> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4887,6 +4889,7 @@ class _NewFollowUpSheetState extends State<_NewFollowUpSheet> {
           bottom: MediaQuery.of(context).viewInsets.bottom + 32,
         ),
         child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -6785,6 +6788,7 @@ class _FUTemplatePickerSheetState extends State<_FUTemplatePickerSheet> {
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
