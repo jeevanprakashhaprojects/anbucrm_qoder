@@ -2317,7 +2317,7 @@ class _SubscriptionStepState extends State<_SubscriptionStep> {
         _PrimaryButton(
           label: widget.isCreating
               ? 'Creating your account…'
-              : 'Create Account  →',
+              : 'Create Account',
           onTap: widget.onCreateAccount,
           enabled: !widget.isCreating && widget.subscriptionTermsAccepted,
         ),
@@ -2819,9 +2819,12 @@ class _SuccessStepState extends State<_SuccessStep>
                           style: _S.successDiscountLabel,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          '(${widget.couponCode})',
-                          style: _S.successDiscountCode,
+                        Flexible(
+                          child: Text(
+                            '(${widget.couponCode})',
+                            style: _S.successDiscountCode,
+                            softWrap: true,
+                          ),
                         ),
                       ],
                     ),
@@ -2900,22 +2903,76 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withAlpha(30)),
       ),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 10),
-          Text(label, style: _S.statCardLabel),
-          const Spacer(),
-          Text(
-            value,
-            style: _S.statCardValue,
-            overflow: TextOverflow.ellipsis,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final scaler = MediaQuery.textScalerOf(context);
+          final labelPainter = TextPainter(
+            text: TextSpan(text: label, style: _S.statCardLabel),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
             maxLines: 1,
-          ),
-        ],
+          )..layout();
+          final valuePainter = TextPainter(
+            text: TextSpan(text: value, style: _S.statCardValue),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
+            maxLines: 1,
+          )..layout();
+          // icon 16 + gap 10 + label + min gap 12 before the value
+          final inlineSpace =
+              constraints.maxWidth - 16 - 10 - labelPainter.width - 12;
+
+          if (valuePainter.width <= inlineSpace) {
+            return Row(
+              children: [
+                Icon(icon, size: 16, color: color),
+                const SizedBox(width: 10),
+                Text(label, style: _S.statCardLabel),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    value,
+                    style: _S.statCardValue,
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 1),
+                child: Icon(icon, size: 16, color: color),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: _S.statCardLabel),
+                    const SizedBox(height: 4),
+                    Text(
+                      _breakable(value),
+                      style: _S.statCardValue,
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
+
+  // Zero-width spaces after @ and . let long emails wrap at natural points.
+  static String _breakable(String s) =>
+      s.replaceAllMapped(RegExp(r'([@._\-])'), (m) => '${m[1]}\u200B');
 }
 
 class _SuccessDetailRow extends StatelessWidget {

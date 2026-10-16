@@ -52,6 +52,12 @@ const C = {
   e800: '#065f46',
 };
 
+const LOGO_URL = 'https://api.anbucrm.com/email/logo.png';
+
+function esc(v) {
+  return String(v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
 function amount(n) {
   return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -100,7 +106,12 @@ function generateInvoicePdf(d) {
 
     // Single-line text clipped to its box so long values never spill past the margins.
     const put = (str, x, y, o = {}) => {
-      const size = o.size || 9;
+      let size = o.size || 9;
+      if (o.fit && o.width) {
+        const min = o.minSize || 6.5;
+        doc.font(o.font || 'Helvetica');
+        while (size > min && doc.fontSize(size).widthOfString(String(str), { characterSpacing: o.spacing || 0 }) > o.width - 3) size -= 0.25;
+      }
       doc.font(o.font || 'Helvetica').fontSize(size).fillColor(o.color || C.s700).fillOpacity(o.opacity == null ? 1 : o.opacity);
       doc.text(String(str), x, y, {
         width: o.width,
@@ -153,7 +164,7 @@ function generateInvoicePdf(d) {
 
     put('Cloud CRM & Insurance Automation Suite', bx, 77, { size: 9.5, color: C.s300, width: brandW });
     put('GSTIN: 33AAACA9812K1Z8  \u00B7  SAC: 998313', bx, 94, { size: 8, color: '#ffffff', opacity: 0.72, width: brandW });
-    put('billing@anbucrm.com  \u00B7  www.anbucrm.com', bx, 106, { size: 8, color: '#ffffff', opacity: 0.72, width: brandW });
+    put('billing@anbucrm.com  \u00B7  support@anbucrm.com', bx, 106, { size: 8, color: '#ffffff', opacity: 0.72, width: brandW });
 
     label('Invoice Reference', metaX, 46, metaW, C.s300, 'right');
     put(d.invoiceNumber, metaX, 58, { width: metaW, align: 'right', size: 17, font: 'Helvetica-Bold', color: '#ffffff' });
@@ -166,10 +177,10 @@ function generateInvoicePdf(d) {
     const billH = 94;
     doc.roundedRect(M, y, W, billH, 8).lineWidth(0.75).fillAndStroke(C.s50, C.s200);
     label('Billed To Customer', M + pad, y + 14, W - pad * 2);
-    put(d.name, M + pad, y + 30, { size: 14, font: 'Helvetica-Bold', color: C.s900, width: W - pad * 2 });
+    put(d.name, M + pad, y + 30, { size: 14, font: 'Helvetica-Bold', color: C.s900, width: W - pad * 2, fit: true, minSize: 8 });
     const infoRow = (k, v, ry) => {
       put(k, M + pad, ry + 1, { size: 7.5, color: C.s400, width: 52 });
-      put(v, M + pad + 54, ry, { size: 9, font: 'Helvetica-Bold', color: C.s800, width: W - pad * 2 - 54 });
+      put(v, M + pad + 54, ry, { size: 9, font: 'Helvetica-Bold', color: C.s800, width: W - pad * 2 - 54, fit: true });
     };
     infoRow('Email:', d.email, y + 50);
     infoRow('Phone:', d.phone || '-', y + 64);
@@ -183,7 +194,7 @@ function generateInvoicePdf(d) {
     const innerW = W - pad * 2;
     const specRow = (k, v, ry, last) => {
       put(k, M + pad, ry, { size: 9, color: C.s500, width: innerW / 2 });
-      if (v) put(v, M + pad + innerW / 2, ry, { size: 9, font: 'Helvetica-Bold', color: C.s900, width: innerW / 2, align: 'right' });
+      if (v) put(v, M + pad + innerW / 2, ry, { size: 9, font: 'Helvetica-Bold', color: C.s900, width: innerW / 2, align: 'right', fit: true });
       if (!last) hline(M + pad, ry + 15, innerW, C.s200, 0.5);
     };
     specRow('Service Plan', `${d.planTerm} Plan`, y + 31);
@@ -222,8 +233,8 @@ function generateInvoicePdf(d) {
 
     if (d.discountPercent > 0) {
       hline(M, y - 8, W, C.s100);
-      const disc = `Promotional Discount (${d.discountPercent}% off${d.couponCode ? ' - ' + d.couponCode : ''})`;
-      put(disc, col.desc.x, y, { size: 9, font: 'Helvetica-Bold', color: C.e600, width: col.desc.w + col.sac.w });
+      const disc = `Coupon Discount (${d.discountPercent}%${d.couponCode ? ' - ' + d.couponCode : ''})`;
+      put(disc, col.desc.x, y, { size: 9, font: 'Helvetica-Bold', color: C.e600, width: col.desc.w + col.sac.w, fit: true });
       put('-', col.qty.x, y, { size: 9, color: C.e600, width: col.qty.w, align: 'center' });
       put('-' + inrPdf(d.basePrice - d.subtotal), col.amt.x, y, { size: 9, font: MONEY_BOLD, color: C.e600, width: col.amt.w, align: 'right' });
       y += 20;
@@ -239,15 +250,15 @@ function generateInvoicePdf(d) {
 
     if (d.discountPercent > 0 && d.couponCode) {
       doc.roundedRect(M, ly, leftW, 42, 6).lineWidth(0.75).fillAndStroke(C.e50, C.e200);
-      put(`Promotional Coupon Applied: ${d.couponCode}`, M + 12, ly + 9, { size: 8.5, font: 'Helvetica-Bold', color: C.e800, width: leftW - 24 });
-      put(`${d.discountPercent}% promotional waiver granted for this billing cycle.`, M + 12, ly + 24, { size: 7.8, color: C.e700, width: leftW - 24 });
+      put(`Coupon Applied: ${d.couponCode}`, M + 12, ly + 9, { size: 8.5, font: 'Helvetica-Bold', color: C.e800, width: leftW - 24, fit: true });
+      put(`${d.discountPercent}% discount applied to this billing cycle.`, M + 12, ly + 24, { size: 7.8, color: C.e700, width: leftW - 24 });
       ly += 54;
     }
 
     label('Payment Settlement & Notes', M, ly, leftW);
     ly += 13;
     doc.roundedRect(M, ly, leftW, 54, 6).lineWidth(0.75).fillAndStroke(C.s50, C.s100);
-    put('Payment Mode: Online / Verified Promo Code', M + 12, ly + 9, { size: 8, color: C.s600, width: leftW - 24 });
+    put(d.discountPercent > 0 ? 'Payment Mode: Online / Coupon' : 'Payment Mode: Online', M + 12, ly + 9, { size: 8, color: C.s600, width: leftW - 24 });
     put(`Transaction Reference: TXN-${d.invoiceNumber.replace('INV-', '')}`, M + 12, ly + 23, { size: 8, color: C.s600, width: leftW - 24 });
     put('This invoice is generated in compliance with GST Rule 46.', M + 12, ly + 37, { size: 8, color: C.s600, width: leftW - 24 });
 
@@ -291,7 +302,7 @@ function generateInvoicePdf(d) {
       '3. Cloud services are governed by the AnbuCRM Master Service Agreement.',
     ];
     terms.forEach((t, i) => put(t, M, footY + 30 + i * 12, { size: 7.8, color: C.s500, width: fLeftW }));
-    put('Thank you for subscribing to AnbuCRM! Access your dashboard at https://anbucrm.com', M, footY + 70, { size: 7.8, color: C.s600, width: fLeftW });
+    put('Thank you for subscribing to AnbuCRM.', M, footY + 70, { size: 7.8, color: C.s600, width: fLeftW });
     put('Support: support@anbucrm.com  |  Master Service Agreement applies', M, footY + 83, { size: 7.5, color: C.s400, width: fLeftW });
 
     const sigW = 160;
@@ -307,16 +318,17 @@ function generateInvoicePdf(d) {
   });
 }
 
-function invoiceHtml(d) {
+function invoiceHtml(raw) {
+  const d = { ...raw, name: esc(raw.name), email: esc(raw.email), phone: esc(raw.phone), country: esc(raw.country), couponCode: esc(raw.couponCode) };
   const td = 'padding:11px 16px;border-bottom:1px solid #f1f5f9;';
   const discountRow = d.discountPercent > 0
-    ? `<tr><td style="${td}color:#059669;font-weight:700;">Promotional Discount (${d.discountPercent}% off${d.couponCode ? ' &middot; ' + d.couponCode : ''})</td><td style="${td}text-align:right;white-space:nowrap;color:#059669;font-weight:700;">-${inrHtml(d.basePrice - d.subtotal)}</td></tr>`
+    ? `<tr><td style="${td}color:#059669;font-weight:700;word-break:break-all;">Coupon Discount (${d.discountPercent}%${d.couponCode ? ' &middot; ' + d.couponCode : ''})</td><td style="${td}text-align:right;white-space:nowrap;color:#059669;font-weight:700;">-${inrHtml(d.basePrice - d.subtotal)}</td></tr>`
     : '';
   const couponBox = d.discountPercent > 0 && d.couponCode
-    ? `<div style="margin:0 0 20px;padding:12px 16px;background-color:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;"><div style="font-size:13px;font-weight:700;color:#065f46;">Promotional Coupon Applied: ${d.couponCode}</div><div style="font-size:12px;color:#047857;margin-top:2px;">${d.discountPercent}% promotional waiver granted for this billing cycle.</div></div>`
+    ? `<div style="margin:0 0 20px;padding:12px 16px;background-color:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;"><div style="font-size:13px;font-weight:700;color:#065f46;word-break:break-all;">Coupon Applied: ${d.couponCode}</div><div style="font-size:12px;color:#047857;margin-top:2px;">${d.discountPercent}% discount applied to this billing cycle.</div></div>`
     : '';
   const spec = (k, v, last) => `<tr><td style="padding:8px 0;font-size:13px;color:#64748b;${last ? '' : 'border-bottom:1px solid #e2e8f0;'}">${k}</td><td style="padding:8px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;${last ? '' : 'border-bottom:1px solid #e2e8f0;'}">${v}</td></tr>`;
-  const info = (k, v) => `<tr><td style="padding:2px 0;width:70px;font-size:11px;color:#94a3b8;">${k}</td><td style="padding:2px 0;font-size:13px;color:#1e293b;font-weight:600;">${v}</td></tr>`;
+  const info = (k, v) => `<tr><td style="padding:2px 0;width:70px;font-size:11px;color:#94a3b8;">${k}</td><td style="padding:2px 0;font-size:13px;color:#1e293b;font-weight:600;word-break:break-all;">${v}</td></tr>`;
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Your AnbuCRM Invoice</title></head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
@@ -327,7 +339,7 @@ function invoiceHtml(d) {
 <table style="width:100%;border-collapse:collapse;"><tr>
 <td style="vertical-align:middle;">
 <table style="border-collapse:collapse;"><tr>
-<td style="width:60px;vertical-align:middle;"><img src="cid:logo_inline" alt="AnbuCRM" width="60" height="60" style="width:60px;height:60px;display:block;border-radius:12px;" /></td>
+<td style="width:60px;vertical-align:middle;"><img src="${LOGO_URL}" alt="AnbuCRM" width="60" height="60" style="width:60px;height:60px;display:block;border-radius:12px;" /></td>
 <td style="padding-left:14px;vertical-align:middle;">
 <div><span style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;vertical-align:middle;">AnbuCRM</span>
 <span style="display:inline-block;margin-left:6px;padding:2px 7px;border:1px solid rgba(255,255,255,0.25);background-color:rgba(255,255,255,0.1);border-radius:4px;color:#ffffff;font-size:9px;font-weight:700;letter-spacing:0.6px;vertical-align:middle;">TAX INVOICE</span></div>
@@ -345,12 +357,12 @@ function invoiceHtml(d) {
 </div>
 
 <div style="padding:28px;">
-<h2 style="margin:0 0 8px;font-size:18px;color:#0f172a;font-weight:700;">Hi ${d.name},</h2>
-<p style="margin:0 0 22px;font-size:14px;color:#475569;line-height:1.6;">Thank you for choosing <strong>AnbuCRM</strong>. Your subscription has been activated successfully. Your official tax invoice PDF is attached to this email.</p>
+<h2 style="margin:0 0 8px;font-size:18px;color:#0f172a;font-weight:700;word-break:break-word;">Hi ${d.name},</h2>
+<p style="margin:0 0 22px;font-size:14px;color:#475569;line-height:1.6;">Thank you for choosing <strong>AnbuCRM</strong>. Your subscription is now active. Your tax invoice is attached to this email as a PDF.</p>
 
 <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px;">
 <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Billed To Customer</div>
-<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px;">${d.name}</div>
+<div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:6px;word-break:break-word;">${d.name}</div>
 <table style="border-collapse:collapse;">${info('Email:', d.email)}${info('Phone:', d.phone || '-')}${info('Location:', d.country || 'India')}</table>
 </div>
 
@@ -383,7 +395,6 @@ ${discountRow}
 
 ${couponBox}
 
-<div style="text-align:center;margin:6px 0 4px;"><a href="https://anbucrm.com" style="display:inline-block;padding:11px 22px;background-color:#09152b;color:#fbbf24;text-decoration:none;border-radius:8px;font-size:13px;font-weight:700;">Open AnbuCRM Dashboard</a></div>
 
 <div style="margin-top:24px;padding-top:18px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;line-height:1.6;text-align:center;">
 This is a computer-generated tax invoice issued by AnbuCRM Technologies Pvt Ltd under the GST framework of India.<br>
@@ -404,9 +415,15 @@ function invoiceText(d) {
   if (d.discountPercent > 0) {
     lines.push(`Discount: -${inrHtml(d.basePrice - d.subtotal)} (${d.discountPercent}% off${d.couponCode ? ', code ' + d.couponCode : ''})`);
   }
-  lines.push(`Taxable Value: ${inrHtml(d.subtotal)}`, `GST @ 18% (CGST 9% + SGST 9%): ${inrHtml(d.tax)}`, `Total Amount Paid: ${inrHtml(d.totalAmount)}`, `Billing Period: ${d.periodStart} to ${d.periodEnd}`, '', 'Your official PDF invoice is attached with this email.', 'Thank you for choosing AnbuCRM!');
+  lines.push(`Taxable Value: ${inrHtml(d.subtotal)}`, `GST @ 18% (CGST 9% + SGST 9%): ${inrHtml(d.tax)}`, `Total Amount Paid: ${inrHtml(d.totalAmount)}`, `Billing Period: ${d.periodStart} to ${d.periodEnd}`, '', 'Your tax invoice is attached to this email as a PDF.', '', 'AnbuCRM Technologies Pvt Ltd', 'support@anbucrm.com');
   return lines.join('\n');
 }
+
+router.get('/logo.png', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=604800');
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.type('png').sendFile(LOGO_PATH);
+});
 
 router.post('/invoice', requireAuth, async (req, res, next) => {
   try {
@@ -449,24 +466,15 @@ router.post('/invoice', requireAuth, async (req, res, next) => {
 
     const pdfBuffer = await generateInvoicePdf(d);
 
-    const attachments = [
-      { filename: `AnbuCRM-Invoice-${invoiceNum}.pdf`, content: pdfBuffer, contentType: 'application/pdf' },
-    ];
-    if (fs.existsSync(LOGO_PATH)) {
-      attachments.push({ filename: 'anbucrm-logo.png', path: LOGO_PATH, cid: 'logo_inline', contentType: 'image/png' });
-    }
-
     await cfg.transporter.sendMail({
-      from: `"AnbuCRM Billing" <${cfg.user}>`,
-      to,
-      subject: `Welcome to AnbuCRM! Your Invoice #${invoiceNum} \u2014 ${planTerm} Plan`,
+      from: { name: 'AnbuCRM', address: cfg.user },
+      to: { name: d.name, address: to },
+      subject: `Your AnbuCRM invoice ${invoiceNum} (${planTerm} plan)`,
       html: invoiceHtml(d),
       text: invoiceText(d),
-      attachments,
-      headers: {
-        'X-Mailer': 'AnbuCRM',
-        'List-Unsubscribe': '<mailto:support@anbucrm.com>',
-      },
+      attachments: [
+        { filename: `AnbuCRM-Invoice-${invoiceNum}.pdf`, content: pdfBuffer, contentType: 'application/pdf' },
+      ],
     });
 
     res.json({ sent: true, to, invoiceNumber: invoiceNum, totalAmount });
