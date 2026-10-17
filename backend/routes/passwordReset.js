@@ -13,6 +13,7 @@ const sentMessage = "If an account exists for this email, a password reset link 
 const invalidLink = "This reset link is invalid or has expired. Please request a new link.";
 const unavailable = "Password reset is temporarily unavailable. Please try again shortly.";
 const throttled = "Too many attempts. Please wait 15 minutes before trying again.";
+const codeThrottled = "Too many attempts with this reset link. Please request a new link.";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const weakPasswordMessage = "Choose a stronger password with uppercase and lowercase letters, a number, and a symbol.";
 
@@ -28,9 +29,12 @@ function passwordMeetsRules(value) {
   return typeof value === "string" && value.length >= 8 && value.length <= 128 && passwordRules.every((rule) => rule(value));
 }
 
+// Per-target buckets: hammering one email or one link must not block other
+// users behind the same IP (office/mobile-network NAT). IP limits stay as a
+// wide backstop only.
 const requestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5,
+  limit: 20,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (_req, res) => res.status(429).json({ error: throttled }),
@@ -45,10 +49,18 @@ const emailLimiter = rateLimit({
 });
 const actionLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 30,
+  limit: 100,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (_req, res) => res.status(429).json({ error: throttled }),
+});
+const codeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 15,
+  standardHeaders: false,
+  legacyHeaders: false,
+  keyGenerator: (req) => createHash("sha256").update(String(req.body?.oobCode ?? "missing")).digest("hex"),
+  handler: (_req, res) => res.status(429).json({ error: codeThrottled }),
 });
 
 function noStore(_req, res, next) {
@@ -174,11 +186,11 @@ r.post("/forgot-password", noStore, requestLimiter, jsonOnly, validateEmail, ema
   }
 });
 
-r.post("/reset-password/verify", noStore, actionLimiter, jsonOnly, validateCode, async (req, res) => {
+r.post("/reset-password/verify", noStore, codeLimiter, actionLimiter, jsonOnly, validateCode, async (req, res) => {
   if (await firebaseReset({ oobCode: req.body.oobCode }, res)) res.json({ ok: true });
 });
 
-r.post("/reset-password/confirm", noStore, actionLimiter, jsonOnly, validateCode, async (req, res) => {
+r.post("/reset-password/confirm", noStore, codeLimiter, actionLimiter, jsonOnly, validateCode, async (req, res) => {
   const password = req.body.newPassword;
   // Validate before touching the one-use code so a rejected password never burns it.
   if (!passwordMeetsRules(password)) {

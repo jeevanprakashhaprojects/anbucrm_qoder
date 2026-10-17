@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../routes/app_routes.dart';
 import '../../services/auth_service.dart';
@@ -65,6 +66,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _hasSubmitted = false;
   bool _isLoading = false;
   bool _hasRequested = false;
+  bool _mailAppFound = true;
   String _requestedEmail = '';
   String? _requestError;
 
@@ -125,6 +127,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       setState(() {
         _requestedEmail = email;
         _hasRequested = true;
+        _mailAppFound = true;
         _isLoading = false;
         _startResendCountdown();
       });
@@ -141,11 +144,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void _editEmail() {
     if (_isLoading) return;
+    // A different address is a fresh attempt, so drop the resend countdown.
+    _resendTimer?.cancel();
     setState(() {
+      _resendTimer = null;
+      _resendAvailableAt = null;
+      _resendSeconds = 0;
       _hasRequested = false;
       _hasSubmitted = false;
       _requestError = null;
     });
+  }
+
+  Future<void> _openMailApp() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: _requestedEmail,
+      queryParameters: {'subject': 'AnbuCRM password reset'},
+    );
+    var opened = false;
+    try {
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      opened = false;
+    }
+    if (!mounted) return;
+    setState(() => _mailAppFound = opened);
   }
 
   void _backToLogin() {
@@ -379,6 +403,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: _openMailApp,
+          icon: const Icon(Icons.mail_outline_rounded, size: 20),
+          label: Text('Open mail app', style: _S.label),
+        ),
+        if (!_mailAppFound) ...[
+          const SizedBox(height: 8),
+          Text(
+            'No mail app was found on this device. Open your email '
+            'yourself to continue.',
+            style: _S.body,
+            textAlign: TextAlign.center,
+          ),
+        ],
         const SizedBox(height: 16),
         Text(
           'Allow a few minutes and check your spam folder. If no email arrives, '

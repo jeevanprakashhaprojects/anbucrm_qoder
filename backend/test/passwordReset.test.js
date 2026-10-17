@@ -33,6 +33,9 @@ const UNAVAILABLE = {
 const THROTTLED = {
   error: "Too many attempts. Please wait 15 minutes before trying again.",
 };
+const CODE_THROTTLED = {
+  error: "Too many attempts with this reset link. Please request a new link.",
+};
 const STRONGER = {
   error: "Choose a stronger password with uppercase and lowercase letters, a number, and a symbol.",
 };
@@ -347,25 +350,36 @@ describe("password reset HTTP routes", { concurrency: false }, () => {
     assert.equal(h.calls.transports.length, 0);
   });
 
-  routeTest("IP limiter allows five emails then returns 429; another proxy client is independent", async (h) => {
-    for (let i = 0; i < 5; i += 1) {
+  routeTest("IP limiter is a 20-request backstop; another proxy client is independent", async (h) => {
+    for (let i = 0; i < 20; i += 1) {
       expectJson(await h.post(FORGOT, { email: `person${i}@example.invalid` }), 200, SENT);
     }
-    const response = await h.post(FORGOT, { email: "sixth@example.invalid" });
+    const response = await h.post(FORGOT, { email: "twentyfirst@example.invalid" });
     expectJson(response, 429, THROTTLED);
-    assert.equal(response.headers["ratelimit-limit"], "5");
+    assert.equal(response.headers["ratelimit-limit"], "20");
     assert.equal(response.headers["ratelimit-remaining"], "0");
     assert.ok(Number(response.headers["retry-after"]) > 0);
     assert.ok(Number(response.headers["retry-after"]) <= 900);
     assert.equal(response.headers["x-ratelimit-limit"], undefined);
-    assert.equal(h.calls.emails.length, 5);
-    assert.equal(h.calls.mail.length, 5);
-    expectJson(await h.post(FORGOT, { email: "sixth@example.invalid" }, { ip: "203.0.113.20" }), 200, SENT);
-    assert.equal(h.calls.mail.length, 6);
+    assert.equal(h.calls.mail.length, 20);
+    expectJson(await h.post(FORGOT, { email: "twentyfirst@example.invalid" }, { ip: "203.0.113.20" }), 200, SENT);
+    assert.equal(h.calls.mail.length, 21);
+  });
+
+  routeTest("email limiter punishes only the repeated address, not the whole IP", async (h) => {
+    for (let i = 0; i < 3; i += 1) {
+      expectJson(await h.post(FORGOT, { email: EMAIL }), 200, SENT);
+    }
+    // Fourth send to the same address is silently skipped.
+    expectJson(await h.post(FORGOT, { email: EMAIL }), 200, SENT);
+    assert.equal(h.calls.mail.length, 3);
+    // Other addresses from the same IP keep working.
+    expectJson(await h.post(FORGOT, { email: "other@example.invalid" }), 200, SENT);
+    assert.equal(h.calls.mail.length, 4);
   });
 
   routeTest("invalid emails still consume the IP limit", async (h) => {
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 20; i += 1) {
       expectJson(await h.post(FORGOT, { email: "invalid" }), 400, { error: "Enter a valid email address." });
     }
     expectJson(await h.post(FORGOT, { email: EMAIL }), 429, THROTTLED);
@@ -670,21 +684,36 @@ describe("password reset HTTP routes", { concurrency: false }, () => {
     ]);
   });
 
-  routeTest("verify and confirm share a 30-attempt IP limit independent of forgot", async (h) => {
-    for (let i = 0; i < 30; i += 1) {
+  routeTest("one exhausted code bucket never blocks another link from the same IP", async (h) => {
+    for (let i = 0; i < 15; i += 1) {
       const action = ACTIONS[i % ACTIONS.length];
       expectJson(await h.post(action.path, action.body), 200, { ok: true });
     }
     for (const action of ACTIONS) {
       const response = await h.post(action.path, action.body);
-      expectJson(response, 429, THROTTLED);
-      assert.equal(response.headers["ratelimit-limit"], "30");
-      assert.equal(response.headers["ratelimit-remaining"], "0");
-      assert.ok(Number(response.headers["retry-after"]) > 0);
+      expectJson(response, 429, CODE_THROTTLED);
+      assert.equal(response.headers["ratelimit-limit"], undefined);
     }
-    assert.equal(h.calls.provider.length, 45);
+    const other = `${CODE}other`;
+    expectJson(await h.post(VERIFY, { oobCode: other }), 200, { ok: true });
+    expectJson(await h.post(CONFIRM, { oobCode: other, newPassword: PASSWORD }), 200, { ok: true });
+    expectJson(await h.post(VERIFY, { oobCode: CODE }, { ip: "203.0.113.20" }), 429, CODE_THROTTLED);
+    expectJson(await h.post(FORGOT, { email: EMAIL }), 200, SENT);
+  });
+
+  routeTest("verify and confirm share a 100-attempt IP limit independent of forgot", async (h) => {
+    for (let i = 0; i < 100; i += 1) {
+      const action = ACTIONS[i % ACTIONS.length];
+      expectJson(await h.post(action.path, { ...action.body, oobCode: `${CODE}${i}` }), 200, { ok: true });
+    }
+    const response = await h.post(VERIFY, { oobCode: `${CODE}blocked` });
+    expectJson(response, 429, THROTTLED);
+    assert.equal(response.headers["ratelimit-limit"], "100");
+    assert.equal(response.headers["ratelimit-remaining"], "0");
+    assert.ok(Number(response.headers["retry-after"]) > 0);
+    assert.equal(h.calls.provider.length, 150);
     expectJson(await h.post(VERIFY, { oobCode: CODE }, { ip: "203.0.113.20" }), 200, { ok: true });
-    assert.equal(h.calls.provider.length, 46);
+    assert.equal(h.calls.provider.length, 151);
     expectJson(await h.post(FORGOT, { email: EMAIL }), 200, SENT);
   });
 });

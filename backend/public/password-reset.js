@@ -34,6 +34,7 @@
   const emailStatus = byId('email-status');
   const sendButton = byId('send-email');
   const cooldownHint = byId('email-cooldown');
+  const openMailLink = byId('open-mail');
   const countdownLine = byId('return-countdown');
   const countdownNumber = byId('countdown-number');
   const countdownUnit = byId('countdown-unit');
@@ -62,6 +63,7 @@
   let currentView = 'checking';
   let cooldownUntil = 0;
   let cooldownTimer = null;
+  let lastSentEmail = '';
   let returnTimer = null;
   let returnCancelled = false;
   let automaticLaunchAttempted = false;
@@ -220,6 +222,7 @@
       if (confirmBusy || completed) return;
       const visible = input.type === 'password';
       input.type = visible ? 'text' : 'password';
+      // Same convention as the app's sign-in field: strike while hidden.
       slash.hidden = !visible;
       button.setAttribute('aria-label', `${visible ? 'Hide' : 'Show'} ${label}`);
       button.setAttribute('aria-pressed', String(visible));
@@ -228,7 +231,7 @@
 
   function resetVisibilityToggle(button, input, label) {
     input.type = 'password';
-    button.querySelector('.slash').hidden = true;
+    button.querySelector('.slash').hidden = false;
     button.setAttribute('aria-label', `Show ${label}`);
     button.setAttribute('aria-pressed', 'false');
   }
@@ -317,6 +320,26 @@
     resumeCooldown();
   }
 
+  function clearCooldown() {
+    cooldownUntil = 0;
+    if (cooldownTimer !== null) {
+      window.clearInterval(cooldownTimer);
+      cooldownTimer = null;
+    }
+    updateRecoveryControls();
+  }
+
+  function setOpenMailLink(address) {
+    if (!address) {
+      openMailLink.hidden = true;
+      openMailLink.removeAttribute('href');
+      return;
+    }
+    // A plain mailto: link opens the browser's default mail app.
+    openMailLink.href = `mailto:${address}`;
+    openMailLink.hidden = false;
+  }
+
   function validateEmail() {
     email.value = email.value.trim();
     const message = !email.value ? 'Enter your email address.' : !email.validity.valid ? 'Enter a valid email address.' : '';
@@ -327,6 +350,11 @@
   email.addEventListener('input', () => {
     // Don’t alter the user’s address while they are still typing it.
     if (email.hasAttribute('aria-invalid') && email.validity.valid) setFieldError(email, emailError, '');
+    // A changed address is a new attempt: drop the countdown and re-enable Send.
+    if (cooldownUntil > 0 && email.value.trim().toLowerCase() !== lastSentEmail) {
+      clearCooldown();
+      setOpenMailLink('');
+    }
   });
 
   emailForm.addEventListener('submit', async (event) => {
@@ -342,6 +370,8 @@
     try {
       await postJson('/auth/forgot-password', { email: email.value });
       // Deliberately identical for existing and nonexistent accounts.
+      lastSentEmail = email.value.trim().toLowerCase();
+      setOpenMailLink(lastSentEmail);
       showNotice(emailStatus, 'If an account exists for this email, we’ll send a password reset link. Check your inbox and spam folder.');
       startCooldown();
     } catch (error) {
@@ -420,6 +450,8 @@
     oobCode = '';
     clearPasswords();
     email.value = '';
+    lastSentEmail = '';
+    setOpenMailLink('');
     if (cooldownTimer !== null) window.clearInterval(cooldownTimer);
     cooldownTimer = null;
     updateRecoveryControls();
