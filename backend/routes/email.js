@@ -323,14 +323,8 @@ function generateInvoicePdf(d) {
 
 function invoiceHtml(raw) {
   const d = { ...raw, name: esc(raw.name), email: esc(raw.email), phone: esc(raw.phone), country: esc(raw.country), couponCode: esc(raw.couponCode) };
-  // All sizes are em of the root font, so one root font-size per screen width scales the whole email proportionally.
   const e = (px, base) => `${+(px / base).toFixed(4)}em`;
-  const DESIGN_W = 530;
-  const css = [];
-  for (let max = 580; max >= 300; max -= 20) {
-    const root = Math.min(16, (16 * (max - 40)) / DESIGN_W);
-    css.push(`@media only screen and (max-width:${max}px){.wr{font-size:${root.toFixed(2)}px !important}}`);
-  }
+  // Fixed 620px width with no viewport/@media on purpose: Gmail floors text at 8px, so CSS shrinking breaks; instead mail apps zoom the whole email to fit, like a PDF.
 
   const td = `padding:${e(11, 13)} ${e(16, 13)};border-bottom:1px solid #f1f5f9;`;
   const discountRow = d.discountPercent > 0
@@ -349,12 +343,9 @@ function invoiceHtml(raw) {
   const th = `padding:${e(11, 11)} ${e(16, 11)};font-size:${e(11, 13)};font-weight:700;color:#fcd34d;letter-spacing:${e(0.5, 11)};`;
   const date = s => s.replace(/ /g, '&nbsp;');
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Your AnbuCRM Invoice</title>
-<style>
-${css.join('\n')}
-</style></head>
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Your AnbuCRM Invoice</title></head>
 <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-text-size-adjust:none;text-size-adjust:none;">
-<div class="wr" style="font-size:16px;max-width:${e(620, 16)};margin:0 auto;padding:${e(32, 16)} ${e(12, 16)};">
+<div class="wr" style="font-size:16px;width:620px;min-width:620px;margin:0 auto;padding:${e(32, 16)} ${e(12, 16)};">
 <div style="background-color:#ffffff;border-radius:${e(14, 16)};overflow:hidden;border:1px solid #e2e8f0;">
 
 <div style="background-color:#09152b;padding:${e(28, 16)} ${e(24, 16)};border-bottom:${e(3, 16)} solid #fbbf24;">

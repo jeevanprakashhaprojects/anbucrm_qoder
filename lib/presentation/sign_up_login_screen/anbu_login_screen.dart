@@ -107,7 +107,6 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _wrongCredentials = false;
-  bool _hasSubmitted = false;
   String _errorMessage = '';
 
   @override
@@ -160,7 +159,6 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
       _previousTab = _activeTab;
       _activeTab = index;
       // Clear form state on tab switch.
-      _hasSubmitted = false;
       _wrongCredentials = false;
       _errorMessage = '';
       _emailController.clear();
@@ -169,10 +167,7 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
   }
 
   Future<void> _submit() async {
-    setState(() {
-      _hasSubmitted = true;
-      _wrongCredentials = false;
-    });
+    setState(() => _wrongCredentials = false);
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
@@ -361,7 +356,6 @@ class _AnbuLoginScreenState extends State<AnbuLoginScreen>
                                     obscurePassword: _obscurePassword,
                                     isLoading: _isLoading,
                                     wrongCredentials: _wrongCredentials,
-                                    hasSubmitted: _hasSubmitted,
                                     errorMessage: _errorMessage,
                                     onToggleObscure: () => setState(
                                       () =>
@@ -482,7 +476,6 @@ class _LoginForm extends StatelessWidget {
   final bool obscurePassword;
   final bool isLoading;
   final bool wrongCredentials;
-  final bool hasSubmitted;
   final String errorMessage;
   final VoidCallback onToggleObscure;
   final VoidCallback onSubmit;
@@ -499,7 +492,6 @@ class _LoginForm extends StatelessWidget {
     required this.obscurePassword,
     required this.isLoading,
     required this.wrongCredentials,
-    required this.hasSubmitted,
     required this.errorMessage,
     required this.onToggleObscure,
     required this.onSubmit,
@@ -580,7 +572,6 @@ class _LoginForm extends StatelessWidget {
               prefixIcon: Icon(Icons.email_outlined, size: 20),
             ),
             validator: (v) {
-              if (!hasSubmitted) return null;
               if (v == null || v.isEmpty) return 'Enter your email';
               if (!v.contains('@')) return 'Enter a valid email';
               return null;
@@ -612,7 +603,6 @@ class _LoginForm extends StatelessWidget {
               ),
             ),
             validator: (v) {
-              if (!hasSubmitted) return null;
               if (v == null || v.isEmpty) return 'Enter your password';
               if (v.length < 6) return 'Password too short';
               return null;

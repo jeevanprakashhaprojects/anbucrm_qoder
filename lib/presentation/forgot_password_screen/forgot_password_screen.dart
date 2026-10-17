@@ -1,23 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../theme/app_theme.dart';
-import '../../routes/app_routes.dart';
-import 'package:go_router/go_router.dart';
+import 'dart:async';
 
-// Precomputed text styles — resolved once, reused on every build.
-// GoogleFonts.plusJakartaSans() does asset lookup + parsing per call;
-// calling it inside build() on every keystroke causes visible frame drops.
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../routes/app_routes.dart';
+import '../../services/auth_service.dart';
+import '../../theme/app_theme.dart';
+
 class _S {
   static final _base = GoogleFonts.plusJakartaSans();
-  static final fieldText = _base.copyWith(fontSize: 14);
-  static final fieldLabel = _base.copyWith(
-    fontSize: 13,
-    fontWeight: FontWeight.w600,
-    color: AppTheme.textPrimary,
-  );
-  static final sectionTitle = _base.copyWith(
-    fontSize: 24,
+  static final title = _base.copyWith(
+    fontSize: 26,
     fontWeight: FontWeight.w800,
     color: AppTheme.textPrimary,
     letterSpacing: -0.5,
@@ -25,65 +19,26 @@ class _S {
   static final body = _base.copyWith(
     fontSize: 13,
     color: AppTheme.textSecondary,
-    height: 1.5,
-  );
-  static final bodyWide = _base.copyWith(
-    fontSize: 14,
-    color: AppTheme.textSecondary,
     height: 1.6,
   );
-  static final stepNum = _base.copyWith(
-    fontSize: 14,
-    fontWeight: FontWeight.w700,
-  );
-  static final stepLabel = _base.copyWith(fontSize: 11);
-  static final otpDigit = _base.copyWith(
-    fontSize: 20,
-    fontWeight: FontWeight.w700,
-    color: AppTheme.textPrimary,
-  );
-  static final errorText = _base.copyWith(
-    fontSize: 12,
-    color: AppTheme.error,
-    fontWeight: FontWeight.w500,
-  );
-  static final resendText = _base.copyWith(
-    fontSize: 13,
-    color: AppTheme.textSecondary,
-  );
-  static final resendBold = _base.copyWith(
-    fontSize: 13,
-    fontWeight: FontWeight.w700,
-    color: AppTheme.primary,
-  );
-  static final hint = _base.copyWith(fontSize: 11, color: AppTheme.textMuted);
-  static final ruleText = _base.copyWith(fontSize: 12);
-  static final buttonText = _base.copyWith(
-    fontSize: 15,
-    fontWeight: FontWeight.w700,
-  );
-  static final successTitle = _base.copyWith(
-    fontSize: 28,
-    fontWeight: FontWeight.w800,
-    color: AppTheme.textPrimary,
-    letterSpacing: -0.5,
-    height: 1.2,
-  );
-  static final successBody = _base.copyWith(
-    fontSize: 14,
-    color: AppTheme.textSecondary,
-    height: 1.6,
-  );
-  static final successNote = _base.copyWith(
-    fontSize: 12,
-    color: AppTheme.success,
-    fontWeight: FontWeight.w500,
-    height: 1.4,
-  );
-  static final emailBold = _base.copyWith(
+  static final label = _base.copyWith(
     fontSize: 13,
     fontWeight: FontWeight.w600,
     color: AppTheme.textPrimary,
+  );
+  static final field = _base.copyWith(
+    fontSize: 14,
+    color: AppTheme.textPrimary,
+  );
+  static final error = _base.copyWith(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: AppTheme.error,
+    height: 1.5,
+  );
+  static final button = _base.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
   );
 }
 
@@ -94,1094 +49,390 @@ class ForgotPasswordScreen extends StatefulWidget {
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
-    with TickerProviderStateMixin {
-  int _step = 0; // 0=email, 1=otp, 2=new password, 3=success
-  String _email = '';
-  String _resetToken = '';
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  static final _emailPattern = RegExp(
+    r"^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+"
+    r"(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
+    r'@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+'
+    r'[A-Za-z](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])$',
+  );
 
-  late AnimationController _stepController;
-  late Animation<double> _stepOpacity;
-  late Animation<Offset> _stepSlide;
-
-  @override
-  void initState() {
-    super.initState();
-    _stepController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    )..forward();
-    _stepOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _stepController, curve: Curves.easeOut));
-    _stepSlide = Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero)
-        .animate(
-          CurvedAnimation(parent: _stepController, curve: Curves.easeOutCubic),
-        );
-  }
-
-  @override
-  void dispose() {
-    _stepController.dispose();
-    super.dispose();
-  }
-
-  void _goToStep(int step) {
-    // PERF: forward() before setState so the new step is already animating in
-    // when it mounts. The old order painted one transparent frame first.
-    _stepController.forward(from: 0);
-    setState(() => _step = step);
-  }
-
-  void _onEmailVerified(String email) {
-    _email = email;
-    _goToStep(1);
-  }
-
-  void _onOtpVerified(String token) {
-    _resetToken = token;
-    _goToStep(2);
-  }
-
-  void _onPasswordReset() {
-    _goToStep(3);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // PERF: sizeOf instead of MediaQuery.of, so opening the keyboard does not
-    // rebuild this whole screen on every frame of the inset animation.
-    final isTablet = MediaQuery.sizeOf(context).width >= 600;
-
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        if (_step >= 3) {
-          context.go(AppRoutes.signUpLoginScreen);
-        } else if (_step > 0) {
-          _goToStep(_step - 1);
-        } else if (context.canPop()) {
-          context.pop();
-        } else {
-          SystemNavigator.pop();
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppTheme.backgroundLight,
-        body: Stack(
-          children: [
-            Positioned(
-              top: -80,
-              right: -60,
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppTheme.primary.withAlpha(25),
-                      AppTheme.primary.withAlpha(0),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // PERF: keyboard inset is added once here rather than being
-                  // double-counted by scrollPadding on each field. The
-                  // viewport has already shrunk by the keyboard height, so the
-                  // fields only need a small buffer.
-                  final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-                  return SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                    physics: const ClampingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 0 : 24,
-                      vertical: 24,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                        maxWidth: isTablet ? 440 : double.infinity,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          bottom: bottomInset > 0 ? 16 : 0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (_step < 3)
-                              GestureDetector(
-                                onTap: () {
-                                  if (_step > 0) {
-                                    _goToStep(_step - 1);
-                                  } else if (context.canPop()) {
-                                    context.pop();
-                                  } else {
-                                    context.go(AppRoutes.signUpLoginScreen);
-                                  }
-                                },
-                                child: Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.surfaceLight,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: AppTheme.surface200,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_back_rounded,
-                                    size: 18,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            if (_step < 3) const SizedBox(height: 28),
-                            if (_step < 3) ...[
-                              _StepIndicator(currentStep: _step),
-                              const SizedBox(height: 32),
-                            ],
-                            // PERF: AnimatedSize animates the height in step with the
-                            // fade/slide, so the scroll content does not snap while
-                            // the 400ms transition is still running.
-                            AnimatedSize(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeOutCubic,
-                              alignment: Alignment.topCenter,
-                              child: FadeTransition(
-                                opacity: _stepOpacity,
-                                child: SlideTransition(
-                                  position: _stepSlide,
-                                  child: _buildStepContent(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStepContent() {
-    switch (_step) {
-      case 0:
-        return _EmailStep(onNext: _onEmailVerified);
-      case 1:
-        return _OtpStep(email: _email, onNext: _onOtpVerified);
-      case 2:
-        return _NewPasswordStep(
-          email: _email,
-          resetToken: _resetToken,
-          onSuccess: _onPasswordReset,
-        );
-      case 3:
-        return _ResetSuccessStep(
-          onGoToLogin: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(AppRoutes.signUpLoginScreen);
-            }
-          },
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-}
-
-// ─── Step Indicator ───────────────────────────────────────────────────────────
-
-class _StepIndicator extends StatelessWidget {
-  final int currentStep;
-  const _StepIndicator({required this.currentStep});
-
-  static const _labels = ['Verify Email', 'Enter OTP', 'New Password'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < 3; i++) ...[
-          _StepCircle(
-            index: i,
-            isActive: i == currentStep,
-            isDone: i < currentStep,
-            label: _labels[i],
-          ),
-          if (i < 2)
-            Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.only(bottom: 26),
-                color: i < currentStep ? AppTheme.success : AppTheme.surface200,
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
-class _StepCircle extends StatelessWidget {
-  final int index;
-  final bool isActive;
-  final bool isDone;
-  final String label;
-
-  const _StepCircle({
-    required this.index,
-    required this.isActive,
-    required this.isDone,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 72,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isDone
-                  ? AppTheme.success
-                  : isActive
-                  ? AppTheme.primary
-                  : AppTheme.surface200,
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: AppTheme.primary.withAlpha(50),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Center(
-              child: isDone
-                  ? const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    )
-                  : Text(
-                      '${index + 1}',
-                      style: _S.stepNum.copyWith(
-                        color: isActive ? Colors.white : AppTheme.textMuted,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: _S.stepLabel.copyWith(
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive ? AppTheme.primary : AppTheme.textMuted,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.visible,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Step 1: Email ────────────────────────────────────────────────────────────
-
-class _EmailStep extends StatefulWidget {
-  final Function(String) onNext;
-  const _EmailStep({required this.onNext});
-
-  @override
-  State<_EmailStep> createState() => _EmailStepState();
-}
-
-class _EmailStepState extends State<_EmailStep> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  bool _isLoading = false;
+  Timer? _resendTimer;
+  DateTime? _resendAvailableAt;
+  int _resendSeconds = 0;
   bool _hasSubmitted = false;
+  bool _isLoading = false;
+  bool _hasRequested = false;
+  String _requestedEmail = '';
+  String? _requestError;
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _emailController.dispose();
     super.dispose();
   }
 
+  String? _validateEmail(String? value) {
+    final email = (value ?? '').trim();
+    if (email.isEmpty) return 'Enter your email address.';
+    if (email.length > 254 ||
+        !_emailPattern.hasMatch(email) ||
+        email.split('@').first.length > 64) {
+      return 'Enter a valid email address.';
+    }
+    return null;
+  }
+
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    _resendAvailableAt = DateTime.now().add(const Duration(seconds: 60));
+    _resendSeconds = 60;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      // Use elapsed time so opening the email app does not pause the cooldown.
+      final remaining = _resendAvailableAt!.difference(DateTime.now());
+      final seconds = (remaining.inMilliseconds / 1000).ceil().clamp(0, 60);
+      if (seconds != _resendSeconds) {
+        setState(() => _resendSeconds = seconds);
+      }
+      if (seconds == 0) timer.cancel();
+    });
+  }
+
   Future<void> _submit() async {
-    setState(() => _hasSubmitted = true);
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
-    setState(() => _isLoading = false);
-    widget.onNext(_emailController.text.trim());
+    if (_isLoading || _resendSeconds > 0) return;
+    if (!_hasRequested) {
+      setState(() => _hasSubmitted = true);
+      if (!(_formKey.currentState?.validate() ?? false)) return;
+    }
+    final email = _hasRequested
+        ? _requestedEmail
+        : _emailController.text.trim();
+    setState(() {
+      _isLoading = true;
+      _requestError = null;
+    });
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      await AuthService.instance.requestPasswordReset(email);
+      if (!mounted) return;
+      setState(() {
+        _requestedEmail = email;
+        _hasRequested = true;
+        _isLoading = false;
+        _startResendCountdown();
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _requestError = error is PasswordResetException
+            ? error.message
+            : const PasswordResetException().message;
+      });
+    }
+  }
+
+  void _editEmail() {
+    if (_isLoading) return;
+    setState(() {
+      _hasRequested = false;
+      _hasSubmitted = false;
+      _requestError = null;
+    });
+  }
+
+  void _backToLogin() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    context.go(AppRoutes.signUpLoginScreen);
   }
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _backToLogin();
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          backgroundColor: AppTheme.backgroundLight,
+          body: Stack(
+            children: [
+              Positioned(
+                top: -80,
+                right: -60,
+                child: Container(
+                  width: 220,
+                  height: 220,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AppTheme.primary.withAlpha(25),
+                        AppTheme.primary.withAlpha(0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.manual,
+                  physics: const ClampingScrollPhysics(),
+                  padding: const EdgeInsets.all(24),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 440),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton.outlined(
+                              tooltip: 'Back to sign in',
+                              onPressed: _backToLogin,
+                              icon: const Icon(
+                                Icons.arrow_back_rounded,
+                                size: 20,
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Icon(
+                                _hasRequested
+                                    ? Icons.mark_email_unread_outlined
+                                    : Icons.lock_reset_rounded,
+                                color: AppTheme.primary,
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            _hasRequested
+                                ? 'Check your email'
+                                : 'Forgot password?',
+                            style: _S.title,
+                          ),
+                          const SizedBox(height: 8),
+                          if (_hasRequested)
+                            _buildCheckEmail()
+                          else
+                            _buildEmailForm(),
+                          if (_requestError != null) ...[
+                            const SizedBox(height: 16),
+                            Semantics(
+                              liveRegion: true,
+                              child: Text(_requestError!, style: _S.error),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          _ActionButton(
+                            label: _isLoading
+                                ? 'Requesting reset link...'
+                                : _hasRequested
+                                ? 'Resend reset link'
+                                : 'Send reset link',
+                            onPressed: _isLoading || _resendSeconds > 0
+                                ? null
+                                : _submit,
+                          ),
+                          if (_resendSeconds > 0) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              'You can request another link in ${_resendSeconds}s.',
+                              style: _S.body,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                          if (_hasRequested) ...[
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: _isLoading ? null : _editEmail,
+                              child: Text(
+                                'Edit email address',
+                                style: _S.label,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: _backToLogin,
+                            child: Text('Back to sign in', style: _S.label),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmailForm() {
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryContainer,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.mail_outline_rounded,
-              color: AppTheme.primary,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text('Forgot Password?', style: _S.sectionTitle),
-          const SizedBox(height: 8),
           Text(
-            "Enter your registered email and we'll send a verification code to reset your password.",
+            'Enter your email address to request a secure password reset link.',
             style: _S.body,
           ),
           const SizedBox(height: 28),
-          _FieldLabel(label: 'Email Address'),
+          Text('Email address', style: _S.label),
           const SizedBox(height: 6),
           TextFormField(
             controller: _emailController,
+            enabled: !_isLoading,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
+            textCapitalization: TextCapitalization.none,
+            autocorrect: false,
+            enableSuggestions: false,
+            autofillHints: const [AutofillHints.email],
             scrollPadding: const EdgeInsets.only(bottom: 24),
-            style: _S.fieldText,
-            onFieldSubmitted: (_) => _submit(),
-            onChanged: (_) {
-              if (_hasSubmitted) {
-                _formKey.currentState?.validate();
-              }
-            },
+            style: _S.field,
             decoration: const InputDecoration(
-              hintText: 'you@anbucrm.in',
+              hintText: 'Enter your email address',
               prefixIcon: Icon(Icons.email_outlined, size: 20),
+              errorMaxLines: 2,
             ),
-            validator: (v) {
-              if (!_hasSubmitted) return null;
-              if (v == null || v.isEmpty) return 'Enter your email';
-              if (!v.contains('@')) return 'Enter a valid email';
-              return null;
-            },
-          ),
-          const SizedBox(height: 24),
-          _ActionButton(
-            label: 'Send Verification Code',
-            isLoading: _isLoading,
-            onTap: _submit,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Step 2: OTP ──────────────────────────────────────────────────────────────
-
-class _OtpStep extends StatefulWidget {
-  final String email;
-  final Function(String) onNext;
-  const _OtpStep({required this.email, required this.onNext});
-
-  @override
-  State<_OtpStep> createState() => _OtpStepState();
-}
-
-class _OtpStepState extends State<_OtpStep>
-    with SingleTickerProviderStateMixin {
-  final List<TextEditingController> _controllers = List.generate(
-    6,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
-  bool _isLoading = false;
-  bool _hasError = false;
-  int _resendSeconds = 60;
-  late AnimationController _shakeController;
-  late Animation<double> _shakeAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _shakeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
-    );
-    _startResendTimer();
-  }
-
-  void _startResendTimer() async {
-    while (_resendSeconds > 0 && mounted) {
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) setState(() => _resendSeconds--);
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
-    _shakeController.dispose();
-    super.dispose();
-  }
-
-  String get _otp => _controllers.map((c) => c.text).join();
-
-  void _onDigitChanged(int index, String value) {
-    if (value.isNotEmpty && index < 5) {
-      _focusNodes[index + 1].requestFocus();
-    }
-    if (_hasError) setState(() => _hasError = false);
-    if (_otp.length == 6) {
-      _verifyOtp();
-    }
-  }
-
-  Future<void> _verifyOtp() async {
-    if (_otp.length < 6) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (_otp == '000000') {
-      setState(() {
-        _isLoading = false;
-        _hasError = true;
-      });
-      _shakeController.forward(from: 0);
-      return;
-    }
-    setState(() => _isLoading = false);
-    widget.onNext('reset_token_demo_${widget.email}');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFEF3C7),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Icon(
-            Icons.verified_outlined,
-            color: Color(0xFFD97706),
-            size: 32,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text('Enter Verification Code', style: _S.sectionTitle),
-        const SizedBox(height: 8),
-        RichText(
-          text: TextSpan(
-            style: _S.body,
-            children: [
-              const TextSpan(text: 'We sent a 6-digit code to '),
-              TextSpan(text: widget.email, style: _S.emailBold),
-            ],
-          ),
-        ),
-        const SizedBox(height: 32),
-        AnimatedBuilder(
-          animation: _shakeAnim,
-          builder: (_, child) => Transform.translate(
-            offset: Offset(
-              _hasError ? ((_shakeAnim.value * 10) % 2 == 0 ? 6 : -6) : 0,
-              0,
-            ),
-            child: child,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(6, (i) {
-              return SizedBox(
-                width: 46,
-                height: 54,
-                child: TextFormField(
-                  controller: _controllers[i],
-                  focusNode: _focusNodes[i],
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  style: _S.otpDigit,
-                  decoration: InputDecoration(
-                    counterText: '',
-                    contentPadding: EdgeInsets.zero,
-                    filled: true,
-                    fillColor: _hasError
-                        ? AppTheme.errorContainer
-                        : AppTheme.surfaceLight,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: _hasError ? AppTheme.error : AppTheme.surface200,
-                        width: 1.5,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppTheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  onChanged: (v) => _onDigitChanged(i, v),
-                  onTap: () {
-                    _controllers[i].selection = TextSelection.fromPosition(
-                      TextPosition(offset: _controllers[i].text.length),
-                    );
-                  },
-                ),
-              );
-            }),
-          ),
-        ),
-        if (_hasError) ...[
-          const SizedBox(height: 10),
-          Text(
-            'Invalid OTP. Please try again.',
-            style: _S.errorText,
-            textAlign: TextAlign.center,
-          ),
-        ],
-        const SizedBox(height: 24),
-        _ActionButton(
-          label: 'Verify Code',
-          isLoading: _isLoading,
-          onTap: _verifyOtp,
-          enabled: _otp.length == 6,
-        ),
-        const SizedBox(height: 20),
-        Center(
-          child: _resendSeconds > 0
-              ? RichText(
-                  text: TextSpan(
-                    style: _S.resendText,
-                    children: [
-                      const TextSpan(text: 'Resend code in '),
-                      TextSpan(
-                        text:
-                            '${_resendSeconds ~/ 60}:${(_resendSeconds % 60).toString().padLeft(2, '0')}',
-                        style: _S.resendBold,
-                      ),
-                    ],
-                  ),
-                )
-              : GestureDetector(
-                  onTap: () {
-                    setState(() => _resendSeconds = 60);
-                    _startResendTimer();
-                  },
-                  child: Text('Resend OTP', style: _S.resendBold),
-                ),
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            'Hint: Enter any 6 digits (except 000000)',
-            style: _S.hint,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Step 3: New Password ─────────────────────────────────────────────────────
-
-class _NewPasswordStep extends StatefulWidget {
-  final String email;
-  final String resetToken;
-  final VoidCallback onSuccess;
-
-  const _NewPasswordStep({
-    required this.email,
-    required this.resetToken,
-    required this.onSuccess,
-  });
-
-  @override
-  State<_NewPasswordStep> createState() => _NewPasswordStepState();
-}
-
-class _NewPasswordStepState extends State<_NewPasswordStep> {
-  final _formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _obscureNew = true;
-  bool _obscureConfirm = true;
-  bool _isLoading = false;
-  bool _hasSubmitted = false;
-
-  bool _hasLength(String t) => t.length >= 8;
-  bool _hasUpperLower(String t) =>
-      t.contains(RegExp(r'[A-Z]')) && t.contains(RegExp(r'[a-z]'));
-  bool _hasNumber(String t) => t.contains(RegExp(r'[0-9]'));
-  bool _hasSpecial(String t) => t.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    _confirmController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    setState(() => _hasSubmitted = true);
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
-    setState(() => _isLoading = false);
-    widget.onSuccess();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppTheme.successContainer,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.lock_reset_rounded,
-              color: AppTheme.success,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text('Create New Password', style: _S.sectionTitle),
-          const SizedBox(height: 8),
-          Text(
-            'Your new password must be different from previously used passwords.',
-            style: _S.body,
-          ),
-          const SizedBox(height: 28),
-          _FieldLabel(label: 'New Password'),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscureNew,
-            textInputAction: TextInputAction.next,
-            scrollPadding: const EdgeInsets.only(bottom: 24),
-            style: _S.fieldText,
-            onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-            onChanged: (_) {
-              if (_hasSubmitted) _formKey.currentState?.validate();
-            },
-            decoration: InputDecoration(
-              hintText: '••••••••',
-              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureNew
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  size: 20,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () => setState(() => _obscureNew = !_obscureNew),
-              ),
-            ),
-            validator: (v) {
-              if (!_hasSubmitted) return null;
-              if (v == null || v.isEmpty) return 'Enter a new password';
-              if (!_hasLength(v)) return 'At least 8 characters required';
-              return null;
-            },
-          ),
-          ListenableBuilder(
-            listenable: _passwordController,
-            builder: (context, _) {
-              final text = _passwordController.text;
-              if (text.isEmpty) return const SizedBox.shrink();
-              return Column(
-                children: [
-                  const SizedBox(height: 12),
-                  _PasswordRulesWidget(
-                    hasLength: _hasLength(text),
-                    hasUpperLower: _hasUpperLower(text),
-                    hasNumber: _hasNumber(text),
-                    hasSpecial: _hasSpecial(text),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _FieldLabel(label: 'Confirm Password'),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: _confirmController,
-            obscureText: _obscureConfirm,
-            textInputAction: TextInputAction.done,
-            scrollPadding: const EdgeInsets.only(bottom: 24),
-            style: _S.fieldText,
+            validator: _validateEmail,
             onFieldSubmitted: (_) => _submit(),
+            // Dismiss on a recognized outside tap, not the start of a scroll.
+            onTapOutside: (_) {},
             onChanged: (_) {
+              if (_requestError != null) {
+                setState(() => _requestError = null);
+              }
               if (_hasSubmitted) _formKey.currentState?.validate();
             },
-            decoration: InputDecoration(
-              hintText: '••••••••',
-              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirm
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  size: 20,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () =>
-                    setState(() => _obscureConfirm = !_obscureConfirm),
-              ),
-            ),
-            validator: (v) {
-              if (!_hasSubmitted) return null;
-              if (v == null || v.isEmpty) return 'Confirm your password';
-              if (v != _passwordController.text) {
-                return 'Passwords do not match';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 28),
-          _ActionButton(
-            label: 'Reset Password',
-            isLoading: _isLoading,
-            onTap: _submit,
           ),
         ],
       ),
     );
   }
-}
 
-// ─── Step 4: Reset Success ────────────────────────────────────────────────────
-
-class _ResetSuccessStep extends StatefulWidget {
-  final VoidCallback onGoToLogin;
-  const _ResetSuccessStep({required this.onGoToLogin});
-
-  @override
-  State<_ResetSuccessStep> createState() => _ResetSuccessStepState();
-}
-
-class _ResetSuccessStepState extends State<_ResetSuccessStep>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animController;
-  late Animation<double> _scaleAnim;
-  late Animation<double> _fadeAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    _scaleAnim = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
-    );
-    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-      ),
-    );
-    _animController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCheckEmail() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 24),
-        Center(
-          child: ScaleTransition(
-            scale: _scaleAnim,
-            child: Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.success, Color(0xFF059669)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.success.withAlpha(80),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.check_rounded,
-                color: Colors.white,
-                size: 48,
-              ),
+        Semantics(
+          liveRegion: true,
+          child: Text.rich(
+            TextSpan(
+              style: _S.body,
+              children: [
+                const TextSpan(text: 'If an account exists for '),
+                TextSpan(text: _requestedEmail, style: _S.label),
+                const TextSpan(text: ', a password reset link has been sent.'),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: 32),
-        FadeTransition(
-          opacity: _fadeAnim,
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.surface200),
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('Reset securely in your browser', style: _S.label),
+              const SizedBox(height: 8),
               Text(
-                'Password Reset\nSuccessfully!',
-                style: _S.successTitle,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Your password has been updated successfully. You can now sign in with your new password.',
-                style: _S.successBody,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.successContainer,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.success.withAlpha(60)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.shield_outlined,
-                      color: AppTheme.success,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Your account is now secured with the new password.',
-                        style: _S.successNote,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 36),
-              _ActionButton(
-                label: 'Back to Sign In',
-                isLoading: false,
-                onTap: widget.onGoToLogin,
+                'Open the secure link in your email to set a new password on '
+                'the AnbuCRM page in your browser. After resetting, the page '
+                'will try to return you to the app in 5 seconds. If it does '
+                'not, open AnbuCRM and sign in with your new password.',
+                style: _S.body,
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-// ─── Password Rules Widget ────────────────────────────────────────────────────
-
-class _PasswordRulesWidget extends StatelessWidget {
-  final bool hasLength;
-  final bool hasUpperLower;
-  final bool hasNumber;
-  final bool hasSpecial;
-
-  const _PasswordRulesWidget({
-    required this.hasLength,
-    required this.hasUpperLower,
-    required this.hasNumber,
-    required this.hasSpecial,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.surface100,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          _RuleRow(label: 'At least 8 characters', met: hasLength),
-          const SizedBox(height: 4),
-          _RuleRow(label: 'Uppercase & lowercase letters', met: hasUpperLower),
-          const SizedBox(height: 4),
-          _RuleRow(label: 'At least one number', met: hasNumber),
-          const SizedBox(height: 4),
-          _RuleRow(label: 'Special character (!@#\$...)', met: hasSpecial),
-        ],
-      ),
-    );
-  }
-}
-
-class _RuleRow extends StatelessWidget {
-  final String label;
-  final bool met;
-  const _RuleRow({required this.label, required this.met});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: met ? AppTheme.success : AppTheme.surface200,
-          ),
-          child: met
-              ? const Icon(Icons.check_rounded, color: Colors.white, size: 10)
-              : null,
-        ),
-        const SizedBox(width: 8),
+        const SizedBox(height: 16),
         Text(
-          label,
-          style: _S.ruleText.copyWith(
-            color: met ? AppTheme.success : AppTheme.textSecondary,
-            fontWeight: met ? FontWeight.w500 : FontWeight.w400,
-          ),
+          'Allow a few minutes and check your spam folder. If no email arrives, '
+          'check the address or request another link.',
+          style: _S.body,
         ),
       ],
     );
-  }
-}
-
-// ─── Shared Widgets ───────────────────────────────────────────────────────────
-
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(label, style: _S.fieldLabel);
   }
 }
 
 class _ActionButton extends StatelessWidget {
-  final String label;
-  final bool isLoading;
-  final VoidCallback onTap;
-  final bool enabled;
+  const _ActionButton({required this.label, required this.onPressed});
 
-  const _ActionButton({
-    required this.label,
-    required this.isLoading,
-    required this.onTap,
-    this.enabled = true,
-  });
+  final String label;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled && !isLoading ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: 52,
-        decoration: BoxDecoration(
-          gradient: enabled
-              ? const LinearGradient(
-                  colors: [AppTheme.primary, Color(0xFF7C3AED)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                )
-              : null,
-          color: enabled ? null : AppTheme.surface200,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                    color: AppTheme.primary.withAlpha(60),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Text(
-                  label,
-                  style: _S.buttonText.copyWith(
-                    color: enabled ? Colors.white : AppTheme.textMuted,
-                  ),
+    final enabled = onPressed != null;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: enabled
+            ? const LinearGradient(
+                colors: [AppTheme.primary, Color(0xFF7C3AED)],
+              )
+            : null,
+        color: enabled ? null : AppTheme.surface200,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: AppTheme.primary.withAlpha(50),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
                 ),
+              ]
+            : null,
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(52),
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          disabledForegroundColor: AppTheme.textSecondary,
+          textStyle: _S.button,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
+        child: Text(label),
       ),
     );
   }

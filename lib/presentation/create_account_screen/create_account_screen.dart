@@ -1219,7 +1219,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // Back button
-                            if (_step < 4)
+                            if (_step < 4 && !_isCreating)
                               GestureDetector(
                                 onTap: () {
                                   if (_step > 0) {
@@ -2042,7 +2042,7 @@ class _ReviewStep extends StatelessWidget {
         _PrimaryButton(
           label: isCreating
               ? 'Creating your account…'
-              : 'Proceed to Payment  →',
+              : 'Proceed to Payment',
           onTap: onProceedToPayment,
           enabled: !isCreating,
         ),

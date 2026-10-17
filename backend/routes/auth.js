@@ -30,4 +30,6 @@ r.post("/check-email", async (req, res, next) => {
   }
 });
 
+r.use(require("./passwordReset"));
+
 module.exports = r;

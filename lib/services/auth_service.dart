@@ -63,6 +63,54 @@ class AuthService {
     return 'Something went wrong. Check your internet and try again.';
   }
 
+  Future<void> requestPasswordReset(String email) async {
+    try {
+      final response = await _dio.post<dynamic>(
+        'https://api.anbucrm.com/auth/forgot-password',
+        data: {'email': email.trim()},
+        options: Options(
+          connectTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 45),
+          contentType: Headers.jsonContentType,
+          responseType: ResponseType.json,
+          followRedirects: false,
+        ),
+      );
+      final data = response.data;
+      if (response.statusCode != 200 || data is! Map || data['ok'] != true) {
+        throw const PasswordResetException();
+      }
+    } on DioException catch (error) {
+      switch (error.response?.statusCode) {
+        case 400:
+          throw const PasswordResetException('Enter a valid email address.');
+        case 429:
+          throw const PasswordResetException(
+            'Too many reset requests. Wait 15 minutes and try again.',
+          );
+        case 503:
+          throw const PasswordResetException(
+            'Password reset is temporarily unavailable. Please try again later.',
+          );
+      }
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          throw const PasswordResetException(
+            'The request timed out. Check your connection and try again.',
+          );
+        case DioExceptionType.connectionError:
+          throw const PasswordResetException(
+            'Unable to connect. Check your internet connection and try again.',
+          );
+        default:
+          throw const PasswordResetException();
+      }
+    }
+  }
+
   Future<bool> checkEmailExists(String email) async {
     final response = await _dio.post(
       'https://api.anbucrm.com/auth/check-email',
@@ -70,4 +118,15 @@ class AuthService {
     );
     return response.data['exists'] == true;
   }
+}
+
+class PasswordResetException implements Exception {
+  const PasswordResetException([
+    this.message = 'Unable to request a password reset. Please try again.',
+  ]);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

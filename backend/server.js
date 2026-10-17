@@ -38,7 +38,9 @@ app.use(express.json({
   verify: (req, _res, buf) => { req.rawBody = buf; },
 }));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("combined"));
+app.use(morgan("combined", {
+  skip: (req) => req.path.startsWith("/auth/reset-password"),
+}));
 
 // Initialize Firebase Admin (non-fatal if not yet configured)
 try { initFirebase(); } catch (e) { console.warn("Firebase init skipped:", e.message); }
